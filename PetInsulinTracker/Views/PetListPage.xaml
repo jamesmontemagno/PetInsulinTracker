@@ -30,7 +30,7 @@
                         SelectionMode="None">
             <CollectionView.EmptyView>
                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
-                    <Image Source="{mi:Fluent Icon=AnimalDog24}" HeightRequest="64" WidthRequest="64" HorizontalOptions="Center" />
+                    <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" HorizontalOptions="Center" />
                     <Label Text="No pets yet"
                            FontSize="20" FontFamily="OpenSansSemibold"
                            HorizontalOptions="Center"
@@ -84,7 +84,7 @@
                                 </Label>
                             </VerticalStackLayout>
                             <!-- Chevron -->
-                            <Image Grid.Column="2" Source="{mi:Fluent Icon=ChevronRight24}" HeightRequest="16" WidthRequest="16"
+                            <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>

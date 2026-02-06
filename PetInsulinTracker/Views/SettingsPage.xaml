@@ -5,6 +5,7 @@
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
+             x:Name="SettingsRoot"
              Title="Settings"
              BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -20,7 +21,7 @@
                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                             HeightRequest="36" WidthRequest="36">
-                        <Image Source="{mi:Fluent Icon=PersonCircle24}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Fluent PersonCircle24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                     <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                         <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
@@ -40,7 +41,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <Image Source="{mi:Fluent Icon=AlertOn20}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent AlertOn20}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="Notifications" VerticalOptions="Center"
                                FontFamily="OpenSansSemibold" />
@@ -54,7 +55,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <Image Source="{mi:Fluent Icon=Scales24}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="Default Weight Unit" VerticalOptions="Center"
                                FontFamily="OpenSansSemibold" />
@@ -70,39 +71,93 @@
             <Border Style="{StaticResource CardStyle}">
                 <VerticalStackLayout Spacing="12">
                     <Label Text="Choose a color theme" Style="{StaticResource SubtleTextStyle}" FontSize="14" />
-                    <CollectionView ItemsSource="{Binding ThemeOptions}" SelectionMode="None"
-                                    HeightRequest="90">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ThemeOption">
-                                <Border StrokeShape="RoundRectangle 12" Padding="0"
-                                        WidthRequest="64" HeightRequest="80"
-                                        StrokeThickness="2"
-                                        Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                        BackgroundColor="{Binding BackgroundColor}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=SelectThemeCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                    <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
-                                        <Border StrokeShape="RoundRectangle 14"
-                                                StrokeThickness="0"
-                                                BackgroundColor="{Binding PrimaryColor}"
-                                                HeightRequest="28" WidthRequest="28"
-                                                HorizontalOptions="Center" />
-                                        <Label Text="{Binding DisplayName}" FontSize="10"
-                                               HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                                               TextColor="{Binding PrimaryColor}"
-                                               FontFamily="OpenSansSemibold"
-                                               LineBreakMode="TailTruncation" MaxLines="2" />
-                                    </VerticalStackLayout>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                    <FlexLayout Wrap="Wrap" JustifyContent="SpaceEvenly" AlignItems="Start">
+                        <!-- Warm -->
+                        <Border StrokeShape="RoundRectangle 12" Padding="4"
+                                WidthRequest="64" HeightRequest="80"
+                                StrokeThickness="2"
+                                Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
+                                BackgroundColor="#FDF5EC" Margin="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
+                                                      CommandParameter="Warm" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                        BackgroundColor="#E8910C" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" />
+                                <Label Text="Warm" FontSize="10" HorizontalOptions="Center"
+                                       TextColor="#E8910C" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Ocean -->
+                        <Border StrokeShape="RoundRectangle 12" Padding="4"
+                                WidthRequest="64" HeightRequest="80"
+                                StrokeThickness="2"
+                                Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
+                                BackgroundColor="#E8F4F8" Margin="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
+                                                      CommandParameter="Ocean" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                        BackgroundColor="#0288D1" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" />
+                                <Label Text="Ocean" FontSize="10" HorizontalOptions="Center"
+                                       TextColor="#0288D1" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Forest -->
+                        <Border StrokeShape="RoundRectangle 12" Padding="4"
+                                WidthRequest="64" HeightRequest="80"
+                                StrokeThickness="2"
+                                Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
+                                BackgroundColor="#E8F0E0" Margin="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
+                                                      CommandParameter="Forest" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                        BackgroundColor="#2E7D32" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" />
+                                <Label Text="Forest" FontSize="10" HorizontalOptions="Center"
+                                       TextColor="#2E7D32" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Berry -->
+                        <Border StrokeShape="RoundRectangle 12" Padding="4"
+                                WidthRequest="64" HeightRequest="80"
+                                StrokeThickness="2"
+                                Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
+                                BackgroundColor="#FCE4EC" Margin="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
+                                                      CommandParameter="Berry" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                        BackgroundColor="#AD1457" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" />
+                                <Label Text="Berry" FontSize="10" HorizontalOptions="Center"
+                                       TextColor="#AD1457" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Midnight -->
+                        <Border StrokeShape="RoundRectangle 12" Padding="4"
+                                WidthRequest="64" HeightRequest="80"
+                                StrokeThickness="2"
+                                Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
+                                BackgroundColor="#E8EAF6" Margin="2">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
+                                                      CommandParameter="Midnight" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                                        BackgroundColor="#5C6BC0" HeightRequest="28" WidthRequest="28" HorizontalOptions="Center" />
+                                <Label Text="Midnight" FontSize="10" HorizontalOptions="Center"
+                                       TextColor="#5C6BC0" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </FlexLayout>
                 </VerticalStackLayout>
             </Border>
 
@@ -116,7 +171,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <Image Source="{mi:Fluent Icon=CloudSync20}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent CloudSync20}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="{Binding SyncStatus}"
                                VerticalOptions="Center" Style="{StaticResource SubtleTextStyle}" FontSize="14" />

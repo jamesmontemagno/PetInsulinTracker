@@ -35,15 +35,6 @@ public partial class SettingsViewModel : ObservableObject
 
 	public List<string> WeightUnitOptions { get; } = ["lbs", "kg"];
 
-	public List<ThemeOption> ThemeOptions { get; } =
-	[
-		new(Themes.AppTheme.Warm, "Warm & Earthy", Color.FromArgb("#E8910C"), Color.FromArgb("#FDF5EC")),
-		new(Themes.AppTheme.Ocean, "Ocean Breeze", Color.FromArgb("#0288D1"), Color.FromArgb("#E8F4F8")),
-		new(Themes.AppTheme.Forest, "Forest Walk", Color.FromArgb("#2E7D32"), Color.FromArgb("#E8F0E0")),
-		new(Themes.AppTheme.Berry, "Berry Bliss", Color.FromArgb("#AD1457"), Color.FromArgb("#FCE4EC")),
-		new(Themes.AppTheme.Midnight, "Midnight Indigo", Color.FromArgb("#5C6BC0"), Color.FromArgb("#E8EAF6"))
-	];
-
 	partial void OnOwnerNameChanged(string value)
 	{
 		Preferences.Set(Constants.OwnerNameKey, value);
@@ -65,9 +56,12 @@ public partial class SettingsViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private void SelectTheme(ThemeOption option)
+	private void SelectTheme(string themeName)
 	{
-		SelectedTheme = option.Theme;
+		if (Enum.TryParse<Themes.AppTheme>(themeName, out var theme))
+		{
+			SelectedTheme = theme;
+		}
 	}
 
 	[RelayCommand]
@@ -90,5 +84,3 @@ public partial class SettingsViewModel : ObservableObject
 		}
 	}
 }
-
-public record ThemeOption(Themes.AppTheme Theme, string DisplayName, Color PrimaryColor, Color BackgroundColor);

@@ -8,7 +8,7 @@
 
     <VerticalStackLayout VerticalOptions="Center" Spacing="24" Padding="32">
 
-        <Image Source="{mi:Fluent Icon=AnimalDog24}" HeightRequest="64" WidthRequest="64" HorizontalOptions="Center" />
+        <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" HorizontalOptions="Center" />
 
         <Label Text="Welcome to Pet Insulin Tracker"
                FontSize="24" FontFamily="OpenSansSemibold"
