@@ -217,6 +217,54 @@
                     </Grid>
                 </Border>
 
+                <!-- Feeding Defaults -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Feeding Defaults" FontFamily="OpenSansSemibold" FontSize="15" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Food Name" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="FoodNameEntry" Placeholder="e.g., Royal Canin Diabetic" />
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Amount per Meal" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="FoodAmountEntry" Placeholder="e.g., 0.5" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Unit" Style="{StaticResource FormLabelStyle}" />
+                                <Picker x:Name="FoodUnitPicker" WidthRequest="90">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>cups</x:String>
+                                            <x:String>grams</x:String>
+                                            <x:String>oz</x:String>
+                                            <x:String>cans</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                    <Picker.SelectedItem>
+                                        <x:String>cups</x:String>
+                                    </Picker.SelectedItem>
+                                </Picker>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                                <Picker x:Name="FoodTypePicker" WidthRequest="80">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>Dry</x:String>
+                                            <x:String>Wet</x:String>
+                                            <x:String>Treat</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                    <Picker.SelectedItem>
+                                        <x:String>Dry</x:String>
+                                    </Picker.SelectedItem>
+                                </Picker>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"

@@ -141,6 +141,12 @@ public partial class WelcomePage : ContentPage
 		if (double.TryParse(WeightEntry.Text, out var weight))
 			pet.CurrentWeight = weight;
 
+		pet.DefaultFoodName = FoodNameEntry.Text?.Trim();
+		if (double.TryParse(FoodAmountEntry.Text, out var foodAmount))
+			pet.DefaultFoodAmount = foodAmount;
+		pet.DefaultFoodUnit = FoodUnitPicker.SelectedItem as string ?? "cups";
+		pet.DefaultFoodType = FoodTypePicker.SelectedItem as string ?? "Dry";
+
 		await db.SavePetAsync(pet);
 		_savedPetId = pet.Id;
 	}
