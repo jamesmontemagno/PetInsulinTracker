@@ -161,14 +161,6 @@ public partial class PetDetailViewModel : ObservableObject
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
 	{
-		if (lastDose is null || Pet is null)
-		{
-			DoseProgress = 0;
-			DoseCountdownText = "--:--";
-			DoseCountdownSubText = "No dose logged";
-			return;
-		}
-
 		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin");
 
 		if (scheduledNext is not null)
@@ -182,18 +174,25 @@ public partial class PetDetailViewModel : ObservableObject
 			}
 			else
 			{
-				// Progress based on time since last dose toward the scheduled time
-				var total = scheduledNext.Value - lastDose.AdministeredAt;
-				DoseProgress = total.TotalMinutes > 0
-					? Math.Clamp(1.0 - remaining.TotalMinutes / total.TotalMinutes, 0, 1)
-					: 0;
+				if (lastDose is not null)
+				{
+					var total = scheduledNext.Value - lastDose.AdministeredAt;
+					DoseProgress = total.TotalMinutes > 0
+						? Math.Clamp(1.0 - remaining.TotalMinutes / total.TotalMinutes, 0, 1)
+						: 0;
+				}
+				else
+				{
+					DoseProgress = 0;
+				}
+
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 					: $"{remaining.Minutes}m";
 				DoseCountdownSubText = "Until next dose";
 			}
 		}
-		else
+		else if (lastDose is not null)
 		{
 			// Fallback: 12-hour interval from last dose
 			var intervalHours = 12.0;
@@ -214,6 +213,12 @@ public partial class PetDetailViewModel : ObservableObject
 					: $"{remaining.Minutes}m";
 				DoseCountdownSubText = "Until next dose";
 			}
+		}
+		else
+		{
+			DoseProgress = 0;
+			DoseCountdownText = "--:--";
+			DoseCountdownSubText = "No schedule set";
 		}
 	}
 
