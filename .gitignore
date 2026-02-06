@@ -34,8 +34,6 @@ Thumbs.db
 *.aab
 *.app
 
-## Azure Functions
-local.settings.json
 
 ## Secrets
 appsettings.Development.json
