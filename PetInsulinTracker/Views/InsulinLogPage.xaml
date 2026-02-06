@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.InsulinLogPage"
              x:DataType="vm:InsulinLogViewModel"
              Title="Insulin Log"
@@ -73,7 +74,7 @@
                                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                             HeightRequest="40" WidthRequest="40">
-                                        <Label Text="💉" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Image Source="{mi:Fluent Icon=Syringe24}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label FontFamily="OpenSansSemibold" FontSize="15"

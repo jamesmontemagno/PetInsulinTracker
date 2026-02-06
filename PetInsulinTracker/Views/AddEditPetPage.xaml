@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.AddEditPetPage"
              x:DataType="vm:AddEditPetViewModel"
              Title="{Binding PageTitle}"
@@ -9,6 +10,38 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Pet Photo Section -->
+            <Label Text="PET PHOTO" Style="{StaticResource OverlineStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <!-- Photo Preview -->
+                    <Border StrokeShape="RoundRectangle 50"
+                            StrokeThickness="3"
+                            Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            HeightRequest="100" WidthRequest="100"
+                            HorizontalOptions="Center">
+                        <Grid>
+                            <Image Source="{mi:Fluent Icon=CameraAdd20}"
+                                   HeightRequest="40" WidthRequest="40"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                            <Image Source="{Binding PhotoPath}"
+                                   Aspect="AspectFill"
+                                   IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                        </Grid>
+                    </Border>
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Button Text="Choose Photo" Command="{Binding PickPhotoCommand}"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                FontSize="13" Padding="16,8" />
+                        <Button Text="Take Photo" Command="{Binding TakePhotoCommand}"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                FontSize="13" Padding="16,8" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Basic Info Section -->
             <Label Text="BASIC INFORMATION" Style="{StaticResource OverlineStyle}" />

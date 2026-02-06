@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.VetInfoPage"
              x:DataType="vm:VetInfoViewModel"
              Title="Vet Information"
@@ -29,7 +30,7 @@
                         <Label Text="Phone" Style="{StaticResource FormLabelStyle}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Entry Grid.Column="0" Text="{Binding Phone}" Keyboard="Telephone" Placeholder="(555) 123-4567" />
-                            <Button Grid.Column="1" Text="📞ㅤCall"
+                            <Button Grid.Column="1" Text="Call"
                                     Style="{StaticResource QuickActionButtonStyle}"
                                     Command="{Binding CallVetCommand}"
                                     SemanticProperties.Hint="Call vet" />
@@ -40,7 +41,7 @@
                         <Label Text="Emergency Phone" Style="{StaticResource FormLabelStyle}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Entry Grid.Column="0" Text="{Binding EmergencyPhone}" Keyboard="Telephone" Placeholder="(555) 987-6543" />
-                            <Button Grid.Column="1" Text="🚨ㅤEmergency"
+                            <Button Grid.Column="1" Text="Emergency"
                                     Style="{StaticResource DangerButtonStyle}"
                                     FontSize="13" Padding="12,8"
                                     Command="{Binding CallEmergencyCommand}"
@@ -74,7 +75,7 @@
 
             <Border Style="{StaticResource WarningBoxStyle}">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="⚠️ Signs of Hypoglycemia" FontFamily="OpenSansSemibold" FontSize="15" />
+                    <Label Text="Signs of Hypoglycemia" FontFamily="OpenSansSemibold" FontSize="15" />
                     <Label Text="Watch for: weakness, trembling, disorientation, seizures, or loss of consciousness. Rub corn syrup or honey on gums and call your vet immediately."
                            Style="{StaticResource SubtleTextStyle}" FontSize="13" />
                 </VerticalStackLayout>
@@ -82,28 +83,28 @@
 
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="💉 Injection Tips" FontFamily="OpenSansSemibold" FontSize="15" />
+                    <Label Text="Injection Tips" FontFamily="OpenSansSemibold" FontSize="15" />
                     <Label FontSize="13" Text="• Rotate injection sites to prevent tissue damage&#10;• Let insulin reach room temperature before injecting&#10;• Gently roll the vial — never shake it&#10;• Use correct syringe (U-40 for Vetsulin/ProZinc, U-100 for Lantus/NPH)" />
                 </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="🍽️ Feeding &amp; Insulin Timing" FontFamily="OpenSansSemibold" FontSize="15" />
+                    <Label Text="Feeding &amp; Insulin Timing" FontFamily="OpenSansSemibold" FontSize="15" />
                     <Label FontSize="13" Text="• Dogs: Feed half at injection time, half at peak effect (4-8h later)&#10;• Cats: Can free-feed or time meals with injections&#10;• Never give insulin if your pet hasn't eaten — call your vet" />
                 </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="🏥 When to Call Your Vet" FontFamily="OpenSansSemibold" FontSize="15" />
+                    <Label Text="When to Call Your Vet" FontFamily="OpenSansSemibold" FontSize="15" />
                     <Label FontSize="13" Text="• Pet refuses to eat for more than 24 hours&#10;• Excessive drinking or urination&#10;• Vomiting or diarrhea&#10;• Lethargy or weakness&#10;• Any signs of hypoglycemia" />
                 </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="📦 Insulin Storage" FontFamily="OpenSansSemibold" FontSize="15" />
+                    <Label Text="Insulin Storage" FontFamily="OpenSansSemibold" FontSize="15" />
                     <Label FontSize="13" Text="• Store unopened insulin in the refrigerator&#10;• Once opened, most insulin is good for 28-42 days&#10;• Never freeze insulin&#10;• Check expiration dates regularly" />
                 </VerticalStackLayout>
             </Border>

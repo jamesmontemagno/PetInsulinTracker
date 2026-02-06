@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.SchedulePage"
              x:DataType="vm:ScheduleViewModel"
              Title="Schedules"
@@ -75,7 +76,7 @@
                                             BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                             HeightRequest="40" WidthRequest="40">
-                                        <Label Text="📋" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Image Source="{mi:Fluent Icon=CalendarAgenda24}" HeightRequest="22" WidthRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="15" />

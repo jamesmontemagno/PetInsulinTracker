@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
              xmlns:controls="clr-namespace:PetInsulinTracker.Controls"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.PetListPage"
              x:DataType="vm:PetListViewModel"
              Title="My Pets"
@@ -29,7 +30,7 @@
                         SelectionMode="None">
             <CollectionView.EmptyView>
                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
-                    <Label Text="🐾" FontSize="64" HorizontalOptions="Center" />
+                    <Image Source="{mi:Fluent Icon=AnimalDog24}" HeightRequest="64" WidthRequest="64" HorizontalOptions="Center" />
                     <Label Text="No pets yet"
                            FontSize="20" FontFamily="OpenSansSemibold"
                            HorizontalOptions="Center"
@@ -58,8 +59,13 @@
                         <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="16">
                             <!-- Avatar -->
                             <Border Grid.Column="0" Style="{StaticResource AvatarStyle}">
-                                <Label Style="{StaticResource AvatarTextStyle}"
-                                       Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}" />
+                                <Grid>
+                                    <Label Style="{StaticResource AvatarTextStyle}"
+                                           Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}"
+                                           IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                                    <Image Source="{Binding PhotoPath}" Aspect="AspectFill"
+                                           IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                </Grid>
                             </Border>
                             <!-- Pet Info -->
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
@@ -78,9 +84,8 @@
                                 </Label>
                             </VerticalStackLayout>
                             <!-- Chevron -->
-                            <Label Grid.Column="2" Text="›" FontSize="24"
-                                   VerticalOptions="Center"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+                            <Image Grid.Column="2" Source="{mi:Fluent Icon=ChevronRight24}" HeightRequest="16" WidthRequest="16"
+                                   VerticalOptions="Center" />
                         </Grid>
                     </Border>
                 </DataTemplate>

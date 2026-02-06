@@ -13,6 +13,7 @@
             <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter" />
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <converters:FirstLetterConverter x:Key="FirstLetterConverter" />
+            <converters:EqualityConverter x:Key="EqualityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

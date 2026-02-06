@@ -1,13 +1,11 @@
 namespace PetInsulinTracker.Converters;
 
-public class IsNotNullOrEmptyConverter : IValueConverter
+public class EqualityConverter : IValueConverter
 {
 	public object Convert(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
 	{
-		var result = value is string s && !string.IsNullOrEmpty(s);
-		if (parameter is string p && p == "invert")
-			result = !result;
-		return result;
+		if (value is null || parameter is null) return false;
+		return value.ToString() == parameter.ToString();
 	}
 
 	public object ConvertBack(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)

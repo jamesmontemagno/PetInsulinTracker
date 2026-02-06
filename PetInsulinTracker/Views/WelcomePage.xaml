@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.WelcomePage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <VerticalStackLayout VerticalOptions="Center" Spacing="24" Padding="32">
 
-        <Label Text="🐾" FontSize="72" HorizontalOptions="Center" />
+        <Image Source="{mi:Fluent Icon=AnimalDog24}" HeightRequest="64" WidthRequest="64" HorizontalOptions="Center" />
 
         <Label Text="Welcome to Pet Insulin Tracker"
                FontSize="24" FontFamily="OpenSansSemibold"
