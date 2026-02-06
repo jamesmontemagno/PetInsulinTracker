@@ -155,20 +155,9 @@ public static class ThemeService
 
     private static void SetColor(ResourceDictionary resources, string key, Color color)
     {
-        // Search merged dictionaries too
-        if (resources.ContainsKey(key))
-        {
-            resources[key] = color;
-            return;
-        }
-        foreach (var dict in resources.MergedDictionaries)
-        {
-            if (dict.ContainsKey(key))
-            {
-                dict[key] = color;
-                return;
-            }
-        }
+        // DynamicResource only reacts to changes on the top-level ResourceDictionary,
+        // so always set there to ensure bindings update.
+        resources[key] = color;
     }
 
     public static string GetThemeDisplayName(AppTheme theme) => theme switch
