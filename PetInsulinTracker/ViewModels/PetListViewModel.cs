@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -13,6 +14,8 @@ public partial class PetListViewModel : ObservableObject
 	public PetListViewModel(IDatabaseService db)
 	{
 		_db = db;
+		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (_, _) => _ = LoadPetsAsync());
+		WeakReferenceMessenger.Default.Register<PetSavedMessage>(this, (_, _) => _ = LoadPetsAsync());
 	}
 
 	[ObservableProperty]

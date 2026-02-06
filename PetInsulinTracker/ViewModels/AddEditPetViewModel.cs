@@ -7,6 +7,7 @@ using PetInsulinTracker.Services;
 namespace PetInsulinTracker.ViewModels;
 
 public sealed class PetSavedMessage(Pet pet) : CommunityToolkit.Mvvm.Messaging.Messages.ValueChangedMessage<Pet>(pet);
+public sealed class WeightUnitChangedMessage(string unit) : CommunityToolkit.Mvvm.Messaging.Messages.ValueChangedMessage<string>(unit);
 
 [QueryProperty(nameof(PetId), "petId")]
 public partial class AddEditPetViewModel : ObservableObject
@@ -45,7 +46,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	private double? currentDoseIU;
 
 	[ObservableProperty]
-	private string weightUnit = "lbs";
+	private string weightUnit = Preferences.Get("default_weight_unit", "lbs");
 
 	[ObservableProperty]
 	private double? currentWeight;

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Services;
 
@@ -8,10 +9,12 @@ namespace PetInsulinTracker.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
 	private readonly ISyncService _syncService;
+	private readonly IDatabaseService _db;
 
-	public SettingsViewModel(ISyncService syncService)
+	public SettingsViewModel(ISyncService syncService, IDatabaseService db)
 	{
 		_syncService = syncService;
+		_db = db;
 		selectedThemeName = Themes.ThemeService.CurrentTheme switch
 		{
 			Themes.AppTheme.Ocean => "Ocean Breeze",
@@ -57,6 +60,18 @@ public partial class SettingsViewModel : ObservableObject
 	partial void OnWeightUnitChanged(string value)
 	{
 		Preferences.Set("default_weight_unit", value);
+		_ = UpdateAllPetsWeightUnitAsync(value);
+	}
+
+	private async Task UpdateAllPetsWeightUnitAsync(string unit)
+	{
+		var pets = await _db.GetPetsAsync();
+		foreach (var pet in pets)
+		{
+			pet.WeightUnit = unit;
+			await _db.SavePetAsync(pet);
+		}
+		WeakReferenceMessenger.Default.Send(new WeightUnitChangedMessage(unit));
 	}
 
 	partial void OnSelectedThemeNameChanged(string value)
