@@ -134,23 +134,23 @@
 			<p class="section-subtitle">Choose from 5 beautiful color themes</p>
 
 			<div class="themes__swatches">
-				<div class="swatch">
+				<div class="swatch" data-theme="warm" onclick="setTheme('warm')">
 					<div class="swatch__circle" style="background: #E8910C;"></div>
 					<span class="swatch__label">Warm</span>
 				</div>
-				<div class="swatch">
+				<div class="swatch" data-theme="ocean" onclick="setTheme('ocean')">
 					<div class="swatch__circle" style="background: #0288D1;"></div>
 					<span class="swatch__label">Ocean</span>
 				</div>
-				<div class="swatch">
+				<div class="swatch" data-theme="forest" onclick="setTheme('forest')">
 					<div class="swatch__circle" style="background: #2E7D32;"></div>
 					<span class="swatch__label">Forest</span>
 				</div>
-				<div class="swatch">
+				<div class="swatch" data-theme="berry" onclick="setTheme('berry')">
 					<div class="swatch__circle" style="background: #AD1457;"></div>
 					<span class="swatch__label">Berry</span>
 				</div>
-				<div class="swatch">
+				<div class="swatch" data-theme="midnight" onclick="setTheme('midnight')">
 					<div class="swatch__circle" style="background: #5C6BC0;"></div>
 					<span class="swatch__label">Midnight</span>
 				</div>
@@ -188,6 +188,47 @@
 			<p class="footer__copy">&copy; 2026 PawCare. Made with ❤️ for pets everywhere.</p>
 		</div>
 	</footer>
+
+	<script>
+	const themes = {
+		warm:     { primary:'#E8910C', deep:'#C67A08', secondary:'#F28B6E', bg:'#FDF5EC', shell:'#4A3728', text:'#3D2C1E', subtle:'#8C7B6B', card:'#FFFFFF', divider:'#E8DDD0' },
+		ocean:    { primary:'#0288D1', deep:'#01579B', secondary:'#26C6DA', bg:'#E8F4F8', shell:'#01579B', text:'#1A3A4A', subtle:'#6B8A9A', card:'#FFFFFF', divider:'#D0E4ED' },
+		forest:   { primary:'#2E7D32', deep:'#1B5E20', secondary:'#8D6E63', bg:'#E8F0E0', shell:'#1B5E20', text:'#1B3A1E', subtle:'#5A7A5D', card:'#FFFFFF', divider:'#C8DCC0' },
+		berry:    { primary:'#AD1457', deep:'#880E4F', secondary:'#7B1FA2', bg:'#FCE4EC', shell:'#880E4F', text:'#3D1A28', subtle:'#8C6B78', card:'#FFFFFF', divider:'#E8D0D8' },
+		midnight: { primary:'#5C6BC0', deep:'#283593', secondary:'#26C6DA', bg:'#E8EAF6', shell:'#283593', text:'#1A1F3D', subtle:'#6B708C', card:'#FFFFFF', divider:'#D0D4E0' }
+	};
+
+	function setTheme(name) {
+		const t = themes[name];
+		if (!t) return;
+		const r = document.documentElement.style;
+		r.setProperty('--color-primary', t.primary);
+		r.setProperty('--color-primary-deep', t.deep);
+		r.setProperty('--color-secondary', t.secondary);
+		r.setProperty('--color-bg', t.bg);
+		r.setProperty('--color-shell', t.shell);
+		r.setProperty('--color-text', t.text);
+		r.setProperty('--color-subtle', t.subtle);
+		r.setProperty('--color-card', t.card);
+		r.setProperty('--color-divider', t.divider);
+		r.setProperty('--gradient-hero', 'linear-gradient(135deg, ' + t.primary + ' 0%, ' + t.secondary + ' 100%)');
+		r.setProperty('--gradient-warm', 'linear-gradient(160deg, ' + t.bg + ' 0%, ' + t.divider + ' 100%)');
+		r.setProperty('--gradient-phone', 'linear-gradient(180deg, ' + t.divider + ' 0%, ' + t.subtle + ' 100%)');
+
+		document.querySelectorAll('.swatch').forEach(function(s) {
+			s.classList.toggle('swatch--active', s.dataset.theme === name);
+		});
+
+		try { localStorage.setItem('pawcare-theme', name); } catch(e) {}
+	}
+
+	(function() {
+		try {
+			var saved = localStorage.getItem('pawcare-theme');
+			if (saved && themes[saved]) setTheme(saved);
+		} catch(e) {}
+	})();
+	</script>
 
 </body>
 </html>

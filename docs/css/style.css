@@ -383,6 +383,7 @@ a {
 	flex-direction: column;
 	align-items: center;
 	gap: 8px;
+	cursor: pointer;
 }
 
 .swatch__circle {
@@ -390,7 +391,13 @@ a {
 	height: 48px;
 	border-radius: 50%;
 	border: 3px solid var(--color-divider);
-	transition: transform 0.2s, box-shadow 0.2s;
+	transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.swatch--active .swatch__circle {
+	border-color: var(--color-text);
+	transform: scale(1.15);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .swatch__circle:hover {
