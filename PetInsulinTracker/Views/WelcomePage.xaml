@@ -9,96 +9,268 @@
     <ScrollView>
         <VerticalStackLayout VerticalOptions="Center" Spacing="20" Padding="32,48,32,32">
 
-            <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="56" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+            <!-- Step indicator -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                <BoxView x:Name="Dot1" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                         Color="{DynamicResource CurrentPrimary}" />
+                <BoxView x:Name="Dot2" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                         Color="{DynamicResource CurrentDivider}" />
+                <BoxView x:Name="Dot3" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                         Color="{DynamicResource CurrentDivider}" />
+            </HorizontalStackLayout>
 
-            <Label Text="Welcome to PawCare"
-                   FontSize="26" FontFamily="OpenSansSemibold"
-                   TextColor="{DynamicResource PageText}"
-                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <!-- ===== STEP 1: Theme + Name ===== -->
+            <VerticalStackLayout x:Name="Step1" Spacing="20" IsVisible="True">
 
-            <Label Text="Let's set things up. First, pick a color theme for your app."
-                   FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
-                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="56" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-            <!-- Theme Carousel -->
-            <CarouselView x:Name="ThemeCarousel"
-                          HeightRequest="180"
-                          PeekAreaInsets="40"
-                          Loop="False"
-                          CurrentItemChanged="OnThemeCarouselChanged"
-                          HorizontalOptions="Fill">
-                <CarouselView.ItemTemplate>
-                    <DataTemplate>
-                        <Border StrokeShape="RoundRectangle 16"
-                                StrokeThickness="3"
-                                Stroke="{Binding BorderColor}"
-                                Margin="6" Padding="0"
-                                BackgroundColor="{Binding Background}">
-                            <Grid RowDefinitions="44,*,Auto" Padding="0">
-                                <!-- Mini shell bar -->
-                                <BoxView Grid.Row="0" Color="{Binding Shell}"
-                                         CornerRadius="16,16,0,0" />
-                                <Label Grid.Row="0" Text="PawCare" FontSize="13"
-                                       FontFamily="OpenSansSemibold" TextColor="White"
-                                       VerticalOptions="Center" Margin="14,0,0,0" />
+                <Label Text="Welcome to PawCare"
+                       FontSize="26" FontFamily="OpenSansSemibold"
+                       TextColor="{DynamicResource PageText}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                                <!-- Mini content area -->
-                                <VerticalStackLayout Grid.Row="1" Spacing="8" Padding="14,10">
-                                    <Border BackgroundColor="{Binding Card}"
-                                            StrokeShape="RoundRectangle 8"
-                                            StrokeThickness="0" Padding="10,8"
-                                            HeightRequest="32">
-                                        <BoxView Color="{Binding Primary}" CornerRadius="4"
-                                                 HeightRequest="10" WidthRequest="80"
-                                                 HorizontalOptions="Start" />
-                                    </Border>
-                                    <Border BackgroundColor="{Binding Card}"
-                                            StrokeShape="RoundRectangle 8"
-                                            StrokeThickness="0" Padding="10,8"
-                                            HeightRequest="28">
-                                        <BoxView Color="{Binding Secondary}" CornerRadius="4"
-                                                 HeightRequest="8" WidthRequest="60"
-                                                 HorizontalOptions="Start" />
-                                    </Border>
-                                </VerticalStackLayout>
+                <Label Text="Let's set things up. First, pick a color theme for your app."
+                       FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                                <!-- Theme name -->
-                                <Label Grid.Row="2" Text="{Binding Name}"
-                                       FontSize="13" FontFamily="OpenSansSemibold"
-                                       TextColor="{Binding TextColor}"
-                                       HorizontalOptions="Center" Margin="0,0,0,10" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CarouselView.ItemTemplate>
-            </CarouselView>
+                <!-- Theme Carousel -->
+                <CarouselView x:Name="ThemeCarousel"
+                              HeightRequest="180"
+                              PeekAreaInsets="40"
+                              Loop="False"
+                              CurrentItemChanged="OnThemeCarouselChanged"
+                              HorizontalOptions="Fill">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate>
+                            <Border StrokeShape="RoundRectangle 16"
+                                    StrokeThickness="3"
+                                    Stroke="{Binding BorderColor}"
+                                    Margin="6" Padding="0"
+                                    BackgroundColor="{Binding Background}">
+                                <Grid RowDefinitions="44,*,Auto" Padding="0">
+                                    <BoxView Grid.Row="0" Color="{Binding Shell}"
+                                             CornerRadius="16,16,0,0" />
+                                    <Label Grid.Row="0" Text="PawCare" FontSize="13"
+                                           FontFamily="OpenSansSemibold" TextColor="White"
+                                           VerticalOptions="Center" Margin="14,0,0,0" />
+                                    <VerticalStackLayout Grid.Row="1" Spacing="8" Padding="14,10">
+                                        <Border BackgroundColor="{Binding Card}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0" Padding="10,8"
+                                                HeightRequest="32">
+                                            <BoxView Color="{Binding Primary}" CornerRadius="4"
+                                                     HeightRequest="10" WidthRequest="80"
+                                                     HorizontalOptions="Start" />
+                                        </Border>
+                                        <Border BackgroundColor="{Binding Card}"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0" Padding="10,8"
+                                                HeightRequest="28">
+                                            <BoxView Color="{Binding Secondary}" CornerRadius="4"
+                                                     HeightRequest="8" WidthRequest="60"
+                                                     HorizontalOptions="Start" />
+                                        </Border>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Row="2" Text="{Binding Name}"
+                                           FontSize="13" FontFamily="OpenSansSemibold"
+                                           TextColor="{Binding TextColor}"
+                                           HorizontalOptions="Center" Margin="0,0,0,10" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
 
-            <IndicatorView x:Name="ThemeIndicator"
-                           HorizontalOptions="Center"
-                           IndicatorColor="{DynamicResource CurrentDivider}"
-                           SelectedIndicatorColor="{DynamicResource CurrentPrimary}"
-                           IndicatorSize="8" />
+                <IndicatorView x:Name="ThemeIndicator"
+                               HorizontalOptions="Center"
+                               IndicatorColor="{DynamicResource CurrentDivider}"
+                               SelectedIndicatorColor="{DynamicResource CurrentPrimary}"
+                               IndicatorSize="8" />
 
-            <!-- Name entry -->
-            <Label Text="What's your name?" FontSize="14"
-                   TextColor="{DynamicResource PageTextSecondary}"
-                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                   Margin="0,8,0,0" />
+                <Label Text="What's your name?" FontSize="14"
+                       TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                       Margin="0,8,0,0" />
 
-            <Border Style="{StaticResource CardStyle}" Padding="16">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
-                    <Entry x:Name="NameEntry" Placeholder="e.g., James"
-                           FontSize="18" HorizontalTextAlignment="Center"
-                           ReturnType="Done"
-                           Completed="OnNameCompleted" />
-                </VerticalStackLayout>
-            </Border>
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
+                        <Entry x:Name="NameEntry" Placeholder="e.g., James"
+                               FontSize="18" HorizontalTextAlignment="Center"
+                               ReturnType="Next" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <Button Text="Get Started"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    HorizontalOptions="Fill"
-                    Clicked="OnGetStartedClicked" />
+                <Button Text="Next"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnStep1Next" />
+            </VerticalStackLayout>
+
+            <!-- ===== STEP 2: Schedule Setup (Optional) ===== -->
+            <VerticalStackLayout x:Name="Step2" Spacing="16" IsVisible="False">
+
+                <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+
+                <Label Text="Set Up Schedules"
+                       FontSize="24" FontFamily="OpenSansSemibold"
+                       TextColor="{DynamicResource PageText}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Label Text="Optionally set up your pet's insulin and feeding schedule. You can always do this later."
+                       FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <!-- Morning Insulin -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Morning Insulin" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="MorningInsulinTime" Time="07:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="MorningInsulinReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="MorningInsulinEnabled" IsToggled="True" />
+                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Evening Insulin -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Evening Insulin" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="EveningInsulinTime" Time="19:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="EveningInsulinReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="EveningInsulinEnabled" IsToggled="True" />
+                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Morning Feeding -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Morning Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="MorningFeedingTime" Time="07:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="MorningFeedingReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="MorningFeedingEnabled" IsToggled="True" />
+                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Evening Feeding -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Evening Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="EveningFeedingTime" Time="19:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="EveningFeedingReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="EveningFeedingEnabled" IsToggled="True" />
+                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Skip"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep2Skip" />
+                    <Button Grid.Column="1" Text="Next"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep2Next" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- ===== STEP 3: Vet Info (Optional) ===== -->
+            <VerticalStackLayout x:Name="Step3" Spacing="16" IsVisible="False">
+
+                <mi:MauiIcon Icon="{mi:Fluent Stethoscope24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+
+                <Label Text="Vet Information"
+                       FontSize="24" FontFamily="OpenSansSemibold"
+                       TextColor="{DynamicResource PageText}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Label Text="Add your vet's details for quick access in emergencies. You can always do this later."
+                       FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Vet Name" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="VetNameEntry" Placeholder="e.g., Dr. Smith" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Clinic Name" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="ClinicNameEntry" Placeholder="e.g., Happy Paws Clinic" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Phone" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="VetPhoneEntry" Placeholder="(555) 123-4567" Keyboard="Telephone" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Emergency Phone" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="EmergencyPhoneEntry" Placeholder="(555) 987-6543" Keyboard="Telephone" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Address" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="VetAddressEntry" Placeholder="123 Main St, Anytown" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Skip"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep3Skip" />
+                    <Button Grid.Column="1" Text="Get Started"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep3Done" />
+                </Grid>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>
