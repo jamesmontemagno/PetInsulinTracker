@@ -90,8 +90,8 @@ public static class ThemeService
     {
         get
         {
-            var saved = Preferences.Get("app_theme", nameof(AppTheme.Warm));
-            return Enum.TryParse<AppTheme>(saved, out var t) ? t : AppTheme.Warm;
+            var saved = Preferences.Get("app_theme", nameof(AppTheme.Berry));
+            return Enum.TryParse<AppTheme>(saved, out var t) ? t : AppTheme.Berry;
         }
     }
 

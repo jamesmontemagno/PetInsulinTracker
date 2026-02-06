@@ -17,11 +17,11 @@ public partial class SettingsViewModel : ObservableObject
 		_db = db;
 		selectedThemeName = Themes.ThemeService.CurrentTheme switch
 		{
+			Themes.AppTheme.Warm => "Warm & Earthy",
 			Themes.AppTheme.Ocean => "Ocean Breeze",
 			Themes.AppTheme.Forest => "Forest Walk",
-			Themes.AppTheme.Berry => "Berry Bliss",
 			Themes.AppTheme.Midnight => "Midnight Indigo",
-			_ => "Warm & Earthy"
+			_ => "Berry Bliss"
 		};
 	}
 

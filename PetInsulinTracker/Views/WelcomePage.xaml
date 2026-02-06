@@ -6,33 +6,101 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{DynamicResource PageBackground}">
 
-    <VerticalStackLayout VerticalOptions="Center" Spacing="24" Padding="32">
+    <ScrollView>
+        <VerticalStackLayout VerticalOptions="Center" Spacing="20" Padding="32,48,32,32">
 
-        <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{DynamicResource PageTextSecondary}" HorizontalOptions="Center" />
+            <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="56" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-        <Label Text="Welcome to Pet Insulin Tracker"
-               FontSize="24" FontFamily="OpenSansSemibold"
-               HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <Label Text="Welcome to PawCare"
+                   FontSize="26" FontFamily="OpenSansSemibold"
+                   TextColor="{DynamicResource PageText}"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-        <Label Text="Before we get started, let us know your name so we can track who logs each entry."
-               Style="{StaticResource SubtleTextStyle}" FontSize="14"
-               HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <Label Text="Let's set things up. First, pick a color theme for your app."
+                   FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-        <Border Style="{StaticResource CardStyle}" Padding="16">
-            <VerticalStackLayout Spacing="8">
-                <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
-                <Entry x:Name="NameEntry" Placeholder="e.g., James"
-                       FontSize="18" HorizontalTextAlignment="Center"
-                       ReturnType="Done"
-                       Completed="OnNameCompleted" />
-            </VerticalStackLayout>
-        </Border>
+            <!-- Theme Carousel -->
+            <CarouselView x:Name="ThemeCarousel"
+                          HeightRequest="180"
+                          PeekAreaInsets="40"
+                          Loop="False"
+                          CurrentItemChanged="OnThemeCarouselChanged"
+                          HorizontalOptions="Fill">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeShape="RoundRectangle 16"
+                                StrokeThickness="3"
+                                Stroke="{Binding BorderColor}"
+                                Margin="6" Padding="0"
+                                BackgroundColor="{Binding Background}">
+                            <Grid RowDefinitions="44,*,Auto" Padding="0">
+                                <!-- Mini shell bar -->
+                                <BoxView Grid.Row="0" Color="{Binding Shell}"
+                                         CornerRadius="16,16,0,0" />
+                                <Label Grid.Row="0" Text="PawCare" FontSize="13"
+                                       FontFamily="OpenSansSemibold" TextColor="White"
+                                       VerticalOptions="Center" Margin="14,0,0,0" />
 
-        <Button Text="Get Started"
-                Style="{StaticResource PrimaryButtonStyle}"
-                HorizontalOptions="Fill"
-                Clicked="OnGetStartedClicked" />
+                                <!-- Mini content area -->
+                                <VerticalStackLayout Grid.Row="1" Spacing="8" Padding="14,10">
+                                    <Border BackgroundColor="{Binding Card}"
+                                            StrokeShape="RoundRectangle 8"
+                                            StrokeThickness="0" Padding="10,8"
+                                            HeightRequest="32">
+                                        <BoxView Color="{Binding Primary}" CornerRadius="4"
+                                                 HeightRequest="10" WidthRequest="80"
+                                                 HorizontalOptions="Start" />
+                                    </Border>
+                                    <Border BackgroundColor="{Binding Card}"
+                                            StrokeShape="RoundRectangle 8"
+                                            StrokeThickness="0" Padding="10,8"
+                                            HeightRequest="28">
+                                        <BoxView Color="{Binding Secondary}" CornerRadius="4"
+                                                 HeightRequest="8" WidthRequest="60"
+                                                 HorizontalOptions="Start" />
+                                    </Border>
+                                </VerticalStackLayout>
 
-    </VerticalStackLayout>
+                                <!-- Theme name -->
+                                <Label Grid.Row="2" Text="{Binding Name}"
+                                       FontSize="13" FontFamily="OpenSansSemibold"
+                                       TextColor="{Binding TextColor}"
+                                       HorizontalOptions="Center" Margin="0,0,0,10" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+
+            <IndicatorView x:Name="ThemeIndicator"
+                           HorizontalOptions="Center"
+                           IndicatorColor="{DynamicResource CurrentDivider}"
+                           SelectedIndicatorColor="{DynamicResource CurrentPrimary}"
+                           IndicatorSize="8" />
+
+            <!-- Name entry -->
+            <Label Text="What's your name?" FontSize="14"
+                   TextColor="{DynamicResource PageTextSecondary}"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                   Margin="0,8,0,0" />
+
+            <Border Style="{StaticResource CardStyle}" Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
+                    <Entry x:Name="NameEntry" Placeholder="e.g., James"
+                           FontSize="18" HorizontalTextAlignment="Center"
+                           ReturnType="Done"
+                           Completed="OnNameCompleted" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="Get Started"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    HorizontalOptions="Fill"
+                    Clicked="OnGetStartedClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

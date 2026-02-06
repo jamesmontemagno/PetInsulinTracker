@@ -11,6 +11,6 @@
     <!-- Paw pad - top right toe -->
     <ellipse cx="308" cy="195" rx="32" ry="40" transform="rotate(15, 308, 195)" fill="#FFFFFF"/>
     <!-- Medical cross / plus sign on main pad -->
-    <rect x="218" y="262" width="20" height="46" rx="4" fill="#E8910C"/>
-    <rect x="205" y="275" width="46" height="20" rx="4" fill="#E8910C"/>
+    <rect x="218" y="262" width="20" height="46" rx="4" fill="#AD1457"/>
+    <rect x="205" y="275" width="46" height="20" rx="4" fill="#AD1457"/>
 </svg>

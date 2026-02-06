@@ -119,13 +119,13 @@ Place screenshots in the `screenshots/` subfolder. Recommended set:
 
 **Dimensions**: 1024 × 500 px
 
-**Concept**: Warm amber gradient background (#E8910C → #F28B6E) with the PawCare paw+cross icon centered, app name "PawCare" in white semibold text below, tagline "Diabetic Pet Care, Simplified" underneath in cream (#FDF5EC).
+**Concept**: Berry gradient background (#AD1457 → #7B1FA2) with the PawCare paw+cross icon centered, app name "PawCare" in white semibold text below, tagline "Diabetic Pet Care, Simplified" underneath in soft pink (#FCE4EC).
 
 ---
 
 ## App Icon
 
-**Design**: White paw print with a medical cross (plus sign) on the central pad, set against a warm amber (#E8910C) rounded-rectangle background. The cross uses the same amber color to create a cutout effect.
+**Design**: White paw print with a medical cross (plus sign) on the central pad, set against a berry pink (#AD1457) rounded-rectangle background. The cross uses the same berry color to create a cutout effect.
 
 **Sizes needed**:
 - iOS: 1024 × 1024 px (App Store), auto-generated at smaller sizes
@@ -139,11 +139,11 @@ Place screenshots in the `screenshots/` subfolder. Recommended set:
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| Amber (Primary) | `#E8910C` | App icon, buttons, accents |
-| Warm Brown (Shell) | `#4A3728` | Navigation bar, splash background |
-| Coral (Secondary) | `#F28B6E` | Gradient accents |
-| Cream (Background) | `#FDF5EC` | Page backgrounds (light mode) |
-| Deep Brown (Text) | `#3D2C1E` | Primary text (light mode) |
+| Berry Pink (Primary) | `#AD1457` | App icon, buttons, accents |
+| Deep Berry (Shell) | `#880E4F` | Navigation bar, splash background |
+| Purple (Secondary) | `#7B1FA2` | Gradient accents |
+| Soft Pink (Background) | `#FCE4EC` | Page backgrounds (light mode) |
+| Dark Berry (Text) | `#3D1A28` | Primary text (light mode) |
 
 ---
 

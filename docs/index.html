@@ -226,7 +226,8 @@
 		try {
 			var saved = localStorage.getItem('pawcare-theme');
 			if (saved && themes[saved]) setTheme(saved);
-		} catch(e) {}
+			else setTheme('berry');
+		} catch(e) { setTheme('berry'); }
 	})();
 	</script>
 

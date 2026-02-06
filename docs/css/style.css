@@ -5,21 +5,21 @@
 
 /* --- Custom Properties --- */
 :root {
-	/* Brand palette */
-	--color-primary: #E8910C;
-	--color-primary-deep: #C67A08;
-	--color-secondary: #F28B6E;
-	--color-bg: #FDF5EC;
-	--color-shell: #4A3728;
-	--color-text: #3D2C1E;
-	--color-subtle: #8C7B6B;
+	/* Brand palette — Berry Bliss */
+	--color-primary: #AD1457;
+	--color-primary-deep: #880E4F;
+	--color-secondary: #7B1FA2;
+	--color-bg: #FCE4EC;
+	--color-shell: #880E4F;
+	--color-text: #3D1A28;
+	--color-subtle: #8C6B78;
 	--color-card: #FFFFFF;
-	--color-divider: #E8DDD0;
+	--color-divider: #E8D0D8;
 
 	/* Gradient helpers */
-	--gradient-hero: linear-gradient(135deg, #E8910C 0%, #F28B6E 100%);
-	--gradient-warm: linear-gradient(160deg, #FDF5EC 0%, #F9E4CC 100%);
-	--gradient-phone: linear-gradient(180deg, #F9E4CC 0%, #F5D3A8 50%, #F28B6E 100%);
+	--gradient-hero: linear-gradient(135deg, #AD1457 0%, #7B1FA2 100%);
+	--gradient-warm: linear-gradient(160deg, #FCE4EC 0%, #F8BBD0 100%);
+	--gradient-phone: linear-gradient(180deg, #F8BBD0 0%, #F48FB1 50%, #AD1457 100%);
 
 	/* Layout */
 	--max-width: 1200px;
@@ -35,18 +35,18 @@
 /* --- Dark mode --- */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--color-primary: #F5A623;
-		--color-primary-deep: #E8910C;
-		--color-secondary: #F28B6E;
-		--color-bg: #1A1410;
-		--color-shell: #1A1410;
-		--color-text: #F5E6D3;
-		--color-subtle: #A89888;
-		--color-card: #2A2018;
-		--color-divider: #3D3028;
+		--color-primary: #EC407A;
+		--color-primary-deep: #AD1457;
+		--color-secondary: #AB47BC;
+		--color-bg: #1A1015;
+		--color-shell: #1A1015;
+		--color-text: #F2D6E0;
+		--color-subtle: #B8909D;
+		--color-card: #352028;
+		--color-divider: #3D2830;
 
-		--gradient-warm: linear-gradient(160deg, #1A1410 0%, #2A2018 100%);
-		--gradient-phone: linear-gradient(180deg, #2A2018 0%, #3D3028 50%, #4A3728 100%);
+		--gradient-warm: linear-gradient(160deg, #1A1015 0%, #2A1820 100%);
+		--gradient-phone: linear-gradient(180deg, #2A1820 0%, #3D2830 50%, #880E4F 100%);
 	}
 }
 
