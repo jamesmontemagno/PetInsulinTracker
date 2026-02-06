@@ -46,4 +46,10 @@ public partial class PetListViewModel : ObservableObject
 	{
 		await Shell.Current.GoToAsync($"{nameof(Views.PetDetailPage)}?petId={pet.Id}");
 	}
+
+	[RelayCommand]
+	private static async Task GoToSettingsAsync()
+	{
+		await Shell.Current.GoToAsync(nameof(Views.SettingsPage));
+	}
 }

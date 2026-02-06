@@ -11,7 +11,7 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto">
             <Label Text="My Pets" VerticalOptions="Center"
                    FontFamily="OpenSansSemibold" FontSize="18"
                    TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}" />
@@ -20,6 +20,12 @@
                     TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}"
                     Command="{Binding GoToAddPetCommand}"
                     SemanticProperties.Hint="Add a new pet"
+                    Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
+            <Button Grid.Column="2" Text="⚙" FontSize="20"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}"
+                    Command="{Binding GoToSettingsCommand}"
+                    SemanticProperties.Hint="Open settings"
                     Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
         </Grid>
     </Shell.TitleView>

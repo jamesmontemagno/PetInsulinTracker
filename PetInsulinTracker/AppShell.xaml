@@ -6,16 +6,9 @@
     xmlns:views="clr-namespace:PetInsulinTracker.Views"
     Title="Pet Insulin Tracker">
 
-    <TabBar>
-        <ShellContent
-            Title="My Pets"
-            ContentTemplate="{DataTemplate views:PetListPage}"
-            Route="PetListPage" />
-
-        <ShellContent
-            Title="Settings"
-            ContentTemplate="{DataTemplate views:SettingsPage}"
-            Route="SettingsPage" />
-    </TabBar>
+    <ShellContent
+        Title="My Pets"
+        ContentTemplate="{DataTemplate views:PetListPage}"
+        Route="PetListPage" />
 
 </Shell>
