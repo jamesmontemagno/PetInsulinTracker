@@ -52,7 +52,27 @@ public partial class FeedingLogViewModel : ObservableObject
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
-			_ = LoadLogsAsync();
+			_ = LoadDataAsync();
+	}
+
+	private async Task LoadDataAsync()
+	{
+		if (PetId is null) return;
+
+		var pet = await _db.GetPetAsync(PetId);
+		if (pet is not null)
+		{
+			if (!string.IsNullOrEmpty(pet.DefaultFoodName))
+				FoodName = pet.DefaultFoodName;
+			if (pet.DefaultFoodAmount is > 0)
+				Amount = pet.DefaultFoodAmount.Value;
+			if (!string.IsNullOrEmpty(pet.DefaultFoodUnit))
+				Unit = pet.DefaultFoodUnit;
+			if (!string.IsNullOrEmpty(pet.DefaultFoodType))
+				FoodType = pet.DefaultFoodType;
+		}
+
+		await LoadLogsAsync();
 	}
 
 	[RelayCommand]
@@ -82,9 +102,7 @@ public partial class FeedingLogViewModel : ObservableObject
 
 		await _db.SaveFeedingLogAsync(log);
 
-		// Reset form
-		FoodName = string.Empty;
-		Amount = 0;
+		// Reset form to pet defaults
 		Notes = null;
 		LogDate = DateTime.Today;
 		LogTime = DateTime.Now.TimeOfDay;
