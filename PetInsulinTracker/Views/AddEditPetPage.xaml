@@ -6,7 +6,7 @@
              x:Class="PetInsulinTracker.Views.AddEditPetPage"
              x:DataType="vm:AddEditPetViewModel"
              Title="{Binding PageTitle}"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
@@ -19,11 +19,11 @@
                     <!-- Photo Preview -->
                     <Border StrokeShape="RoundRectangle 50"
                             StrokeThickness="3"
-                            Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            Stroke="{DynamicResource CurrentPrimary}"
                             HeightRequest="100" WidthRequest="100"
                             HorizontalOptions="Center">
                         <Grid>
-                            <mi:MauiIcon Icon="{mi:Fluent CameraAdd20}" IconSize="40" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            <mi:MauiIcon Icon="{mi:Fluent CameraAdd20}" IconSize="40" IconColor="{DynamicResource PageTextSecondary}"
                                    HorizontalOptions="Center" VerticalOptions="Center"
                                    IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                             <Image Source="{Binding PhotoPath}"

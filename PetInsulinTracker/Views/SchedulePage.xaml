@@ -7,7 +7,7 @@
              x:Class="PetInsulinTracker.Views.SchedulePage"
              x:DataType="vm:ScheduleViewModel"
              Title="Schedules"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
@@ -65,7 +65,7 @@
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="Delete"
-                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                               BackgroundColor="{DynamicResource CurrentDanger}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=DeleteScheduleCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
@@ -76,7 +76,7 @@
                                             BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                             HeightRequest="40" WidthRequest="40">
-                                        <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="15" />

@@ -11,6 +11,9 @@ public partial class App : Application
 
 		// Apply saved theme on startup
 		ThemeService.ApplyTheme(ThemeService.CurrentTheme);
+
+		// Re-apply when system light/dark changes so resolved keys stay correct
+		RequestedThemeChanged += (_, _) => ThemeService.ApplyTheme(ThemeService.CurrentTheme);
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

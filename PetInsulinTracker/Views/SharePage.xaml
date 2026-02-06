@@ -6,7 +6,7 @@
              x:Class="PetInsulinTracker.Views.SharePage"
              x:DataType="vm:ShareViewModel"
              Title="Share Pet"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
@@ -20,15 +20,15 @@
                 <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
                     <Label Text="Your pet's share code" Style="{StaticResource SubtleTextStyle}"
                            HorizontalOptions="Center" />
-                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    <Border BackgroundColor="{DynamicResource CurrentSurface}"
                             StrokeThickness="2"
-                            Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            Stroke="{DynamicResource CurrentPrimary}"
                             StrokeShape="RoundRectangle 12"
                             Padding="24,16"
                             HorizontalOptions="Center">
                         <Label Text="{Binding ShareCode}" FontSize="36" FontFamily="OpenSansSemibold"
                                LetterSpacing="6" HorizontalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                               TextColor="{DynamicResource CurrentPrimary}"
                                SemanticProperties.Description="Share code" />
                     </Border>
                     <Button Text="Copy Code" Command="{Binding CopyShareCodeCommand}"
@@ -67,7 +67,7 @@
             <!-- Status -->
             <Label Text="{Binding StatusMessage}" FontSize="14" FontFamily="OpenSansSemibold"
                    HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                   TextColor="{DynamicResource CurrentPrimary}"
                    IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
 
         </VerticalStackLayout>

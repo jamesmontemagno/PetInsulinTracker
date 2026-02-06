@@ -8,25 +8,25 @@
              x:Class="PetInsulinTracker.Views.PetListPage"
              x:DataType="vm:PetListViewModel"
              Title="My Pets"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto,Auto">
             <Label Text="My Pets" VerticalOptions="Center"
                    FontFamily="OpenSansSemibold" FontSize="18"
-                   TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}" />
+                   TextColor="{DynamicResource CurrentShellForeground}" />
             <Button Grid.Column="1" Text="+" FontSize="22" FontFamily="OpenSansSemibold"
                     BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}"
+                    TextColor="{DynamicResource CurrentShellForeground}"
                     Command="{Binding GoToAddPetCommand}"
                     SemanticProperties.Hint="Add a new pet"
                     Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
-            <Button Grid.Column="2" Text="⚙" FontSize="20"
-                    BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}"
-                    Command="{Binding GoToSettingsCommand}"
-                    SemanticProperties.Hint="Open settings"
-                    Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
+            <ImageButton Grid.Column="2"
+                         Source="{mi:Fluent Icon=Settings24, IconColor=White}"
+                         BackgroundColor="Transparent"
+                         Command="{Binding GoToSettingsCommand}"
+                         SemanticProperties.Hint="Open settings"
+                         Padding="8,0" WidthRequest="44" HeightRequest="44" />
         </Grid>
     </Shell.TitleView>
 
@@ -36,14 +36,14 @@
                         SelectionMode="None">
             <CollectionView.EmptyView>
                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
-                    <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" HorizontalOptions="Center" />
+                    <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{DynamicResource PageTextSecondary}" HorizontalOptions="Center" />
                     <Label Text="No pets yet"
                            FontSize="20" FontFamily="OpenSansSemibold"
                            HorizontalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                           TextColor="{DynamicResource PageText}" />
                     <Label Text="Tap + in the toolbar to add your first furry friend!"
                            FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                           TextColor="{DynamicResource PageTextSecondary}" />
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
             <CollectionView.Header>
@@ -90,7 +90,7 @@
                                 </Label>
                             </VerticalStackLayout>
                             <!-- Chevron -->
-                            <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>

@@ -6,7 +6,7 @@
              x:Class="PetInsulinTracker.Views.VetInfoPage"
              x:DataType="vm:VetInfoViewModel"
              Title="Vet Information"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">

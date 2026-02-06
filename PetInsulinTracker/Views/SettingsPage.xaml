@@ -6,7 +6,7 @@
              x:Class="PetInsulinTracker.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
              Title="Settings"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
@@ -20,7 +20,7 @@
                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                             HeightRequest="36" WidthRequest="36">
-                        <mi:MauiIcon Icon="{mi:Fluent PersonCircle24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Fluent PersonCircle24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                     <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                         <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
@@ -40,7 +40,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <mi:MauiIcon Icon="{mi:Fluent AlertOn20}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent AlertOn20}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="Notifications" VerticalOptions="Center"
                                FontFamily="OpenSansSemibold" />
@@ -54,7 +54,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="Default Weight Unit" VerticalOptions="Center"
                                FontFamily="OpenSansSemibold" />
@@ -73,7 +73,7 @@
                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                             HeightRequest="36" WidthRequest="36">
-                        <mi:MauiIcon Icon="{mi:Fluent PaintBrush24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Fluent PaintBrush24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                     <Label Grid.Column="1" Text="Color Theme" VerticalOptions="Center"
                            FontFamily="OpenSansSemibold" />
@@ -92,7 +92,7 @@
                                 BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
-                            <mi:MauiIcon Icon="{mi:Fluent CloudSync20}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent CloudSync20}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <Label Grid.Column="1" Text="{Binding SyncStatus}"
                                VerticalOptions="Center" Style="{StaticResource SubtleTextStyle}" FontSize="14" />

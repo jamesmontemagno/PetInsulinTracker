@@ -7,7 +7,7 @@
              x:Class="PetInsulinTracker.Views.PetDetailPage"
              x:DataType="vm:PetDetailViewModel"
              Title="{Binding Pet.Name}"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Spacing="16">
@@ -54,9 +54,9 @@
                                             Progress="{Binding DoseProgress}"
                                             CenterText="{Binding DoseCountdownText}"
                                             SubText="{Binding DoseCountdownSubText}"
-                                            RingColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            RingColor="{DynamicResource CurrentPrimary}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                            CenterTextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                            CenterTextColor="{DynamicResource PageText}" />
                     <Button Grid.Column="1"
                             Text="Quick Log Insulin"
                             Style="{StaticResource PrimaryButtonStyle}"
@@ -77,13 +77,13 @@
                         <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="40" WidthRequest="40">
-                            <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                             <Label Text="Last Insulin" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="{Binding LastInsulinText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
-                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" VerticalOptions="Center" />
+                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
                     </Grid>
                 </Border>
 
@@ -96,13 +96,13 @@
                         <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="40" WidthRequest="40">
-                            <mi:MauiIcon Icon="{mi:Fluent Food24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent Food24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                             <Label Text="Last Feeding" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="{Binding LastFeedingText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
-                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" VerticalOptions="Center" />
+                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
                     </Grid>
                 </Border>
 
@@ -115,13 +115,13 @@
                         <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="40" WidthRequest="40">
-                            <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                             <Label Text="Weight" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="{Binding LastWeightText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
-                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" VerticalOptions="Center" />
+                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
                     </Grid>
                 </Border>
 

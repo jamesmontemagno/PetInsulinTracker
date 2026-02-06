@@ -63,6 +63,20 @@
     <Color x:Key="Gray900">#3D2C1E</Color>
     <Color x:Key="Gray950">#2A1F14</Color>
 
+    <!-- Resolved theme keys (updated at runtime by ThemeService) -->
+    <Color x:Key="PageBackground">#FDF5EC</Color>
+    <Color x:Key="PageText">#3D2C1E</Color>
+    <Color x:Key="PageTextSecondary">#8C7B6B</Color>
+    <Color x:Key="CurrentPrimary">#E8910C</Color>
+    <Color x:Key="CurrentSecondary">#F28B6E</Color>
+    <Color x:Key="CurrentCardBackground">#FFFFFF</Color>
+    <Color x:Key="CurrentSurface">#FFF8F0</Color>
+    <Color x:Key="CurrentDivider">#E8DDD0</Color>
+    <Color x:Key="CurrentShellBackground">#4A3728</Color>
+    <Color x:Key="CurrentShellForeground">#FFFFFF</Color>
+    <Color x:Key="CurrentDanger">#D94F4F</Color>
+    <Color x:Key="CurrentSuccess">#5B9A6F</Color>
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>

@@ -8,7 +8,7 @@
              x:Class="PetInsulinTracker.Views.WeightLogPage"
              x:DataType="vm:WeightLogViewModel"
              Title="Weight Log"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
@@ -21,11 +21,11 @@
                     <controls:WeightChart HeightRequest="200"
                                           DataPoints="{Binding ChartData}"
                                           Labels="{Binding ChartLabels}"
-                                          LineColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                          TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                                          LineColor="{DynamicResource CurrentPrimary}"
+                                          TextColor="{DynamicResource PageTextSecondary}" />
                     <Label Text="{Binding TrendText}" FontSize="15" FontFamily="OpenSansSemibold"
                            HorizontalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                           TextColor="{DynamicResource CurrentPrimary}"
                            IsVisible="{Binding TrendText, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                 </VerticalStackLayout>
             </Border>
@@ -44,7 +44,7 @@
                         <Label Grid.Column="1" Text="{Binding Unit}" FontSize="16"
                                FontFamily="OpenSansSemibold"
                                VerticalOptions="End" Margin="0,0,0,8"
-                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                               TextColor="{DynamicResource PageTextSecondary}" />
                     </Grid>
 
                     <VerticalStackLayout Spacing="4">
@@ -76,7 +76,7 @@
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="Delete"
-                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                               BackgroundColor="{DynamicResource CurrentDanger}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WeightLogViewModel}}, Path=DeleteLogCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
@@ -87,7 +87,7 @@
                                             BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                             HeightRequest="40" WidthRequest="40">
-                                        <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <mi:MauiIcon Icon="{mi:Fluent Scales24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label FontFamily="OpenSansSemibold" FontSize="15">

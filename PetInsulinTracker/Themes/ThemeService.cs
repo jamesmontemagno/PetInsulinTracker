@@ -104,6 +104,10 @@ public static class ThemeService
         var res = Application.Current?.Resources;
         if (res is null) return;
 
+        // Detect current system appearance
+        var isDark = Application.Current!.RequestedTheme == Microsoft.Maui.ApplicationModel.AppTheme.Dark;
+
+        // Set both light/dark variants (for AppThemeBinding) 
         SetColor(res, "Primary", p.Primary);
         SetColor(res, "PrimaryDark", p.PrimaryDark);
         SetColor(res, "Secondary", p.Secondary);
@@ -112,7 +116,7 @@ public static class ThemeService
         SetColor(res, "TertiaryDark", p.TertiaryDark);
         SetColor(res, "Surface", p.Surface);
         SetColor(res, "SurfaceDark", p.SurfaceDark);
-        SetColor(res, "Background", p.Background);
+        SetColor(res, "Background", isDark ? p.BackgroundDark : p.Background);
         SetColor(res, "BackgroundDark", p.BackgroundDark);
         SetColor(res, "CardBackground", p.CardBackground);
         SetColor(res, "CardBackgroundDark", p.CardBackgroundDark);
@@ -124,6 +128,25 @@ public static class ThemeService
         SetColor(res, "ShellBackgroundDark", p.ShellBackgroundDark);
         SetColor(res, "Divider", p.Divider);
         SetColor(res, "DividerDark", p.DividerDark);
+
+        // Set resolved "current" keys for DynamicResource usage
+        SetColor(res, "PageBackground", isDark ? p.BackgroundDark : p.Background);
+        SetColor(res, "PageText", isDark ? p.TextPrimaryDark : p.TextPrimary);
+        SetColor(res, "PageTextSecondary", isDark ? p.TextSecondaryDark : p.TextSecondary);
+        SetColor(res, "CurrentPrimary", isDark ? p.PrimaryDark : p.Primary);
+        SetColor(res, "CurrentCardBackground", isDark ? p.CardBackgroundDark : p.CardBackground);
+        SetColor(res, "CurrentSurface", isDark ? p.SurfaceDark : p.Surface);
+        SetColor(res, "CurrentDivider", isDark ? p.DividerDark : p.Divider);
+        SetColor(res, "CurrentShellBackground", isDark ? p.ShellBackgroundDark : p.ShellBackground);
+
+        // Non-palette resolved keys (same across all themes, just light/dark variant)
+        var danger = isDark ? Color.FromArgb("#E86565") : Color.FromArgb("#D94F4F");
+        var success = isDark ? Color.FromArgb("#6BAD7F") : Color.FromArgb("#5B9A6F");
+        var shellFg = isDark ? Color.FromArgb("#F5E6D3") : Color.FromArgb("#FFFFFF");
+        SetColor(res, "CurrentDanger", danger);
+        SetColor(res, "CurrentSuccess", success);
+        SetColor(res, "CurrentSecondary", isDark ? p.SecondaryDark : p.Secondary);
+        SetColor(res, "CurrentShellForeground", shellFg);
 
         // Also update legacy keys that derive from primary
         SetColor(res, "Magenta", p.Primary);

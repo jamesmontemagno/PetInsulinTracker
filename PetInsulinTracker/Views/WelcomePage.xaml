@@ -4,11 +4,11 @@
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.WelcomePage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <VerticalStackLayout VerticalOptions="Center" Spacing="24" Padding="32">
 
-        <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" HorizontalOptions="Center" />
+        <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="64" IconColor="{DynamicResource PageTextSecondary}" HorizontalOptions="Center" />
 
         <Label Text="Welcome to Pet Insulin Tracker"
                FontSize="24" FontFamily="OpenSansSemibold"

@@ -7,7 +7,7 @@
              x:Class="PetInsulinTracker.Views.InsulinLogPage"
              x:DataType="vm:InsulinLogViewModel"
              Title="Insulin Log"
-             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+             BackgroundColor="{DynamicResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
@@ -63,7 +63,7 @@
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="Delete"
-                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                               BackgroundColor="{DynamicResource CurrentDanger}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InsulinLogViewModel}}, Path=DeleteLogCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
@@ -74,7 +74,7 @@
                                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                             HeightRequest="40" WidthRequest="40">
-                                        <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label FontFamily="OpenSansSemibold" FontSize="15"
