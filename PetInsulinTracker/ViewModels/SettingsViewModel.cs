@@ -70,6 +70,14 @@ public partial class SettingsViewModel : ObservableObject
 		{
 			pet.WeightUnit = unit;
 			await _db.SavePetAsync(pet);
+
+			// Also update unit on existing weight log records
+			var logs = await _db.GetWeightLogsAsync(pet.Id);
+			foreach (var log in logs)
+			{
+				log.Unit = unit;
+				await _db.SaveWeightLogAsync(log);
+			}
 		}
 		WeakReferenceMessenger.Default.Send(new WeightUnitChangedMessage(unit));
 	}

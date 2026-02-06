@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
@@ -15,6 +16,10 @@ public partial class WeightLogViewModel : ObservableObject
 	public WeightLogViewModel(IDatabaseService db)
 	{
 		_db = db;
+		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (r, m) =>
+		{
+			((WeightLogViewModel)r).Unit = m.Value;
+		});
 	}
 
 	[ObservableProperty]
