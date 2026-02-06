@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Services;
 
 namespace PetInsulinTracker.ViewModels;
@@ -14,6 +15,9 @@ public partial class SettingsViewModel : ObservableObject
 	}
 
 	[ObservableProperty]
+	private string ownerName = Preferences.Get(Constants.OwnerNameKey, string.Empty);
+
+	[ObservableProperty]
 	private bool notificationsEnabled = Preferences.Get("notifications_enabled", true);
 
 	[ObservableProperty]
@@ -26,6 +30,11 @@ public partial class SettingsViewModel : ObservableObject
 	private string syncStatus = "Not synced";
 
 	public List<string> WeightUnitOptions { get; } = ["lbs", "kg"];
+
+	partial void OnOwnerNameChanged(string value)
+	{
+		Preferences.Set(Constants.OwnerNameKey, value);
+	}
 
 	partial void OnNotificationsEnabledChanged(bool value)
 	{

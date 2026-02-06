@@ -97,8 +97,13 @@
                                                 </MultiBinding>
                                             </Label.Text>
                                         </Label>
-                                        <Label Text="{Binding RecordedAt, StringFormat='{0:d}'}"
-                                               Style="{StaticResource SubtleTextStyle}" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding RecordedAt, StringFormat='{0:d}'}"
+                                                   Style="{StaticResource SubtleTextStyle}" />
+                                            <Label Text="{Binding LoggedBy, StringFormat='· {0}'}"
+                                                   Style="{StaticResource SubtleTextStyle}"
+                                                   IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                        </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </Grid>
                             </Border>

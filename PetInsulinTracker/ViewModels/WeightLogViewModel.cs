@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -102,7 +103,8 @@ public partial class WeightLogViewModel : ObservableObject
 			Weight = Weight,
 			Unit = Unit,
 			RecordedAt = LogDate,
-			Notes = Notes
+			Notes = Notes,
+			LoggedBy = Constants.OwnerName
 		};
 
 		await _db.SaveWeightLogAsync(log);

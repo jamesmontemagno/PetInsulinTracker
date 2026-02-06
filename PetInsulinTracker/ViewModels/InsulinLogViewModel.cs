@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -69,7 +70,8 @@ public partial class InsulinLogViewModel : ObservableObject
 			DoseIU = DoseIU,
 			AdministeredAt = LogDate.Date + LogTime,
 			InjectionSite = InjectionSite,
-			Notes = Notes
+			Notes = Notes,
+			LoggedBy = Constants.OwnerName
 		};
 
 		await _db.SaveInsulinLogAsync(log);

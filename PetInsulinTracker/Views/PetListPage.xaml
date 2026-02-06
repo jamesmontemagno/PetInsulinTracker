@@ -9,89 +9,83 @@
              Title="My Pets"
              BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <Grid>
-        <RefreshView Command="{Binding LoadPetsCommand}"
-                     IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView ItemsSource="{Binding Pets}"
-                            SelectionMode="None">
-                <CollectionView.EmptyView>
-                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
-                        <Label Text="🐾" FontSize="64" HorizontalOptions="Center" />
-                        <Label Text="No pets yet"
-                               FontSize="20" FontFamily="OpenSansSemibold"
-                               HorizontalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                        <Label Text="Tap the + button to add your first furry friend!"
-                               FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
-                    </VerticalStackLayout>
-                </CollectionView.EmptyView>
-                <CollectionView.Header>
-                    <VerticalStackLayout Padding="20,24,20,8">
-                        <Label Text="Your Pets" Style="{StaticResource SectionHeaderStyle}" />
-                    </VerticalStackLayout>
-                </CollectionView.Header>
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Pet">
-                        <Border Style="{StaticResource CardStyle}" Margin="20,0">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetListViewModel}}, Path=GoToPetDetailCommand}"
-                                    CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="16">
-                                <!-- Avatar -->
-                                <Border Grid.Column="0" Style="{StaticResource AvatarStyle}">
-                                    <Label Style="{StaticResource AvatarTextStyle}"
-                                           Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}" />
-                                </Border>
-                                <!-- Pet Info -->
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
-                                    <Label Text="{Binding Name}"
-                                           FontSize="17" FontFamily="OpenSansSemibold"
-                                           SemanticProperties.HeadingLevel="Level3" />
-                                    <Label Text="{Binding Species}"
-                                           Style="{StaticResource SubtleTextStyle}" />
-                                    <Label Style="{StaticResource SubtleTextStyle}">
-                                        <Label.Text>
-                                            <MultiBinding StringFormat="{}{0:F1} {1}">
-                                                <Binding Path="CurrentWeight" />
-                                                <Binding Path="WeightUnit" />
-                                            </MultiBinding>
-                                        </Label.Text>
-                                    </Label>
-                                </VerticalStackLayout>
-                                <!-- Chevron -->
-                                <Label Grid.Column="2" Text="›" FontSize="24"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto">
+            <Label Text="My Pets" VerticalOptions="Center"
+                   FontFamily="OpenSansSemibold" FontSize="18"
+                   TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}" />
+            <Button Grid.Column="1" Text="+" FontSize="22" FontFamily="OpenSansSemibold"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource ShellForeground}, Dark={StaticResource ShellForegroundDark}}"
+                    Command="{Binding GoToAddPetCommand}"
+                    SemanticProperties.Hint="Add a new pet"
+                    Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
+        </Grid>
+    </Shell.TitleView>
 
-        <!-- FAB -->
-        <Button Text="+"
-                FontSize="28"
-                FontFamily="OpenSansSemibold"
-                WidthRequest="56"
-                HeightRequest="56"
-                CornerRadius="28"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                Margin="24"
-                Command="{Binding GoToAddPetCommand}"
-                SemanticProperties.Hint="Add a new pet">
-            <Button.Shadow>
-                <Shadow Brush="{AppThemeBinding Light={StaticResource Gray900Brush}, Dark={StaticResource BlackBrush}}"
-                        Offset="0,4" Radius="12" Opacity="0.2" />
-            </Button.Shadow>
-        </Button>
-    </Grid>
+    <RefreshView Command="{Binding LoadPetsCommand}"
+                 IsRefreshing="{Binding IsRefreshing}">
+        <CollectionView ItemsSource="{Binding Pets}"
+                        SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
+                    <Label Text="🐾" FontSize="64" HorizontalOptions="Center" />
+                    <Label Text="No pets yet"
+                           FontSize="20" FontFamily="OpenSansSemibold"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="Tap + in the toolbar to add your first furry friend!"
+                           FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.Header>
+                <VerticalStackLayout Padding="20,24,20,8">
+                    <Label Text="Your Pets" Style="{StaticResource SectionHeaderStyle}" />
+                </VerticalStackLayout>
+            </CollectionView.Header>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Pet">
+                    <Border Style="{StaticResource CardStyle}" Margin="20,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetListViewModel}}, Path=GoToPetDetailCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="16">
+                            <!-- Avatar -->
+                            <Border Grid.Column="0" Style="{StaticResource AvatarStyle}">
+                                <Label Style="{StaticResource AvatarTextStyle}"
+                                       Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}" />
+                            </Border>
+                            <!-- Pet Info -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                <Label Text="{Binding Name}"
+                                       FontSize="17" FontFamily="OpenSansSemibold"
+                                       SemanticProperties.HeadingLevel="Level3" />
+                                <Label Text="{Binding Species}"
+                                       Style="{StaticResource SubtleTextStyle}" />
+                                <Label Style="{StaticResource SubtleTextStyle}">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0:F1} {1}">
+                                            <Binding Path="CurrentWeight" />
+                                            <Binding Path="WeightUnit" />
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </VerticalStackLayout>
+                            <!-- Chevron -->
+                            <Label Grid.Column="2" Text="›" FontSize="24"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
 
 </ContentPage>

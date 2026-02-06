@@ -104,6 +104,9 @@
                                             </Border>
                                             <Label Text="{Binding FedAt, StringFormat='{0:g}'}"
                                                    Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center" />
+                                            <Label Text="{Binding LoggedBy, StringFormat='· {0}'}"
+                                                   Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center"
+                                                   IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </Grid>

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -75,7 +76,8 @@ public partial class FeedingLogViewModel : ObservableObject
 			Unit = Unit,
 			FoodType = FoodType,
 			FedAt = LogDate.Date + LogTime,
-			Notes = Notes
+			Notes = Notes,
+			LoggedBy = Constants.OwnerName
 		};
 
 		await _db.SaveFeedingLogAsync(log);

@@ -80,8 +80,13 @@
                                                Text="{Binding DoseIU, StringFormat='{0} IU'}" />
                                         <Label Text="{Binding AdministeredAt, StringFormat='{0:g}'}"
                                                Style="{StaticResource SubtleTextStyle}" />
-                                        <Label Text="{Binding InjectionSite}"
-                                               Style="{StaticResource SubtleTextStyle}" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding InjectionSite}"
+                                                   Style="{StaticResource SubtleTextStyle}" />
+                                            <Label Text="{Binding LoggedBy, StringFormat='by {0}'}"
+                                                   Style="{StaticResource SubtleTextStyle}"
+                                                   IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                        </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </Grid>
                             </Border>

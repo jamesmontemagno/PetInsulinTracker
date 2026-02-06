@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -127,7 +128,8 @@ public partial class PetDetailViewModel : ObservableObject
 		{
 			PetId = Pet.Id,
 			DoseIU = Pet.CurrentDoseIU ?? 0,
-			AdministeredAt = DateTime.Now
+			AdministeredAt = DateTime.Now,
+			LoggedBy = Constants.OwnerName
 		};
 		await _db.SaveInsulinLogAsync(log);
 		await LoadDataAsync(Pet.Id);

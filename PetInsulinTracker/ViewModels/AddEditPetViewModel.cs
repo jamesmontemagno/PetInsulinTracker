@@ -51,6 +51,9 @@ public partial class AddEditPetViewModel : ObservableObject
 	private double? currentWeight;
 
 	[ObservableProperty]
+	private string? photoPath;
+
+	[ObservableProperty]
 	private bool isEditing;
 
 	public string PageTitle => IsEditing ? "Edit Pet" : "Add Pet";
@@ -83,6 +86,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		CurrentDoseIU = _existingPet.CurrentDoseIU;
 		WeightUnit = _existingPet.WeightUnit;
 		CurrentWeight = _existingPet.CurrentWeight;
+		PhotoPath = _existingPet.PhotoPath;
 		OnPropertyChanged(nameof(PageTitle));
 	}
 
@@ -99,6 +103,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		pet.CurrentDoseIU = CurrentDoseIU;
 		pet.WeightUnit = WeightUnit;
 		pet.CurrentWeight = CurrentWeight;
+		pet.PhotoPath = PhotoPath;
 
 		await _db.SavePetAsync(pet);
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
@@ -106,4 +111,62 @@ public partial class AddEditPetViewModel : ObservableObject
 	}
 
 	private bool CanSave() => !string.IsNullOrWhiteSpace(Name);
+
+	[RelayCommand]
+	private async Task PickPhotoAsync()
+	{
+		try
+		{
+			var results = await MediaPicker.PickPhotosAsync(new MediaPickerOptions
+			{
+				Title = "Select pet photo"
+			});
+
+			var result = results?.FirstOrDefault();
+			if (result is null) return;
+
+			// Copy to app data directory so it persists
+			var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
+			Directory.CreateDirectory(destDir);
+			var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{Path.GetExtension(result.FileName)}");
+
+			using var sourceStream = await result.OpenReadAsync();
+			using var destStream = File.Create(destPath);
+			await sourceStream.CopyToAsync(destStream);
+
+			PhotoPath = destPath;
+		}
+		catch (Exception)
+		{
+			// User cancelled or permission denied
+		}
+	}
+
+	[RelayCommand]
+	private async Task TakePhotoAsync()
+	{
+		try
+		{
+			var result = await MediaPicker.CapturePhotoAsync(new MediaPickerOptions
+			{
+				Title = "Take pet photo"
+			});
+
+			if (result is null) return;
+
+			var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
+			Directory.CreateDirectory(destDir);
+			var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{Path.GetExtension(result.FileName)}");
+
+			using var sourceStream = await result.OpenReadAsync();
+			using var destStream = File.Create(destPath);
+			await sourceStream.CopyToAsync(destStream);
+
+			PhotoPath = destPath;
+		}
+		catch (Exception)
+		{
+			// User cancelled or permission denied
+		}
+	}
 }

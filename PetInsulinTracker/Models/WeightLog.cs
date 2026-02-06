@@ -19,6 +19,9 @@ public class WeightLog
 
 	public string? Notes { get; set; }
 
+	/// <summary>Name of the person who logged this entry</summary>
+	public string? LoggedBy { get; set; }
+
 	public DateTimeOffset LastModified { get; set; } = DateTimeOffset.UtcNow;
 
 	public bool IsSynced { get; set; }
