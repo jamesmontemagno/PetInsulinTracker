@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.VetInfoPage"
+             x:DataType="vm:VetInfoViewModel"
+             Title="Vet Information">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <Label Text="Veterinarian" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Text="Vet Name" FontAttributes="Bold" />
+            <Entry Text="{Binding VetName}" Placeholder="Dr. Smith" />
+
+            <Label Text="Clinic Name" FontAttributes="Bold" />
+            <Entry Text="{Binding ClinicName}" Placeholder="Happy Paws Clinic" />
+
+            <Label Text="Phone" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Entry Grid.Column="0" Text="{Binding Phone}" Keyboard="Telephone" Placeholder="(555) 123-4567" />
+                <Button Grid.Column="1" Text="📞" Command="{Binding CallVetCommand}"
+                        BackgroundColor="Transparent" FontSize="20"
+                        SemanticProperties.Hint="Call vet" />
+            </Grid>
+
+            <Label Text="Emergency Phone" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Entry Grid.Column="0" Text="{Binding EmergencyPhone}" Keyboard="Telephone" Placeholder="(555) 987-6543" />
+                <Button Grid.Column="1" Text="🚨" Command="{Binding CallEmergencyCommand}"
+                        BackgroundColor="Transparent" FontSize="20"
+                        SemanticProperties.Hint="Call emergency vet" />
+            </Grid>
+
+            <Label Text="Address" FontAttributes="Bold" />
+            <Entry Text="{Binding Address}" Placeholder="123 Main St" />
+
+            <Label Text="Email" FontAttributes="Bold" />
+            <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="vet@clinic.com" />
+
+            <Label Text="Notes" FontAttributes="Bold" />
+            <Editor Text="{Binding VetNotes}" Placeholder="Additional notes..." HeightRequest="100" />
+
+            <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Fill" Margin="0,16" />
+
+            <!-- Pro Tips -->
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="🩺 Diabetic Pet Care Tips" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Frame Padding="12" CornerRadius="8" BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3E2723}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="⚠️ Signs of Hypoglycemia (Low Blood Sugar)" FontAttributes="Bold" />
+                    <Label Text="Watch for: weakness, trembling, disorientation, seizures, or loss of consciousness. If you notice these signs, rub corn syrup or honey on your pet's gums and call your vet immediately." />
+
+                    <Label Text="💉 Injection Tips" FontAttributes="Bold" />
+                    <Label Text="• Rotate injection sites to prevent tissue damage&#10;• Let insulin reach room temperature before injecting&#10;• Gently roll the vial — never shake it&#10;• Always use the correct syringe (U-40 for Vetsulin/ProZinc, U-100 for Lantus/NPH)" />
+
+                    <Label Text="🍽️ Feeding &amp; Insulin Timing" FontAttributes="Bold" />
+                    <Label Text="• Dogs: Feed half the meal at injection time, half at peak insulin effect (4-8 hours later)&#10;• Cats: Can free-feed or time meals with injections&#10;• Never give insulin if your pet hasn't eaten — call your vet" />
+
+                    <Label Text="🏥 When to Call Your Vet" FontAttributes="Bold" />
+                    <Label Text="• Pet refuses to eat for more than 24 hours&#10;• Excessive drinking or urination&#10;• Vomiting or diarrhea&#10;• Lethargy or weakness&#10;• Any signs of hypoglycemia" />
+
+                    <Label Text="📦 Insulin Storage" FontAttributes="Bold" />
+                    <Label Text="• Store unopened insulin in the refrigerator&#10;• Once opened, most insulin is good for 28-42 days&#10;• Never freeze insulin&#10;• Check expiration dates regularly" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

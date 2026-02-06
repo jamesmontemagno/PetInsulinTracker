@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="Preferences" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Notifications" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Label Text="Default Weight Unit" VerticalOptions="Center" />
+                <Picker Grid.Column="1" ItemsSource="{Binding WeightUnitOptions}"
+                        SelectedItem="{Binding WeightUnit}" WidthRequest="80" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="Sync" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Text="{Binding SyncStatus}" FontSize="14" TextColor="{StaticResource Gray500}" />
+
+            <Button Text="Sync Now" Command="{Binding SyncNowCommand}"
+                    IsEnabled="{Binding IsSyncing, Converter={StaticResource InvertedBoolConverter}}"
+                    HorizontalOptions="Fill" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="About" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Text="Pet Insulin Tracker" FontSize="14" FontAttributes="Bold" />
+            <Label Text="Track your diabetic pet's insulin, feeding, and weight with ease. Share care responsibilities with family and pet sitters."
+                   FontSize="12" TextColor="{StaticResource Gray500}" />
+            <Label Text="{Binding Source={x:Static Application.Current}, Path=MainPage, StringFormat='Version 1.0'}"
+                   FontSize="12" TextColor="{StaticResource Gray500}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

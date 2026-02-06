@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.PetDetailPage"
+             x:DataType="vm:PetDetailViewModel"
+             Title="{Binding Pet.Name}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Pet Info Header -->
+            <Frame Padding="16" CornerRadius="12" HasShadow="True">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding Pet.Name}" FontSize="24" FontAttributes="Bold"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label FontSize="14" TextColor="{StaticResource Gray500}">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0} · {1}">
+                                    <Binding Path="Pet.Species" />
+                                    <Binding Path="Pet.Breed" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                        <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
+                               FontSize="14" TextColor="{StaticResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="✏️" FontSize="20"
+                            BackgroundColor="Transparent"
+                            Command="{Binding GoToEditPetCommand}"
+                            SemanticProperties.Hint="Edit pet" />
+                </Grid>
+            </Frame>
+
+            <!-- Quick Insulin Log -->
+            <Button Text="💉 Quick Log Insulin"
+                    Command="{Binding QuickLogInsulinCommand}"
+                    FontSize="16"
+                    HeightRequest="50"
+                    HorizontalOptions="Fill"
+                    SemanticProperties.Hint="Log insulin at current dose and time" />
+
+            <!-- Recent Activity -->
+            <Label Text="Recent Activity" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <!-- Last Insulin -->
+            <Frame Padding="12" CornerRadius="8" HasShadow="True">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToInsulinLogCommand}" />
+                </Frame.GestureRecognizers>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="💉 Last Insulin" FontAttributes="Bold" FontSize="14" />
+                    <Label Text="{Binding LastInsulinText}" FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Last Feeding -->
+            <Frame Padding="12" CornerRadius="8" HasShadow="True">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToFeedingLogCommand}" />
+                </Frame.GestureRecognizers>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="🍽️ Last Feeding" FontAttributes="Bold" FontSize="14" />
+                    <Label Text="{Binding LastFeedingText}" FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Last Weight -->
+            <Frame Padding="12" CornerRadius="8" HasShadow="True">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToWeightLogCommand}" />
+                </Frame.GestureRecognizers>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="⚖️ Weight" FontAttributes="Bold" FontSize="14" />
+                    <Label Text="{Binding LastWeightText}" FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Navigation Buttons -->
+            <Label Text="Manage" FontSize="18" FontAttributes="Bold" Margin="0,8,0,0"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                <Button Grid.Row="0" Grid.Column="0" Text="📋 Schedules"
+                        Command="{Binding GoToScheduleCommand}" />
+                <Button Grid.Row="0" Grid.Column="1" Text="🏥 Vet Info"
+                        Command="{Binding GoToVetInfoCommand}" />
+                <Button Grid.Row="1" Grid.Column="0" Text="💉 Insulin Log"
+                        Command="{Binding GoToInsulinLogCommand}" />
+                <Button Grid.Row="1" Grid.Column="1" Text="🍽️ Feeding Log"
+                        Command="{Binding GoToFeedingLogCommand}" />
+                <Button Grid.Row="2" Grid.Column="0" Text="🔗 Share"
+                        Command="{Binding GoToShareCommand}" />
+                <Button Grid.Row="2" Grid.Column="1" Text="⚙️ Settings"
+                        Command="{Binding GoToSettingsCommand}" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

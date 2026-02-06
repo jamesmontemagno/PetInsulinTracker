@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.AddEditPetPage"
+             x:DataType="vm:AddEditPetViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="Pet Name" FontAttributes="Bold" />
+            <Entry Text="{Binding Name}" Placeholder="e.g., Whiskers"
+                   SemanticProperties.Description="Pet name" />
+
+            <Label Text="Species" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding SpeciesOptions}"
+                    SelectedItem="{Binding Species}" />
+
+            <Label Text="Breed" FontAttributes="Bold" />
+            <Entry Text="{Binding Breed}" Placeholder="e.g., Tabby, Labrador" />
+
+            <Label Text="Date of Birth" FontAttributes="Bold" />
+            <DatePicker Date="{Binding DateOfBirth}" MaximumDate="{x:Static sys:DateTime.Today}"
+                        xmlns:sys="clr-namespace:System;assembly=mscorlib" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="Insulin Information" FontSize="16" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Text="Insulin Type" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding InsulinTypeOptions}"
+                    SelectedItem="{Binding InsulinType}" />
+
+            <Label Text="Concentration" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding ConcentrationOptions}"
+                    SelectedItem="{Binding InsulinConcentration}" />
+
+            <Label Text="Current Dose (IU)" FontAttributes="Bold" />
+            <Entry Text="{Binding CurrentDoseIU}" Keyboard="Numeric"
+                   Placeholder="e.g., 2.0" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="Weight" FontSize="16" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Entry Grid.Column="0" Text="{Binding CurrentWeight}" Keyboard="Numeric"
+                       Placeholder="Weight" />
+                <Picker Grid.Column="1" ItemsSource="{Binding WeightUnitOptions}"
+                        SelectedItem="{Binding WeightUnit}" WidthRequest="80" />
+            </Grid>
+
+            <Button Text="Save" Command="{Binding SaveCommand}"
+                    Margin="0,16" HorizontalOptions="Fill"
+                    SemanticProperties.Hint="Save pet information" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

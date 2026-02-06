@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:models="clr-namespace:PetInsulinTracker.Models"
+             x:Class="PetInsulinTracker.Views.SchedulePage"
+             x:DataType="vm:ScheduleViewModel"
+             Title="Schedules">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+
+            <!-- Add New Schedule -->
+            <Label Text="Add Schedule" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Text="Label" FontAttributes="Bold" />
+            <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="Type" FontAttributes="Bold" />
+                    <Picker ItemsSource="{Binding ScheduleTypeOptions}"
+                            SelectedItem="{Binding ScheduleType}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="Time" FontAttributes="Bold" />
+                    <TimePicker Time="{Binding TimeOfDay}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="Interval (hours)" FontAttributes="Bold" />
+                    <Entry Text="{Binding IntervalHours}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="Remind (min before)" FontAttributes="Bold" />
+                    <Entry Text="{Binding ReminderLeadTimeMinutes}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Button Text="Add Schedule" Command="{Binding SaveScheduleCommand}" HorizontalOptions="Fill" />
+
+            <!-- Existing Schedules -->
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
+            <Label Text="Active Schedules" FontSize="18" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <CollectionView ItemsSource="{Binding Schedules}" SelectionMode="None"
+                            EmptyView="No schedules yet">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Schedule">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Delete" BackgroundColor="Red"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=DeleteScheduleCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <Frame Padding="12" Margin="0,4" CornerRadius="8" HasShadow="True">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Label}" FontAttributes="Bold" />
+                                        <Label FontSize="12" TextColor="{StaticResource Gray500}">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} · Every {1}h">
+                                                    <Binding Path="ScheduleType" />
+                                                    <Binding Path="IntervalHours" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" IsToggled="{Binding IsEnabled}"
+                                            VerticalOptions="Center" />
+                                </Grid>
+                            </Frame>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
