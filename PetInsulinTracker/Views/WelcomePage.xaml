@@ -172,10 +172,24 @@
                                 </Picker>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Dose (IU)" Style="{StaticResource FormLabelStyle}" />
-                                <Entry x:Name="DoseEntry" Placeholder="e.g., 2.0" Keyboard="Numeric" />
+                                <Label Text="Concentration" Style="{StaticResource FormLabelStyle}" />
+                                <Picker x:Name="ConcentrationPicker">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>U-40</x:String>
+                                            <x:String>U-100</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                    <Picker.SelectedItem>
+                                        <x:String>U-40</x:String>
+                                    </Picker.SelectedItem>
+                                </Picker>
                             </VerticalStackLayout>
                         </Grid>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Dose (IU)" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="DoseEntry" Placeholder="e.g., 2.0" Keyboard="Numeric" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
@@ -183,7 +197,7 @@
                 <Border Style="{StaticResource CardStyle}" Padding="16">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Current Weight" Style="{StaticResource FormLabelStyle}" />
+                            <Label Text="Goal Weight" Style="{StaticResource FormLabelStyle}" />
                             <Entry x:Name="WeightEntry" Placeholder="Weight" Keyboard="Numeric" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="4">

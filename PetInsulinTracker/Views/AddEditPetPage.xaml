@@ -98,7 +98,7 @@
             <Border Style="{StaticResource CardStyle}">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Current Weight" Style="{StaticResource FormLabelStyle}" />
+                        <Label Text="Goal Weight" Style="{StaticResource FormLabelStyle}" />
                         <Entry Text="{Binding CurrentWeight}" Keyboard="Numeric"
                                Placeholder="Weight" />
                     </VerticalStackLayout>

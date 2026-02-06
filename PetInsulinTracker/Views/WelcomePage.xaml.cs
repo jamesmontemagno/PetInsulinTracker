@@ -131,6 +131,7 @@ public partial class WelcomePage : ContentPage
 			Species = SpeciesPicker.SelectedItem as string ?? "Dog",
 			Breed = BreedEntry.Text?.Trim() ?? "",
 			InsulinType = InsulinTypePicker.SelectedItem as string,
+			InsulinConcentration = ConcentrationPicker.SelectedItem as string ?? "U-40",
 			WeightUnit = WeightUnitPicker.SelectedItem as string ?? "lbs"
 		};
 
