@@ -36,6 +36,15 @@ public partial class PetDetailViewModel : ObservableObject
 	[ObservableProperty]
 	private string lastFeedingText = "No feeding logged yet";
 
+	[ObservableProperty]
+	private double doseProgress;
+
+	[ObservableProperty]
+	private string doseCountdownText = "";
+
+	[ObservableProperty]
+	private string doseCountdownSubText = "";
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -73,6 +82,40 @@ public partial class PetDetailViewModel : ObservableObject
 		LastFeedingText = lastFeeding is not null
 			? $"{lastFeeding.FoodName} ({lastFeeding.Amount} {lastFeeding.Unit}) — {lastFeeding.FedAt:g}"
 			: "No feeding logged yet";
+
+		// Dose countdown calculation
+		UpdateDoseCountdown(insulinLog);
+	}
+
+	private void UpdateDoseCountdown(InsulinLog? lastDose)
+	{
+		if (lastDose is null || Pet is null)
+		{
+			DoseProgress = 0;
+			DoseCountdownText = "--:--";
+			DoseCountdownSubText = "No dose logged";
+			return;
+		}
+
+		// Assume 12-hour dosing interval by default
+		var intervalHours = 12.0;
+		var elapsed = DateTime.Now - lastDose.AdministeredAt;
+		var remaining = TimeSpan.FromHours(intervalHours) - elapsed;
+
+		if (remaining.TotalMinutes <= 0)
+		{
+			DoseProgress = 1.0;
+			DoseCountdownText = "NOW";
+			DoseCountdownSubText = "Dose due";
+		}
+		else
+		{
+			DoseProgress = Math.Clamp(elapsed.TotalHours / intervalHours, 0, 1);
+			DoseCountdownText = remaining.TotalHours >= 1
+				? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
+				: $"{remaining.Minutes}m";
+			DoseCountdownSubText = "Until next dose";
+		}
 	}
 
 	[RelayCommand]

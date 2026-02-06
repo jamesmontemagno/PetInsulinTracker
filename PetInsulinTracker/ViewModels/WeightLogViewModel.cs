@@ -39,6 +39,12 @@ public partial class WeightLogViewModel : ObservableObject
 	[ObservableProperty]
 	private string trendText = "";
 
+	[ObservableProperty]
+	private List<double> chartData = [];
+
+	[ObservableProperty]
+	private List<string> chartLabels = [];
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -64,6 +70,8 @@ public partial class WeightLogViewModel : ObservableObject
 		if (Logs.Count < 2)
 		{
 			TrendText = "";
+			ChartData = [];
+			ChartLabels = [];
 			return;
 		}
 
@@ -76,6 +84,11 @@ public partial class WeightLogViewModel : ObservableObject
 			< 0 => $"↓ {diff:F1} {Unit} since last",
 			_ => "→ No change"
 		};
+
+		// Build chart data (oldest to newest, max 20 points)
+		var chartLogs = Logs.Reverse().TakeLast(20).ToList();
+		ChartData = chartLogs.Select(l => l.Weight).ToList();
+		ChartLabels = chartLogs.Select(l => l.RecordedAt.ToString("M/d")).ToList();
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveLog))]

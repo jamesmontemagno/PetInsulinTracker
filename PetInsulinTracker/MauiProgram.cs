@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Maui;
+using MauiIcons.Fluent;
+using Microsoft.Extensions.Logging;
 using PetInsulinTracker.Services;
 using PetInsulinTracker.ViewModels;
 using PetInsulinTracker.Views;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace PetInsulinTracker;
 
@@ -12,6 +15,9 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
+			.UseFluentMauiIcons()
+			.UseSkiaSharp()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

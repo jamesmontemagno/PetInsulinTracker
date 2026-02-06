@@ -5,74 +5,109 @@
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
              x:Class="PetInsulinTracker.Views.FeedingLogPage"
              x:DataType="vm:FeedingLogViewModel"
-             Title="Feeding Log">
+             Title="Feeding Log"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
 
             <!-- Log New Entry -->
-            <Label Text="Log Feeding" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="LOG FEEDING" Style="{StaticResource OverlineStyle}" />
 
-            <Label Text="Food Name" FontAttributes="Bold" />
-            <Entry Text="{Binding FoodName}" Placeholder="e.g., Hill's w/d" />
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Food Name" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding FoodName}" Placeholder="e.g., Hill's w/d" />
+                    </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                <Entry Grid.Column="0" Text="{Binding Amount}" Keyboard="Numeric" Placeholder="Amount" />
-                <Picker Grid.Column="1" ItemsSource="{Binding UnitOptions}"
-                        SelectedItem="{Binding Unit}" WidthRequest="90" />
-                <Picker Grid.Column="2" ItemsSource="{Binding FoodTypeOptions}"
-                        SelectedItem="{Binding FoodType}" WidthRequest="80" />
-            </Grid>
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Amount" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding Amount}" Keyboard="Numeric" Placeholder="Amount" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Unit" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding UnitOptions}"
+                                    SelectedItem="{Binding Unit}" WidthRequest="90" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding FoodTypeOptions}"
+                                    SelectedItem="{Binding FoodType}" WidthRequest="80" />
+                        </VerticalStackLayout>
+                    </Grid>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="Date" FontAttributes="Bold" />
-                    <DatePicker Date="{Binding LogDate}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Date" Style="{StaticResource FormLabelStyle}" />
+                            <DatePicker Date="{Binding LogDate}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                            <TimePicker Time="{Binding LogTime}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Notes" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
+                    </VerticalStackLayout>
+
+                    <Button Text="Save" Command="{Binding SaveLogCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill" />
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="Time" FontAttributes="Bold" />
-                    <TimePicker Time="{Binding LogTime}" />
-                </VerticalStackLayout>
-            </Grid>
-
-            <Label Text="Notes" FontAttributes="Bold" />
-            <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
-
-            <Button Text="Save" Command="{Binding SaveLogCommand}" HorizontalOptions="Fill" />
+            </Border>
 
             <!-- History -->
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
-            <Label Text="History" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
             <CollectionView ItemsSource="{Binding Logs}" SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:FeedingLog">
                         <SwipeView>
                             <SwipeView.RightItems>
                                 <SwipeItems>
-                                    <SwipeItem Text="Delete" BackgroundColor="Red"
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FeedingLogViewModel}}, Path=DeleteLogCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
-                            <Frame Padding="12" Margin="0,4" CornerRadius="8" HasShadow="True">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label FontAttributes="Bold">
-                                        <Label.Text>
-                                            <MultiBinding StringFormat="{}{0} — {1} {2} ({3})">
-                                                <Binding Path="FoodName" />
-                                                <Binding Path="Amount" />
-                                                <Binding Path="Unit" />
-                                                <Binding Path="FoodType" />
-                                            </MultiBinding>
-                                        </Label.Text>
-                                    </Label>
-                                    <Label Text="{Binding FedAt, StringFormat='{0:g}'}"
-                                           FontSize="12" TextColor="{StaticResource Gray500}" />
-                                </VerticalStackLayout>
-                            </Frame>
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            HeightRequest="40" WidthRequest="40">
+                                        <Label Text="🍽️" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label FontFamily="OpenSansSemibold" FontSize="15">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} — {1} {2}">
+                                                    <Binding Path="FoodName" />
+                                                    <Binding Path="Amount" />
+                                                    <Binding Path="Unit" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                    StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                    Padding="8,2">
+                                                <Label Text="{Binding FoodType}" Style="{StaticResource BadgeTextStyle}" />
+                                            </Border>
+                                            <Label Text="{Binding FedAt, StringFormat='{0:g}'}"
+                                                   Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
                         </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

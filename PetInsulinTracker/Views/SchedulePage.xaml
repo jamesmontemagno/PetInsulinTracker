@@ -5,65 +5,81 @@
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
              x:Class="PetInsulinTracker.Views.SchedulePage"
              x:DataType="vm:ScheduleViewModel"
-             Title="Schedules">
+             Title="Schedules"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
 
             <!-- Add New Schedule -->
-            <Label Text="Add Schedule" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="ADD SCHEDULE" Style="{StaticResource OverlineStyle}" />
 
-            <Label Text="Label" FontAttributes="Bold" />
-            <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Label" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
+                    </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="Type" FontAttributes="Bold" />
-                    <Picker ItemsSource="{Binding ScheduleTypeOptions}"
-                            SelectedItem="{Binding ScheduleType}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="Time" FontAttributes="Bold" />
-                    <TimePicker Time="{Binding TimeOfDay}" />
-                </VerticalStackLayout>
-            </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding ScheduleTypeOptions}"
+                                    SelectedItem="{Binding ScheduleType}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                            <TimePicker Time="{Binding TimeOfDay}" />
+                        </VerticalStackLayout>
+                    </Grid>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="Interval (hours)" FontAttributes="Bold" />
-                    <Entry Text="{Binding IntervalHours}" Keyboard="Numeric" />
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="Remind (min before)" FontAttributes="Bold" />
-                    <Entry Text="{Binding ReminderLeadTimeMinutes}" Keyboard="Numeric" />
-                </VerticalStackLayout>
-            </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Interval (hours)" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding IntervalHours}" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding ReminderLeadTimeMinutes}" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                    </Grid>
 
-            <Button Text="Add Schedule" Command="{Binding SaveScheduleCommand}" HorizontalOptions="Fill" />
+                    <Button Text="Add Schedule" Command="{Binding SaveScheduleCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Existing Schedules -->
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
-            <Label Text="Active Schedules" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="ACTIVE SCHEDULES" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
             <CollectionView ItemsSource="{Binding Schedules}" SelectionMode="None"
                             EmptyView="No schedules yet">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Schedule">
                         <SwipeView>
                             <SwipeView.RightItems>
                                 <SwipeItems>
-                                    <SwipeItem Text="Delete" BackgroundColor="Red"
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=DeleteScheduleCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
-                            <Frame Padding="12" Margin="0,4" CornerRadius="8" HasShadow="True">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="{Binding Label}" FontAttributes="Bold" />
-                                        <Label FontSize="12" TextColor="{StaticResource Gray500}">
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            HeightRequest="40" WidthRequest="40">
+                                        <Label Text="📋" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="15" />
+                                        <Label Style="{StaticResource SubtleTextStyle}">
                                             <Label.Text>
                                                 <MultiBinding StringFormat="{}{0} · Every {1}h">
                                                     <Binding Path="ScheduleType" />
@@ -72,10 +88,10 @@
                                             </Label.Text>
                                         </Label>
                                     </VerticalStackLayout>
-                                    <Switch Grid.Column="1" IsToggled="{Binding IsEnabled}"
+                                    <Switch Grid.Column="2" IsToggled="{Binding IsEnabled}"
                                             VerticalOptions="Center" />
                                 </Grid>
-                            </Frame>
+                            </Border>
                         </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

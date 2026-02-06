@@ -3,57 +3,93 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
              xmlns:models="clr-namespace:PetInsulinTracker.Models"
+             xmlns:controls="clr-namespace:PetInsulinTracker.Controls"
              x:Class="PetInsulinTracker.Views.WeightLogPage"
              x:DataType="vm:WeightLogViewModel"
-             Title="Weight Log">
+             Title="Weight Log"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
 
+            <!-- Weight Chart -->
+            <Border Style="{StaticResource CardStyle}" Padding="8"
+                    IsVisible="{Binding ChartData.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Weight Trend" Style="{StaticResource SectionHeaderStyle}" Margin="8,4,0,0" />
+                    <controls:WeightChart HeightRequest="200"
+                                          DataPoints="{Binding ChartData}"
+                                          Labels="{Binding ChartLabels}"
+                                          LineColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                          TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="{Binding TrendText}" FontSize="15" FontFamily="OpenSansSemibold"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                           IsVisible="{Binding TrendText, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Log New Entry -->
-            <Label Text="Log Weight" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="LOG WEIGHT" Style="{StaticResource OverlineStyle}" />
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Entry Grid.Column="0" Text="{Binding Weight}" Keyboard="Numeric"
-                       Placeholder="Weight" />
-                <Label Grid.Column="1" Text="{Binding Unit}" FontSize="16"
-                       VerticalOptions="Center" />
-            </Grid>
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Weight" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding Weight}" Keyboard="Numeric"
+                                   Placeholder="Weight" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Unit}" FontSize="16"
+                               FontFamily="OpenSansSemibold"
+                               VerticalOptions="End" Margin="0,0,0,8"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    </Grid>
 
-            <Label Text="Date" FontAttributes="Bold" />
-            <DatePicker Date="{Binding LogDate}" />
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Date" Style="{StaticResource FormLabelStyle}" />
+                        <DatePicker Date="{Binding LogDate}" />
+                    </VerticalStackLayout>
 
-            <Label Text="Notes" FontAttributes="Bold" />
-            <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Notes" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
+                    </VerticalStackLayout>
 
-            <Button Text="Save" Command="{Binding SaveLogCommand}" HorizontalOptions="Fill" />
-
-            <!-- Trend -->
-            <Label Text="{Binding TrendText}" FontSize="16" FontAttributes="Bold"
-                   HorizontalOptions="Center" Margin="0,8"
-                   IsVisible="{Binding TrendText, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                    <Button Text="Save" Command="{Binding SaveLogCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+            </Border>
 
             <!-- History -->
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" Margin="0,8" />
-            <Label Text="History" FontSize="18" FontAttributes="Bold"
-                   SemanticProperties.HeadingLevel="Level2" />
+            <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
             <CollectionView ItemsSource="{Binding Logs}" SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:WeightLog">
                         <SwipeView>
                             <SwipeView.RightItems>
                                 <SwipeItems>
-                                    <SwipeItem Text="Delete" BackgroundColor="Red"
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WeightLogViewModel}}, Path=DeleteLogCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
-                            <Frame Padding="12" Margin="0,4" CornerRadius="8" HasShadow="True">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label FontAttributes="Bold">
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            HeightRequest="40" WidthRequest="40">
+                                        <Label Text="⚖️" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label FontFamily="OpenSansSemibold" FontSize="15">
                                             <Label.Text>
                                                 <MultiBinding StringFormat="{}{0} {1}">
                                                     <Binding Path="Weight" />
@@ -62,10 +98,10 @@
                                             </Label.Text>
                                         </Label>
                                         <Label Text="{Binding RecordedAt, StringFormat='{0:d}'}"
-                                               FontSize="12" TextColor="{StaticResource Gray500}" />
+                                               Style="{StaticResource SubtleTextStyle}" />
                                     </VerticalStackLayout>
                                 </Grid>
-                            </Frame>
+                            </Border>
                         </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
