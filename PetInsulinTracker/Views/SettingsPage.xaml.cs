@@ -19,4 +19,12 @@ public partial class SettingsPage : ContentPage
 			Content.FadeToAsync(1, 300, Easing.CubicOut),
 			Content.TranslateToAsync(0, 0, 300, Easing.CubicOut));
 	}
+
+	private void OnThemeTapped(object? sender, EventArgs e)
+	{
+		if (sender is Border border && BindingContext is SettingsViewModel vm)
+		{
+			vm.SelectThemeCommand.Execute(border.ClassId);
+		}
+	}
 }

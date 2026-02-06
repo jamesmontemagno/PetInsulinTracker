@@ -77,10 +77,10 @@
                                 WidthRequest="64" HeightRequest="80"
                                 StrokeThickness="2"
                                 Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                BackgroundColor="#FDF5EC" Margin="2">
+                                BackgroundColor="#FDF5EC" Margin="2"
+                                ClassId="Warm">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
-                                                      CommandParameter="Warm" />
+                                <TapGestureRecognizer Tapped="OnThemeTapped" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
@@ -94,10 +94,10 @@
                                 WidthRequest="64" HeightRequest="80"
                                 StrokeThickness="2"
                                 Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                BackgroundColor="#E8F4F8" Margin="2">
+                                BackgroundColor="#E8F4F8" Margin="2"
+                                ClassId="Ocean">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
-                                                      CommandParameter="Ocean" />
+                                <TapGestureRecognizer Tapped="OnThemeTapped" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
@@ -111,10 +111,10 @@
                                 WidthRequest="64" HeightRequest="80"
                                 StrokeThickness="2"
                                 Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                BackgroundColor="#E8F0E0" Margin="2">
+                                BackgroundColor="#E8F0E0" Margin="2"
+                                ClassId="Forest">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
-                                                      CommandParameter="Forest" />
+                                <TapGestureRecognizer Tapped="OnThemeTapped" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
@@ -128,10 +128,10 @@
                                 WidthRequest="64" HeightRequest="80"
                                 StrokeThickness="2"
                                 Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                BackgroundColor="#FCE4EC" Margin="2">
+                                BackgroundColor="#FCE4EC" Margin="2"
+                                ClassId="Berry">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
-                                                      CommandParameter="Berry" />
+                                <TapGestureRecognizer Tapped="OnThemeTapped" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
@@ -145,10 +145,10 @@
                                 WidthRequest="64" HeightRequest="80"
                                 StrokeThickness="2"
                                 Stroke="{AppThemeBinding Light={StaticResource Divider}, Dark={StaticResource DividerDark}}"
-                                BackgroundColor="#E8EAF6" Margin="2">
+                                BackgroundColor="#E8EAF6" Margin="2"
+                                ClassId="Midnight">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference SettingsRoot}, Path=BindingContext.SelectThemeCommand}"
-                                                      CommandParameter="Midnight" />
+                                <TapGestureRecognizer Tapped="OnThemeTapped" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout VerticalOptions="Center" Spacing="6" HorizontalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 14" StrokeThickness="0"
