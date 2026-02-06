@@ -59,6 +59,17 @@ public partial class PetDetailViewModel : ObservableObject
 	[ObservableProperty]
 	private string doseCountdownSubText = "";
 
+	[ObservableProperty]
+	private string feedingCountdownText = "";
+
+	[ObservableProperty]
+	private string feedingCountdownSubText = "";
+
+	[ObservableProperty]
+	private double feedingProgress;
+
+	private List<Schedule> _schedules = [];
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -97,8 +108,36 @@ public partial class PetDetailViewModel : ObservableObject
 			? $"{lastFeeding.FoodName} ({lastFeeding.Amount} {lastFeeding.Unit}) — {lastFeeding.FedAt:g}"
 			: "No feeding logged yet";
 
+		_schedules = await _db.GetSchedulesAsync(id);
+
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
+
+		// Feeding countdown calculation
+		UpdateFeedingCountdown(lastFeeding);
+	}
+
+	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType)
+	{
+		var enabled = schedules
+			.Where(s => s.ScheduleType == scheduleType && s.IsEnabled)
+			.OrderBy(s => s.TimeOfDay)
+			.ToList();
+		if (enabled.Count == 0) return null;
+
+		var now = DateTime.Now;
+		var today = now.Date;
+
+		// Find the next upcoming time today
+		foreach (var s in enabled)
+		{
+			var candidate = today + s.TimeOfDay;
+			if (candidate > now)
+				return candidate;
+		}
+
+		// All times today have passed — use the first one tomorrow
+		return today.AddDays(1) + enabled[0].TimeOfDay;
 	}
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
@@ -111,24 +150,92 @@ public partial class PetDetailViewModel : ObservableObject
 			return;
 		}
 
-		// Assume 12-hour dosing interval by default
-		var intervalHours = 12.0;
-		var elapsed = DateTime.Now - lastDose.AdministeredAt;
-		var remaining = TimeSpan.FromHours(intervalHours) - elapsed;
+		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin");
 
-		if (remaining.TotalMinutes <= 0)
+		if (scheduledNext is not null)
 		{
-			DoseProgress = 1.0;
-			DoseCountdownText = "NOW";
-			DoseCountdownSubText = "Dose due";
+			var remaining = scheduledNext.Value - DateTime.Now;
+			if (remaining.TotalMinutes <= 0)
+			{
+				DoseProgress = 1.0;
+				DoseCountdownText = "NOW";
+				DoseCountdownSubText = "Dose due";
+			}
+			else
+			{
+				// Progress based on time since last dose toward the scheduled time
+				var total = scheduledNext.Value - lastDose.AdministeredAt;
+				DoseProgress = total.TotalMinutes > 0
+					? Math.Clamp(1.0 - remaining.TotalMinutes / total.TotalMinutes, 0, 1)
+					: 0;
+				DoseCountdownText = remaining.TotalHours >= 1
+					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
+					: $"{remaining.Minutes}m";
+				DoseCountdownSubText = "Until next dose";
+			}
 		}
 		else
 		{
-			DoseProgress = Math.Clamp(elapsed.TotalHours / intervalHours, 0, 1);
-			DoseCountdownText = remaining.TotalHours >= 1
+			// Fallback: 12-hour interval from last dose
+			var intervalHours = 12.0;
+			var elapsed = DateTime.Now - lastDose.AdministeredAt;
+			var remaining = TimeSpan.FromHours(intervalHours) - elapsed;
+
+			if (remaining.TotalMinutes <= 0)
+			{
+				DoseProgress = 1.0;
+				DoseCountdownText = "NOW";
+				DoseCountdownSubText = "Dose due";
+			}
+			else
+			{
+				DoseProgress = Math.Clamp(elapsed.TotalHours / intervalHours, 0, 1);
+				DoseCountdownText = remaining.TotalHours >= 1
+					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
+					: $"{remaining.Minutes}m";
+				DoseCountdownSubText = "Until next dose";
+			}
+		}
+	}
+
+	private void UpdateFeedingCountdown(FeedingLog? lastFeeding)
+	{
+		var scheduledNext = GetNextScheduledTime(_schedules, "Feeding");
+
+		if (scheduledNext is null)
+		{
+			FeedingProgress = 0;
+			FeedingCountdownText = "--:--";
+			FeedingCountdownSubText = "No schedule set";
+			return;
+		}
+
+		var remaining = scheduledNext.Value - DateTime.Now;
+
+		if (remaining.TotalMinutes <= 0)
+		{
+			FeedingProgress = 1.0;
+			FeedingCountdownText = "NOW";
+			FeedingCountdownSubText = "Feeding due";
+		}
+		else
+		{
+			if (lastFeeding is not null)
+			{
+				var total = scheduledNext.Value - lastFeeding.FedAt;
+				FeedingProgress = total.TotalMinutes > 0
+					? Math.Clamp(1.0 - remaining.TotalMinutes / total.TotalMinutes, 0, 1)
+					: 0;
+			}
+			else
+			{
+				FeedingProgress = 0;
+			}
+
+			FeedingCountdownText = remaining.TotalHours >= 1
 				? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 				: $"{remaining.Minutes}m";
-			DoseCountdownSubText = "Until next dose";
+			FeedingCountdownSubText = "Until next feeding";
 		}
 	}
 

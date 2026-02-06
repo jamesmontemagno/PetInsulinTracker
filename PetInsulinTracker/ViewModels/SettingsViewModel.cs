@@ -63,23 +63,27 @@ public partial class SettingsViewModel : ObservableObject
 		_ = UpdateAllPetsWeightUnitAsync(value);
 	}
 
-	private async Task UpdateAllPetsWeightUnitAsync(string unit)
+	private async Task UpdateAllPetsWeightUnitAsync(string newUnit)
 	{
 		var pets = await _db.GetPetsAsync();
 		foreach (var pet in pets)
 		{
-			pet.WeightUnit = unit;
+			var oldUnit = pet.WeightUnit;
+			if (pet.CurrentWeight.HasValue && !string.Equals(oldUnit, newUnit, StringComparison.OrdinalIgnoreCase))
+				pet.CurrentWeight = WeightConverter.Convert(pet.CurrentWeight.Value, oldUnit, newUnit);
+			pet.WeightUnit = newUnit;
 			await _db.SavePetAsync(pet);
 
-			// Also update unit on existing weight log records
 			var logs = await _db.GetWeightLogsAsync(pet.Id);
 			foreach (var log in logs)
 			{
-				log.Unit = unit;
+				if (!string.Equals(log.Unit, newUnit, StringComparison.OrdinalIgnoreCase))
+					log.Weight = WeightConverter.Convert(log.Weight, log.Unit, newUnit);
+				log.Unit = newUnit;
 				await _db.SaveWeightLogAsync(log);
 			}
 		}
-		WeakReferenceMessenger.Default.Send(new WeightUnitChangedMessage(unit));
+		WeakReferenceMessenger.Default.Send(new WeightUnitChangedMessage(newUnit));
 	}
 
 	partial void OnSelectedThemeNameChanged(string value)

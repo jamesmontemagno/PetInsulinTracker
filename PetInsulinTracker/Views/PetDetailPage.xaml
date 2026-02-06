@@ -65,6 +65,22 @@
                             SemanticProperties.Hint="Log insulin at current dose and time" />
                 </Grid>
 
+                <!-- Feeding Indicator -->
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <controls:DoseIndicator Grid.Column="0"
+                                            WidthRequest="100" HeightRequest="100"
+                                            Progress="{Binding FeedingProgress}"
+                                            CenterText="{Binding FeedingCountdownText}"
+                                            SubText="{Binding FeedingCountdownSubText}"
+                                            RingColor="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}"
+                                            TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                            CenterTextColor="{DynamicResource PageText}" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                        <Label Text="Next Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Label Text="{Binding FeedingCountdownSubText}" Style="{StaticResource SubtleTextStyle}" />
+                    </VerticalStackLayout>
+                </Grid>
+
                 <!-- Recent Activity -->
                 <Label Text="RECENT ACTIVITY" Style="{StaticResource OverlineStyle}" />
 

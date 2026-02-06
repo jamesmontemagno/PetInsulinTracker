@@ -34,7 +34,7 @@ public partial class WeightLogViewModel : ObservableObject
 	private double weight;
 
 	[ObservableProperty]
-	private string unit = "lbs";
+	private string unit = Preferences.Get("default_weight_unit", "lbs");
 
 	[ObservableProperty]
 	private DateTime logDate = DateTime.Today;

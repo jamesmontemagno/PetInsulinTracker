@@ -10,25 +10,14 @@
              Title="My Pets"
              BackgroundColor="{DynamicResource PageBackground}">
 
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto">
-            <Label Text="My Pets" VerticalOptions="Center"
-                   FontFamily="OpenSansSemibold" FontSize="18"
-                   TextColor="{DynamicResource CurrentShellForeground}" />
-            <Button Grid.Column="1" Text="+" FontSize="22" FontFamily="OpenSansSemibold"
-                    BackgroundColor="Transparent"
-                    TextColor="{DynamicResource CurrentShellForeground}"
-                    Command="{Binding GoToAddPetCommand}"
-                    SemanticProperties.Hint="Add a new pet"
-                    Padding="8,0" MinimumWidthRequest="44" MinimumHeightRequest="44" />
-            <ImageButton Grid.Column="2"
-                         Source="{mi:Fluent Icon=Settings24, IconColor=White}"
-                         BackgroundColor="Transparent"
-                         Command="{Binding GoToSettingsCommand}"
-                         SemanticProperties.Hint="Open settings"
-                         Padding="8,0" WidthRequest="44" HeightRequest="44" />
-        </Grid>
-    </Shell.TitleView>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add"
+                     Command="{Binding GoToAddPetCommand}"
+                     IconImageSource="{mi:Fluent Icon=Add24, IconColor=White}" />
+        <ToolbarItem Text="Settings"
+                     Command="{Binding GoToSettingsCommand}"
+                     IconImageSource="{mi:Fluent Icon=Settings24, IconColor=White}" />
+    </ContentPage.ToolbarItems>
 
     <RefreshView Command="{Binding LoadPetsCommand}"
                  IsRefreshing="{Binding IsRefreshing}">

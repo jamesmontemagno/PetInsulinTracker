@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - 'PetInsulinTracker/**'
+      - 'PetInsulinTracker.Shared/**'
       - '.github/workflows/main_petinsulintracker.yml'
   workflow_dispatch:
 
