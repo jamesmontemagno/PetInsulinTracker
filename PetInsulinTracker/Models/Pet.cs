@@ -33,6 +33,18 @@ public class Pet
 	/// <summary>Current weight value</summary>
 	public double? CurrentWeight { get; set; }
 
+	/// <summary>Default food name for quick logging, e.g., "Royal Canin Diabetic"</summary>
+	public string? DefaultFoodName { get; set; }
+
+	/// <summary>Default food amount per meal</summary>
+	public double? DefaultFoodAmount { get; set; }
+
+	/// <summary>cups, grams, oz, or cans</summary>
+	public string DefaultFoodUnit { get; set; } = "cups";
+
+	/// <summary>Wet, Dry, or Treat</summary>
+	public string DefaultFoodType { get; set; } = "Dry";
+
 	/// <summary>Share code for syncing with others</summary>
 	public string? ShareCode { get; set; }
 

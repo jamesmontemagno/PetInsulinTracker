@@ -34,6 +34,12 @@ public class Schedule
 	/// <summary>Minutes before scheduled time to send reminder</summary>
 	public int ReminderLeadTimeMinutes { get; set; } = 15;
 
+	[Ignore]
+	public string TimeDisplay => DateTime.Today.Add(TimeOfDay).ToString("h:mm tt");
+
+	[Ignore]
+	public string ReminderDisplay => $"Remind {ReminderLeadTimeMinutes} min before";
+
 	public DateTimeOffset LastModified { get; set; } = DateTimeOffset.UtcNow;
 
 	public bool IsSynced { get; set; }

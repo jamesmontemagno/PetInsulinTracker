@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
              xmlns:controls="clr-namespace:PetInsulinTracker.Controls"
+             xmlns:models="clr-namespace:PetInsulinTracker.Models"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.PetDetailPage"
              x:DataType="vm:PetDetailViewModel"
@@ -37,6 +38,7 @@
                         </Label>
                         <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
                                Style="{StaticResource SubtleTextStyle}" />
+                        <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" />
                     </VerticalStackLayout>
                     <Button Grid.Column="1" Text="Edit"
                             Style="{StaticResource GhostButtonStyle}"
@@ -65,7 +67,7 @@
                             SemanticProperties.Hint="Log insulin at current dose and time" />
                 </Grid>
 
-                <!-- Feeding Indicator -->
+                <!-- Feeding Indicator + Quick Log -->
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
@@ -75,9 +77,12 @@
                                             RingColor="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             CenterTextColor="{DynamicResource PageText}" />
-                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
-                        <Label Text="Next Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
-                        <Label Text="{Binding FeedingCountdownSubText}" Style="{StaticResource SubtleTextStyle}" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="8">
+                        <Button Text="Quick Log Feeding"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding QuickLogFeedingCommand}"
+                                SemanticProperties.Hint="Log feeding with default food" />
+                        <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                     </VerticalStackLayout>
                 </Grid>
 
@@ -140,6 +145,47 @@
                         <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
                     </Grid>
                 </Border>
+
+                <!-- Active Schedules -->
+                <Label Text="ACTIVE SCHEDULES" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
+                       IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+
+                <CollectionView ItemsSource="{Binding ActiveSchedules}" SelectionMode="None"
+                                IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Schedule">
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            HeightRequest="40" WidthRequest="40">
+                                        <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="14" />
+                                            <Label Text="{Binding TimeDisplay}" FontSize="13"
+                                                   TextColor="{DynamicResource CurrentPrimary}" FontFamily="OpenSansSemibold" />
+                                        </HorizontalStackLayout>
+                                        <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} · Every {1}h · Remind {2} min before">
+                                                    <Binding Path="ScheduleType" />
+                                                    <Binding Path="IntervalHours" />
+                                                    <Binding Path="ReminderLeadTimeMinutes" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
                 <!-- Manage Section -->
                 <Label Text="MANAGE" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />

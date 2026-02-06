@@ -79,12 +79,17 @@
                                         <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                        <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="15" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="15" />
+                                            <Label Text="{Binding TimeDisplay}" FontSize="14"
+                                                   TextColor="{DynamicResource CurrentPrimary}" FontFamily="OpenSansSemibold" />
+                                        </HorizontalStackLayout>
                                         <Label Style="{StaticResource SubtleTextStyle}">
                                             <Label.Text>
-                                                <MultiBinding StringFormat="{}{0} · Every {1}h">
+                                                <MultiBinding StringFormat="{}{0} · Every {1}h · Remind {2} min before">
                                                     <Binding Path="ScheduleType" />
                                                     <Binding Path="IntervalHours" />
+                                                    <Binding Path="ReminderLeadTimeMinutes" />
                                                 </MultiBinding>
                                             </Label.Text>
                                         </Label>

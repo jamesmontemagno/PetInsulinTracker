@@ -52,6 +52,18 @@ public partial class AddEditPetViewModel : ObservableObject
 	private double? currentWeight;
 
 	[ObservableProperty]
+	private string? defaultFoodName;
+
+	[ObservableProperty]
+	private double? defaultFoodAmount;
+
+	[ObservableProperty]
+	private string defaultFoodUnit = "cups";
+
+	[ObservableProperty]
+	private string defaultFoodType = "Dry";
+
+	[ObservableProperty]
 	private string? photoPath;
 
 	[ObservableProperty]
@@ -63,6 +75,8 @@ public partial class AddEditPetViewModel : ObservableObject
 	public List<string> InsulinTypeOptions { get; } = ["Vetsulin", "ProZinc", "NPH (Humulin N)", "Glargine (Lantus)", "Other"];
 	public List<string> ConcentrationOptions { get; } = ["U-40", "U-100"];
 	public List<string> WeightUnitOptions { get; } = ["lbs", "kg"];
+	public List<string> FoodUnitOptions { get; } = ["cups", "grams", "oz", "cans"];
+	public List<string> FoodTypeOptions { get; } = ["Dry", "Wet", "Treat"];
 
 	partial void OnPetIdChanged(string? value)
 	{
@@ -87,6 +101,10 @@ public partial class AddEditPetViewModel : ObservableObject
 		CurrentDoseIU = _existingPet.CurrentDoseIU;
 		WeightUnit = _existingPet.WeightUnit;
 		CurrentWeight = _existingPet.CurrentWeight;
+		DefaultFoodName = _existingPet.DefaultFoodName;
+		DefaultFoodAmount = _existingPet.DefaultFoodAmount;
+		DefaultFoodUnit = _existingPet.DefaultFoodUnit;
+		DefaultFoodType = _existingPet.DefaultFoodType;
 		PhotoPath = _existingPet.PhotoPath;
 		OnPropertyChanged(nameof(PageTitle));
 	}
@@ -104,6 +122,10 @@ public partial class AddEditPetViewModel : ObservableObject
 		pet.CurrentDoseIU = CurrentDoseIU;
 		pet.WeightUnit = WeightUnit;
 		pet.CurrentWeight = CurrentWeight;
+		pet.DefaultFoodName = DefaultFoodName;
+		pet.DefaultFoodAmount = DefaultFoodAmount;
+		pet.DefaultFoodUnit = DefaultFoodUnit;
+		pet.DefaultFoodType = DefaultFoodType;
 		pet.PhotoPath = PhotoPath;
 
 		await _db.SavePetAsync(pet);

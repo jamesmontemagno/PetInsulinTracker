@@ -110,6 +110,32 @@
                 </Grid>
             </Border>
 
+            <!-- Feeding Defaults Section -->
+            <Label Text="FEEDING DEFAULTS" Style="{StaticResource OverlineStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Food Name" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding DefaultFoodName}" Placeholder="e.g., Royal Canin Diabetic" />
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Amount per Meal" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding DefaultFoodAmount}" Keyboard="Numeric" Placeholder="e.g., 0.5" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Unit" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding FoodUnitOptions}" SelectedItem="{Binding DefaultFoodUnit}" WidthRequest="90" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding FoodTypeOptions}" SelectedItem="{Binding DefaultFoodType}" WidthRequest="80" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
             <Button Text="Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Margin="0,8" HorizontalOptions="Fill"

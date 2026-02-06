@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -68,6 +69,15 @@ public partial class PetDetailViewModel : ObservableObject
 	[ObservableProperty]
 	private double feedingProgress;
 
+	[ObservableProperty]
+	private string doseInfoText = "";
+
+	[ObservableProperty]
+	private string quickFeedInfoText = "";
+
+	[ObservableProperty]
+	private ObservableCollection<Schedule> activeSchedules = [];
+
 	private List<Schedule> _schedules = [];
 
 	partial void OnPetIdChanged(string? value)
@@ -90,6 +100,14 @@ public partial class PetDetailViewModel : ObservableObject
 		Pet = await _db.GetPetAsync(id);
 		if (Pet is null) return;
 
+		DoseInfoText = Pet.CurrentDoseIU.HasValue
+			? $"Dose: {Pet.CurrentDoseIU.Value} IU ({Pet.InsulinConcentration ?? "U-40"})"
+			: "No dose set";
+
+		QuickFeedInfoText = !string.IsNullOrEmpty(Pet.DefaultFoodName)
+			? $"{Pet.DefaultFoodName} · {Pet.DefaultFoodAmount ?? 0} {Pet.DefaultFoodUnit}"
+			: "Set food defaults in Edit Pet";
+
 		var insulinLog = await _db.GetLatestInsulinLogAsync(id);
 		LastInsulinLog = insulinLog;
 		LastInsulinText = insulinLog is not null
@@ -109,6 +127,7 @@ public partial class PetDetailViewModel : ObservableObject
 			: "No feeding logged yet";
 
 		_schedules = await _db.GetSchedulesAsync(id);
+		ActiveSchedules = new ObservableCollection<Schedule>(_schedules.Where(s => s.IsEnabled));
 
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
@@ -252,6 +271,25 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedBy = Constants.OwnerName
 		};
 		await _db.SaveInsulinLogAsync(log);
+		await LoadDataAsync(Pet.Id);
+	}
+
+	[RelayCommand]
+	private async Task QuickLogFeedingAsync()
+	{
+		if (Pet is null) return;
+
+		var log = new FeedingLog
+		{
+			PetId = Pet.Id,
+			FoodName = Pet.DefaultFoodName ?? "Meal",
+			Amount = Pet.DefaultFoodAmount ?? 0,
+			Unit = Pet.DefaultFoodUnit,
+			FoodType = Pet.DefaultFoodType,
+			FedAt = DateTime.Now,
+			LoggedBy = Constants.OwnerName
+		};
+		await _db.SaveFeedingLogAsync(log);
 		await LoadDataAsync(Pet.Id);
 	}
 
