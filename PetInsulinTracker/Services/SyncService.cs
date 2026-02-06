@@ -102,7 +102,7 @@ public class SyncService : ISyncService
 			{
 				Id = s.Id, PetId = s.PetId, ScheduleType = s.ScheduleType,
 				Label = s.Label, TimeTicks = s.TimeTicks,
-				IntervalHours = s.IntervalHours, IsEnabled = s.IsEnabled,
+				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
 				LastModified = s.LastModified, IsSynced = true
 			});
@@ -161,7 +161,7 @@ public class SyncService : ISyncService
 			{
 				Id = s.Id, PetId = s.PetId, ScheduleType = s.ScheduleType,
 				Label = s.Label, TimeTicks = s.TimeTicks,
-				IntervalHours = s.IntervalHours, IsEnabled = s.IsEnabled,
+				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
 				LastModified = s.LastModified
 			}).ToList()

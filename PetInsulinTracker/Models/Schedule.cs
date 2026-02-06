@@ -26,9 +26,6 @@ public class Schedule
 		set => TimeTicks = value.Ticks;
 	}
 
-	/// <summary>Interval in hours between doses/feedings (e.g., 12 for twice daily)</summary>
-	public int IntervalHours { get; set; } = 12;
-
 	public bool IsEnabled { get; set; } = true;
 
 	/// <summary>Minutes before scheduled time to send reminder</summary>

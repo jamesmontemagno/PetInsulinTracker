@@ -99,7 +99,6 @@ public class ScheduleEntity : ITableEntity
 	public string ScheduleType { get; set; } = "Insulin";
 	public string Label { get; set; } = string.Empty;
 	public long TimeTicks { get; set; }
-	public int IntervalHours { get; set; } = 12;
 	public bool IsEnabled { get; set; } = true;
 	public int ReminderLeadTimeMinutes { get; set; } = 15;
 	public DateTimeOffset LastModified { get; set; }

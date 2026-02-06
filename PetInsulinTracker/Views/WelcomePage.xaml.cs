@@ -1,4 +1,6 @@
 using PetInsulinTracker.Helpers;
+using PetInsulinTracker.Models;
+using PetInsulinTracker.Services;
 using PetInsulinTracker.Themes;
 
 namespace PetInsulinTracker.Views;
@@ -6,6 +8,7 @@ namespace PetInsulinTracker.Views;
 public partial class WelcomePage : ContentPage
 {
 	private readonly List<ThemePreview> _themes;
+	private string? _savedPetId;
 
 	public WelcomePage()
 	{
@@ -23,6 +26,9 @@ public partial class WelcomePage : ContentPage
 		ThemeCarousel.ItemsSource = _themes;
 		ThemeCarousel.IndicatorView = ThemeIndicator;
 		ThemeCarousel.Position = 3;
+
+		// Default weight unit from preferences
+		WeightUnitPicker.SelectedItem = Preferences.Get("default_weight_unit", "lbs");
 	}
 
 	private void OnThemeCarouselChanged(object? sender, CurrentItemChangedEventArgs e)
@@ -41,9 +47,11 @@ public partial class WelcomePage : ContentPage
 		Step1.IsVisible = step == 1;
 		Step2.IsVisible = step == 2;
 		Step3.IsVisible = step == 3;
+		Step4.IsVisible = step == 4;
 		Dot1.Color = step >= 1 ? GetPrimaryColor() : GetDividerColor();
 		Dot2.Color = step >= 2 ? GetPrimaryColor() : GetDividerColor();
 		Dot3.Color = step >= 3 ? GetPrimaryColor() : GetDividerColor();
+		Dot4.Color = step >= 4 ? GetPrimaryColor() : GetDividerColor();
 	}
 
 	private static Color GetPrimaryColor() =>
@@ -67,73 +75,137 @@ public partial class WelcomePage : ContentPage
 		GoToStep(2);
 	}
 
-	// Step 2 → Step 3 (save schedule prefs)
-	private void OnStep2Next(object? sender, EventArgs e)
+	// Step 2: Save pet and continue to schedules
+	private async void OnStep2Next(object? sender, EventArgs e)
 	{
-		SaveSchedulePreferences();
+		var petName = PetNameEntry.Text?.Trim();
+		if (string.IsNullOrWhiteSpace(petName))
+		{
+			await DisplayAlertAsync("Pet Name Required", "Please enter your pet's name to continue.", "OK");
+			return;
+		}
+
+		await SavePetAsync(petName);
 		GoToStep(3);
 	}
 
-	// Step 2 skip → Step 3
+	// Step 2 skip → finish (no pet = no schedules/vet needed)
 	private void OnStep2Skip(object? sender, EventArgs e)
 	{
-		GoToStep(3);
-	}
-
-	// Step 3 done (save vet prefs + finish)
-	private void OnStep3Done(object? sender, EventArgs e)
-	{
-		SaveVetPreferences();
 		FinishOnboarding();
 	}
 
-	// Step 3 skip → finish
+	// Step 3: Save schedules → Step 4
+	private async void OnStep3Next(object? sender, EventArgs e)
+	{
+		await SaveSchedulesAsync();
+		GoToStep(4);
+	}
+
+	// Step 3 skip → Step 4
 	private void OnStep3Skip(object? sender, EventArgs e)
 	{
+		GoToStep(4);
+	}
+
+	// Step 4 done (save vet + finish)
+	private async void OnStep4Done(object? sender, EventArgs e)
+	{
+		await SaveVetInfoAsync();
 		FinishOnboarding();
 	}
 
-	private void SaveSchedulePreferences()
+	// Step 4 skip → finish
+	private void OnStep4Skip(object? sender, EventArgs e)
 	{
-		if (MorningInsulinEnabled.IsToggled)
-		{
-			Preferences.Set("onboard_morning_insulin_time", (MorningInsulinTime.Time ?? new TimeSpan(7, 0, 0)).Ticks);
-			Preferences.Set("onboard_morning_insulin_reminder",
-				int.TryParse(MorningInsulinReminder.Text, out var r) ? r : 15);
-		}
-		if (EveningInsulinEnabled.IsToggled)
-		{
-			Preferences.Set("onboard_evening_insulin_time", (EveningInsulinTime.Time ?? new TimeSpan(19, 0, 0)).Ticks);
-			Preferences.Set("onboard_evening_insulin_reminder",
-				int.TryParse(EveningInsulinReminder.Text, out var r) ? r : 15);
-		}
-		if (MorningFeedingEnabled.IsToggled)
-		{
-			Preferences.Set("onboard_morning_feeding_time", (MorningFeedingTime.Time ?? new TimeSpan(7, 0, 0)).Ticks);
-			Preferences.Set("onboard_morning_feeding_reminder",
-				int.TryParse(MorningFeedingReminder.Text, out var r) ? r : 15);
-		}
-		if (EveningFeedingEnabled.IsToggled)
-		{
-			Preferences.Set("onboard_evening_feeding_time", (EveningFeedingTime.Time ?? new TimeSpan(19, 0, 0)).Ticks);
-			Preferences.Set("onboard_evening_feeding_reminder",
-				int.TryParse(EveningFeedingReminder.Text, out var r) ? r : 15);
-		}
-		Preferences.Set("onboard_has_schedules", true);
+		FinishOnboarding();
 	}
 
-	private void SaveVetPreferences()
+	private async Task SavePetAsync(string petName)
 	{
+		var db = GetDatabaseService();
+
+		var pet = new Pet
+		{
+			Name = petName,
+			Species = SpeciesPicker.SelectedItem as string ?? "Dog",
+			Breed = BreedEntry.Text?.Trim() ?? "",
+			InsulinType = InsulinTypePicker.SelectedItem as string,
+			WeightUnit = WeightUnitPicker.SelectedItem as string ?? "lbs"
+		};
+
+		if (double.TryParse(DoseEntry.Text, out var dose))
+			pet.CurrentDoseIU = dose;
+
+		if (double.TryParse(WeightEntry.Text, out var weight))
+			pet.CurrentWeight = weight;
+
+		await db.SavePetAsync(pet);
+		_savedPetId = pet.Id;
+	}
+
+	private async Task SaveSchedulesAsync()
+	{
+		if (_savedPetId is null) return;
+		var db = GetDatabaseService();
+
+		if (MorningInsulinEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Morning Insulin", "Insulin",
+				MorningInsulinTime.Time ?? new TimeSpan(7, 0, 0),
+				int.TryParse(MorningInsulinReminder.Text, out var r1) ? r1 : 15);
+
+		if (EveningInsulinEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Evening Insulin", "Insulin",
+				EveningInsulinTime.Time ?? new TimeSpan(19, 0, 0),
+				int.TryParse(EveningInsulinReminder.Text, out var r2) ? r2 : 15);
+
+		if (MorningFeedingEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Morning Feeding", "Feeding",
+				MorningFeedingTime.Time ?? new TimeSpan(7, 0, 0),
+				int.TryParse(MorningFeedingReminder.Text, out var r3) ? r3 : 15);
+
+		if (EveningFeedingEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Evening Feeding", "Feeding",
+				EveningFeedingTime.Time ?? new TimeSpan(19, 0, 0),
+				int.TryParse(EveningFeedingReminder.Text, out var r4) ? r4 : 15);
+	}
+
+	private async Task SaveScheduleAsync(IDatabaseService db, string label, string type,
+		TimeSpan time, int reminderMinutes)
+	{
+		var schedule = new Schedule
+		{
+			PetId = _savedPetId!,
+			Label = label,
+			ScheduleType = type,
+			TimeOfDay = time,
+			ReminderLeadTimeMinutes = reminderMinutes,
+			IsEnabled = true
+		};
+		await db.SaveScheduleAsync(schedule);
+	}
+
+	private async Task SaveVetInfoAsync()
+	{
+		if (_savedPetId is null) return;
 		var vetName = VetNameEntry.Text?.Trim();
 		if (string.IsNullOrWhiteSpace(vetName)) return;
 
-		Preferences.Set("onboard_vet_name", vetName);
-		Preferences.Set("onboard_clinic_name", ClinicNameEntry.Text?.Trim() ?? "");
-		Preferences.Set("onboard_vet_phone", VetPhoneEntry.Text?.Trim() ?? "");
-		Preferences.Set("onboard_emergency_phone", EmergencyPhoneEntry.Text?.Trim() ?? "");
-		Preferences.Set("onboard_vet_address", VetAddressEntry.Text?.Trim() ?? "");
-		Preferences.Set("onboard_has_vet", true);
+		var db = GetDatabaseService();
+		var vet = new VetInfo
+		{
+			PetId = _savedPetId,
+			VetName = vetName,
+			ClinicName = ClinicNameEntry.Text?.Trim() ?? "",
+			Phone = VetPhoneEntry.Text?.Trim() ?? "",
+			EmergencyPhone = EmergencyPhoneEntry.Text?.Trim() ?? "",
+			Address = VetAddressEntry.Text?.Trim() ?? ""
+		};
+		await db.SaveVetInfoAsync(vet);
 	}
+
+	private static IDatabaseService GetDatabaseService() =>
+		IPlatformApplication.Current!.Services.GetRequiredService<IDatabaseService>();
 
 	private void FinishOnboarding()
 	{

@@ -130,71 +130,8 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		await _db.SavePetAsync(pet);
 
-		// Apply onboarding data to first pet if available
-		if (!IsEditing)
-			await ApplyOnboardingDataAsync(pet.Id);
-
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
 		await Shell.Current.GoToAsync("..");
-	}
-
-	private async Task ApplyOnboardingDataAsync(string petId)
-	{
-		// Apply onboarding schedules
-		if (Preferences.Get("onboard_has_schedules", false))
-		{
-			await SaveOnboardingScheduleAsync(petId, "Morning Insulin", "Insulin",
-				"onboard_morning_insulin_time", "onboard_morning_insulin_reminder");
-			await SaveOnboardingScheduleAsync(petId, "Evening Insulin", "Insulin",
-				"onboard_evening_insulin_time", "onboard_evening_insulin_reminder");
-			await SaveOnboardingScheduleAsync(petId, "Morning Feeding", "Feeding",
-				"onboard_morning_feeding_time", "onboard_morning_feeding_reminder");
-			await SaveOnboardingScheduleAsync(petId, "Evening Feeding", "Feeding",
-				"onboard_evening_feeding_time", "onboard_evening_feeding_reminder");
-			Preferences.Remove("onboard_has_schedules");
-		}
-
-		// Apply onboarding vet info
-		if (Preferences.Get("onboard_has_vet", false))
-		{
-			var vet = new Models.VetInfo
-			{
-				PetId = petId,
-				VetName = Preferences.Get("onboard_vet_name", ""),
-				ClinicName = Preferences.Get("onboard_clinic_name", ""),
-				Phone = Preferences.Get("onboard_vet_phone", ""),
-				EmergencyPhone = Preferences.Get("onboard_emergency_phone", ""),
-				Address = Preferences.Get("onboard_vet_address", "")
-			};
-			await _db.SaveVetInfoAsync(vet);
-			Preferences.Remove("onboard_has_vet");
-			Preferences.Remove("onboard_vet_name");
-			Preferences.Remove("onboard_clinic_name");
-			Preferences.Remove("onboard_vet_phone");
-			Preferences.Remove("onboard_emergency_phone");
-			Preferences.Remove("onboard_vet_address");
-		}
-	}
-
-	private async Task SaveOnboardingScheduleAsync(string petId, string label, string type,
-		string timeKey, string reminderKey)
-	{
-		var timeTicks = Preferences.Get(timeKey, 0L);
-		if (timeTicks <= 0) return;
-
-		var schedule = new Models.Schedule
-		{
-			PetId = petId,
-			Label = label,
-			ScheduleType = type,
-			TimeOfDay = TimeSpan.FromTicks(timeTicks),
-			IntervalHours = 12,
-			ReminderLeadTimeMinutes = Preferences.Get(reminderKey, 15),
-			IsEnabled = true
-		};
-		await _db.SaveScheduleAsync(schedule);
-		Preferences.Remove(timeKey);
-		Preferences.Remove(reminderKey);
 	}
 
 	private bool CanSave() => !string.IsNullOrWhiteSpace(Name);

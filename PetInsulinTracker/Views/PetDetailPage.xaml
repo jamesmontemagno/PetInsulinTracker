@@ -173,10 +173,9 @@
                                         </HorizontalStackLayout>
                                         <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
                                             <Label.Text>
-                                                <MultiBinding StringFormat="{}{0} · Every {1}h · Remind {2} min before">
+                                                <MultiBinding StringFormat="{}{0} · {1}">
                                                     <Binding Path="ScheduleType" />
-                                                    <Binding Path="IntervalHours" />
-                                                    <Binding Path="ReminderLeadTimeMinutes" />
+                                                    <Binding Path="ReminderDisplay" />
                                                 </MultiBinding>
                                             </Label.Text>
                                         </Label>

@@ -128,7 +128,6 @@ public class SyncFunctions
 				ScheduleType = s.ScheduleType,
 				Label = s.Label,
 				TimeTicks = s.TimeTicks,
-				IntervalHours = s.IntervalHours,
 				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
 				LastModified = s.LastModified
@@ -216,7 +215,6 @@ public class SyncFunctions
 				ScheduleType = s.ScheduleType,
 				Label = s.Label,
 				TimeTicks = s.TimeTicks,
-				IntervalHours = s.IntervalHours,
 				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
 				LastModified = s.LastModified

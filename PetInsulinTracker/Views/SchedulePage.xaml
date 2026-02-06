@@ -22,22 +22,16 @@
                         <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
                     </VerticalStackLayout>
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
-                            <Picker ItemsSource="{Binding ScheduleTypeOptions}"
-                                    SelectedItem="{Binding ScheduleType}" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="4">
-                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                            <TimePicker Time="{Binding TimeOfDay}" />
-                        </VerticalStackLayout>
-                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                        <Picker ItemsSource="{Binding ScheduleTypeOptions}"
+                                SelectedItem="{Binding ScheduleType}" />
+                    </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Interval (hours)" Style="{StaticResource FormLabelStyle}" />
-                            <Entry Text="{Binding IntervalHours}" Keyboard="Numeric" />
+                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                            <TimePicker Time="{Binding TimeOfDay}" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
                             <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -86,10 +80,9 @@
                                         </HorizontalStackLayout>
                                         <Label Style="{StaticResource SubtleTextStyle}">
                                             <Label.Text>
-                                                <MultiBinding StringFormat="{}{0} · Every {1}h · Remind {2} min before">
+                                                <MultiBinding StringFormat="{}{0} · {1}">
                                                     <Binding Path="ScheduleType" />
-                                                    <Binding Path="IntervalHours" />
-                                                    <Binding Path="ReminderLeadTimeMinutes" />
+                                                    <Binding Path="ReminderDisplay" />
                                                 </MultiBinding>
                                             </Label.Text>
                                         </Label>

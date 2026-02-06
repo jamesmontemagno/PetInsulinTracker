@@ -34,9 +34,6 @@ public partial class ScheduleViewModel : ObservableObject
 	private TimeSpan timeOfDay = new(7, 0, 0);
 
 	[ObservableProperty]
-	private int intervalHours = 12;
-
-	[ObservableProperty]
 	private int reminderLeadTimeMinutes = 15;
 
 	public List<string> ScheduleTypeOptions { get; } = ["Insulin", "Feeding"];
@@ -66,7 +63,6 @@ public partial class ScheduleViewModel : ObservableObject
 			Label = Label,
 			ScheduleType = ScheduleType,
 			TimeOfDay = TimeOfDay,
-			IntervalHours = IntervalHours,
 			ReminderLeadTimeMinutes = ReminderLeadTimeMinutes,
 			IsEnabled = true
 		};
