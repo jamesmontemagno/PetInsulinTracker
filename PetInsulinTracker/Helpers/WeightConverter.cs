@@ -10,10 +10,10 @@ public static class WeightConverter
 			return weight;
 		if (string.Equals(fromUnit, "lbs", StringComparison.OrdinalIgnoreCase)
 			&& string.Equals(toUnit, "kg", StringComparison.OrdinalIgnoreCase))
-			return weight / LbsPerKg;
+			return Math.Round(weight / LbsPerKg, 2);
 		if (string.Equals(fromUnit, "kg", StringComparison.OrdinalIgnoreCase)
 			&& string.Equals(toUnit, "lbs", StringComparison.OrdinalIgnoreCase))
-			return weight * LbsPerKg;
+			return Math.Round(weight * LbsPerKg, 2);
 		return weight;
 	}
 
