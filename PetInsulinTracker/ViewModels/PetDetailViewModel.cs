@@ -187,6 +187,6 @@ public partial class PetDetailViewModel : ObservableObject
 	[RelayCommand]
 	private static async Task GoToSettingsAsync()
 	{
-		await Shell.Current.GoToAsync(nameof(Views.SettingsPage));
+		await Shell.Current.GoToAsync("//SettingsPage");
 	}
 }

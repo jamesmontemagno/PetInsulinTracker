@@ -12,7 +12,14 @@ public partial class SettingsViewModel : ObservableObject
 	public SettingsViewModel(ISyncService syncService)
 	{
 		_syncService = syncService;
-		selectedTheme = Themes.ThemeService.CurrentTheme;
+		selectedThemeName = Themes.ThemeService.CurrentTheme switch
+		{
+			Themes.AppTheme.Ocean => "Ocean Breeze",
+			Themes.AppTheme.Forest => "Forest Walk",
+			Themes.AppTheme.Berry => "Berry Bliss",
+			Themes.AppTheme.Midnight => "Midnight Indigo",
+			_ => "Warm & Earthy"
+		};
 	}
 
 	[ObservableProperty]
@@ -31,9 +38,11 @@ public partial class SettingsViewModel : ObservableObject
 	private string syncStatus = "Not synced";
 
 	[ObservableProperty]
-	private Themes.AppTheme selectedTheme;
+	private string selectedThemeName;
 
 	public List<string> WeightUnitOptions { get; } = ["lbs", "kg"];
+
+	public List<string> ThemeDisplayNames { get; } = ["Warm & Earthy", "Ocean Breeze", "Forest Walk", "Berry Bliss", "Midnight Indigo"];
 
 	partial void OnOwnerNameChanged(string value)
 	{
@@ -50,18 +59,17 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set("default_weight_unit", value);
 	}
 
-	partial void OnSelectedThemeChanged(Themes.AppTheme value)
+	partial void OnSelectedThemeNameChanged(string value)
 	{
-		Themes.ThemeService.ApplyTheme(value);
-	}
-
-	[RelayCommand]
-	private void SelectTheme(string themeName)
-	{
-		if (Enum.TryParse<Themes.AppTheme>(themeName, out var theme))
+		var theme = value switch
 		{
-			SelectedTheme = theme;
-		}
+			"Ocean Breeze" => Themes.AppTheme.Ocean,
+			"Forest Walk" => Themes.AppTheme.Forest,
+			"Berry Bliss" => Themes.AppTheme.Berry,
+			"Midnight Indigo" => Themes.AppTheme.Midnight,
+			_ => Themes.AppTheme.Warm
+		};
+		Themes.ThemeService.ApplyTheme(theme);
 	}
 
 	[RelayCommand]
