@@ -3,6 +3,7 @@ namespace PetInsulinTracker.Shared.DTOs;
 public class PetDto
 {
 	public string Id { get; set; } = string.Empty;
+	public string? OwnerId { get; set; }
 	public string Name { get; set; } = string.Empty;
 	public string Species { get; set; } = string.Empty;
 	public string Breed { get; set; } = string.Empty;
@@ -13,6 +14,7 @@ public class PetDto
 	public string WeightUnit { get; set; } = "lbs";
 	public double? CurrentWeight { get; set; }
 	public string? ShareCode { get; set; }
+	public string AccessLevel { get; set; } = "owner";
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -24,6 +26,7 @@ public class InsulinLogDto
 	public DateTime AdministeredAt { get; set; }
 	public string? InjectionSite { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -37,6 +40,7 @@ public class FeedingLogDto
 	public string FoodType { get; set; } = "Dry";
 	public DateTime FedAt { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -48,6 +52,7 @@ public class WeightLogDto
 	public string Unit { get; set; } = "lbs";
 	public DateTime RecordedAt { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 

@@ -80,6 +80,12 @@ public partial class FeedingLogViewModel : ObservableObject
 	{
 		if (PetId is null) return;
 		var logList = await _db.GetFeedingLogsAsync(PetId);
+
+		// Filter for guest access — only show own logs
+		var pet = await _db.GetPetAsync(PetId);
+		if (pet?.AccessLevel == "guest")
+			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+
 		Logs = new ObservableCollection<FeedingLog>(logList);
 	}
 

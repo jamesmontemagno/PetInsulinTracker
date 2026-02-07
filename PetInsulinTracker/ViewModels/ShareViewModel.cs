@@ -38,6 +38,9 @@ public partial class ShareViewModel : ObservableObject
 	[ObservableProperty]
 	private string statusMessage = string.Empty;
 
+	[ObservableProperty]
+	private string shareCodeLabel = "Share Code";
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -51,7 +54,18 @@ public partial class ShareViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private async Task GenerateShareCodeAsync()
+	private async Task GenerateFullAccessCodeAsync()
+	{
+		await GenerateCodeAsync("full");
+	}
+
+	[RelayCommand]
+	private async Task GenerateGuestAccessCodeAsync()
+	{
+		await GenerateCodeAsync("guest");
+	}
+
+	private async Task GenerateCodeAsync(string accessLevel)
 	{
 		if (Pet is null) return;
 
@@ -60,12 +74,15 @@ public partial class ShareViewModel : ObservableObject
 			IsGenerating = true;
 			StatusMessage = "Generating share code...";
 
-			var code = await _syncService.GenerateShareCodeAsync(Pet.Id);
+			var code = await _syncService.GenerateShareCodeAsync(Pet.Id, accessLevel);
 			ShareCode = code;
+			ShareCodeLabel = accessLevel == "guest" ? "Guest Access Code" : "Full Access Code";
 			Pet.ShareCode = code;
 			await _db.SavePetAsync(Pet);
 
-			StatusMessage = "Share code generated! Share this code with your family or pet sitter.";
+			StatusMessage = accessLevel == "guest"
+				? "Guest code generated! They can view pet info and log entries, but won't see your logs."
+				: "Full access code generated! They can see all logs and pet info.";
 		}
 		catch (Exception ex)
 		{

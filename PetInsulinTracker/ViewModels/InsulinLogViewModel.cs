@@ -56,6 +56,11 @@ public partial class InsulinLogViewModel : ObservableObject
 			DoseIU = pet.CurrentDoseIU.Value;
 
 		var logList = await _db.GetInsulinLogsAsync(PetId);
+
+		// Filter for guest access — only show own logs
+		if (pet?.AccessLevel == "guest")
+			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+
 		Logs = new ObservableCollection<InsulinLog>(logList);
 	}
 

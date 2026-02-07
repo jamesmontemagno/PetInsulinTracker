@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
 
@@ -113,6 +114,8 @@ public partial class AddEditPetViewModel : ObservableObject
 	private async Task SaveAsync()
 	{
 		var pet = _existingPet ?? new Pet();
+		if (_existingPet is null)
+			pet.OwnerId = Constants.OwnerName;
 		pet.Name = Name;
 		pet.Species = Species;
 		pet.Breed = Breed;

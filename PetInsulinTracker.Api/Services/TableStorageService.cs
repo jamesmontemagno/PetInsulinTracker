@@ -100,14 +100,15 @@ public class TableStorageService
 		}
 	}
 
-	public async Task CreateShareCodeAsync(string code, string petId)
+	public async Task CreateShareCodeAsync(string code, string petId, string accessLevel = "full")
 	{
 		var client = await GetTableClientAsync("ShareCodes");
 		var entity = new ShareCodeEntity
 		{
 			PartitionKey = "ShareCodes",
 			RowKey = code,
-			PetId = petId
+			PetId = petId,
+			AccessLevel = accessLevel
 		};
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}

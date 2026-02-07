@@ -128,6 +128,7 @@ public partial class WelcomePage : ContentPage
 		var pet = new Pet
 		{
 			Name = petName,
+			OwnerId = Helpers.Constants.OwnerName,
 			Species = SpeciesPicker.SelectedItem as string ?? "Dog",
 			Breed = BreedEntry.Text?.Trim() ?? "",
 			InsulinType = InsulinTypePicker.SelectedItem as string,

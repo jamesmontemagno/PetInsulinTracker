@@ -39,6 +39,8 @@ public class SyncFunctions
 			await _storage.UpsertPetAsync(shareCode, new PetEntity
 			{
 				RowKey = pet.Id,
+				OwnerId = pet.OwnerId,
+				AccessLevel = pet.AccessLevel,
 				Name = pet.Name,
 				Species = pet.Species,
 				Breed = pet.Breed,
@@ -64,6 +66,7 @@ public class SyncFunctions
 				AdministeredAt = log.AdministeredAt,
 				InjectionSite = log.InjectionSite,
 				Notes = log.Notes,
+				LoggedBy = log.LoggedBy,
 				LastModified = log.LastModified
 			});
 		}
@@ -81,6 +84,7 @@ public class SyncFunctions
 				FoodType = log.FoodType,
 				FedAt = log.FedAt,
 				Notes = log.Notes,
+				LoggedBy = log.LoggedBy,
 				LastModified = log.LastModified
 			});
 		}
@@ -96,6 +100,7 @@ public class SyncFunctions
 				WeightUnit = log.Unit,
 				RecordedAt = log.RecordedAt,
 				Notes = log.Notes,
+				LoggedBy = log.LoggedBy,
 				LastModified = log.LastModified
 			});
 		}
@@ -151,6 +156,8 @@ public class SyncFunctions
 			Pets = serverPets.Select(p => new PetDto
 			{
 				Id = p.RowKey,
+				OwnerId = p.OwnerId,
+				AccessLevel = p.AccessLevel,
 				Name = p.Name,
 				Species = p.Species,
 				Breed = p.Breed,
@@ -171,6 +178,7 @@ public class SyncFunctions
 				AdministeredAt = l.AdministeredAt,
 				InjectionSite = l.InjectionSite,
 				Notes = l.Notes,
+				LoggedBy = l.LoggedBy,
 				LastModified = l.LastModified
 			}).ToList(),
 			FeedingLogs = serverFeedingLogs.Select(l => new FeedingLogDto
@@ -183,6 +191,7 @@ public class SyncFunctions
 				FoodType = l.FoodType,
 				FedAt = l.FedAt,
 				Notes = l.Notes,
+				LoggedBy = l.LoggedBy,
 				LastModified = l.LastModified
 			}).ToList(),
 			WeightLogs = serverWeightLogs.Select(l => new WeightLogDto
@@ -193,6 +202,7 @@ public class SyncFunctions
 				Unit = l.WeightUnit,
 				RecordedAt = l.RecordedAt,
 				Notes = l.Notes,
+				LoggedBy = l.LoggedBy,
 				LastModified = l.LastModified
 			}).ToList(),
 			VetInfos = serverVetInfos.Select(v => new VetInfoDto

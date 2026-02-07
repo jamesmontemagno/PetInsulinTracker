@@ -18,7 +18,7 @@
                     Padding="24"
                     IsVisible="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
                 <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="Your pet's share code" Style="{StaticResource SubtleTextStyle}"
+                    <Label Text="{Binding ShareCodeLabel}" Style="{StaticResource SubtleTextStyle}"
                            HorizontalOptions="Center" />
                     <Border BackgroundColor="{DynamicResource CurrentSurface}"
                             StrokeThickness="2"
@@ -40,11 +40,22 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Button Text="Generate Share Code"
-                    Command="{Binding GenerateShareCodeCommand}"
-                    IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    HorizontalOptions="Fill" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Grid.Column="0" Text="Full Access"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding GenerateFullAccessCodeCommand}"
+                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}"
+                        HorizontalOptions="Fill" />
+                <Button Grid.Column="1" Text="Guest Access"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        Command="{Binding GenerateGuestAccessCodeCommand}"
+                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}"
+                        HorizontalOptions="Fill" />
+            </Grid>
+
+            <Label Text="Full Access: See all logs and pet info (family members)&#x0a;Guest Access: See pet info, log entries, but not other people's logs (pet sitters)"
+                   Style="{StaticResource SubtleTextStyle}" FontSize="12"
+                   HorizontalTextAlignment="Center" />
 
             <!-- Redeem Code -->
             <BoxView Style="{StaticResource DividerStyle}" Margin="0,8" />

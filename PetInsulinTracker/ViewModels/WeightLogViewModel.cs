@@ -67,6 +67,11 @@ public partial class WeightLogViewModel : ObservableObject
 			Unit = pet.WeightUnit;
 
 		var logList = await _db.GetWeightLogsAsync(PetId);
+
+		// Filter for guest access — only show own logs
+		if (pet?.AccessLevel == "guest")
+			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+
 		Logs = new ObservableCollection<WeightLog>(logList);
 		UpdateTrend();
 	}

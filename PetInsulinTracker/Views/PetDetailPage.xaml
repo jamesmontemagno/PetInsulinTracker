@@ -43,8 +43,16 @@
                     <Button Grid.Column="1" Text="Edit"
                             Style="{StaticResource GhostButtonStyle}"
                             Command="{Binding GoToEditPetCommand}"
+                            IsVisible="{Binding IsOwnerOrFull}"
                             SemanticProperties.Hint="Edit pet" />
                 </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}" Margin="20,8,20,0"
+                    IsVisible="{Binding IsGuest}" Padding="12,8">
+                <Label Text="👤 Guest Access — You can log entries but cannot edit pet info"
+                       Style="{StaticResource SubtleTextStyle}" FontSize="12"
+                       HorizontalTextAlignment="Center" />
             </Border>
 
             <VerticalStackLayout Padding="20,0" Spacing="16">
@@ -192,10 +200,12 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Button Grid.Row="0" Grid.Column="0" Text="Schedules"
                             Style="{StaticResource OutlineButtonStyle}"
-                            Command="{Binding GoToScheduleCommand}" />
+                            Command="{Binding GoToScheduleCommand}"
+                            IsVisible="{Binding IsOwnerOrFull}" />
                     <Button Grid.Row="0" Grid.Column="1" Text="Vet Info"
                             Style="{StaticResource OutlineButtonStyle}"
-                            Command="{Binding GoToVetInfoCommand}" />
+                            Command="{Binding GoToVetInfoCommand}"
+                            IsVisible="{Binding IsOwnerOrFull}" />
                     <Button Grid.Row="1" Grid.Column="0" Text="Insulin"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToInsulinLogCommand}" />
@@ -204,7 +214,8 @@
                             Command="{Binding GoToFeedingLogCommand}" />
                     <Button Grid.Row="2" Grid.Column="0" Text="Share"
                             Style="{StaticResource OutlineButtonStyle}"
-                            Command="{Binding GoToShareCommand}" />
+                            Command="{Binding GoToShareCommand}"
+                            IsVisible="{Binding IsOwnerOrFull}" />
                     <Button Grid.Row="2" Grid.Column="1" Text="Settings"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToSettingsCommand}" />

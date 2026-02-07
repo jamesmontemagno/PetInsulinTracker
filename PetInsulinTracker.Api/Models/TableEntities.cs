@@ -10,6 +10,8 @@ public class PetEntity : ITableEntity
 	public DateTimeOffset? Timestamp { get; set; }
 	public ETag ETag { get; set; }
 
+	public string? OwnerId { get; set; }
+	public string AccessLevel { get; set; } = "owner";
 	public string Name { get; set; } = string.Empty;
 	public string Species { get; set; } = string.Empty;
 	public string Breed { get; set; } = string.Empty;
@@ -35,6 +37,7 @@ public class InsulinLogEntity : ITableEntity
 	public DateTime AdministeredAt { get; set; }
 	public string? InjectionSite { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -52,6 +55,7 @@ public class FeedingLogEntity : ITableEntity
 	public string FoodType { get; set; } = "Dry";
 	public DateTime FedAt { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -67,6 +71,7 @@ public class WeightLogEntity : ITableEntity
 	public string WeightUnit { get; set; } = "lbs";
 	public DateTime RecordedAt { get; set; }
 	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -112,5 +117,6 @@ public class ShareCodeEntity : ITableEntity
 	public ETag ETag { get; set; }
 
 	public string PetId { get; set; } = string.Empty;
+	public string AccessLevel { get; set; } = "full";
 	public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

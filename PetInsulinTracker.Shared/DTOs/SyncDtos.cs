@@ -26,11 +26,13 @@ public class SyncResponse
 public class ShareCodeRequest
 {
 	public string PetId { get; set; } = string.Empty;
+	public string AccessLevel { get; set; } = "full";
 }
 
 public class ShareCodeResponse
 {
 	public string ShareCode { get; set; } = string.Empty;
+	public string AccessLevel { get; set; } = "full";
 }
 
 public class RedeemShareCodeResponse

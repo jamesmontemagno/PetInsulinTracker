@@ -37,11 +37,11 @@ public class ShareFunctions
 		}
 		while (await _storage.GetShareCodeAsync(code) is not null);
 
-		await _storage.CreateShareCodeAsync(code, request.PetId);
+		await _storage.CreateShareCodeAsync(code, request.PetId, request.AccessLevel);
 		_logger.LogInformation("Generated share code {Code} for pet {PetId}", code, request.PetId);
 
 		var response = req.CreateResponse(HttpStatusCode.OK);
-		await response.WriteAsJsonAsync(new ShareCodeResponse { ShareCode = code });
+		await response.WriteAsJsonAsync(new ShareCodeResponse { ShareCode = code, AccessLevel = request.AccessLevel });
 		return response;
 	}
 
@@ -55,6 +55,8 @@ public class ShareFunctions
 		{
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
+
+		var accessLevel = shareCode.AccessLevel ?? "full";
 
 		// Get all data for this share code
 		var pets = await _storage.GetPetsByShareCodeAsync(code);
@@ -75,6 +77,8 @@ public class ShareFunctions
 			Pet = new PetDto
 			{
 				Id = pet.RowKey,
+				OwnerId = pet.OwnerId,
+				AccessLevel = accessLevel,
 				Name = pet.Name,
 				Species = pet.Species,
 				Breed = pet.Breed,
@@ -87,23 +91,23 @@ public class ShareFunctions
 				ShareCode = code,
 				LastModified = pet.LastModified
 			},
-			InsulinLogs = insulinLogs.Select(l => new InsulinLogDto
+			InsulinLogs = accessLevel == "guest" ? [] : insulinLogs.Select(l => new InsulinLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
-			FeedingLogs = feedingLogs.Select(l => new FeedingLogDto
+			FeedingLogs = accessLevel == "guest" ? [] : feedingLogs.Select(l => new FeedingLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LastModified = l.LastModified
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
-			WeightLogs = weightLogs.Select(l => new WeightLogDto
+			WeightLogs = accessLevel == "guest" ? [] : weightLogs.Select(l => new WeightLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, Weight = l.Weight,
 				Unit = l.WeightUnit, RecordedAt = l.RecordedAt,
-				Notes = l.Notes, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
 			VetInfo = vetInfos.Select(v => new VetInfoDto
 			{

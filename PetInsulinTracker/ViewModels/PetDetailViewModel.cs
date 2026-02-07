@@ -76,6 +76,12 @@ public partial class PetDetailViewModel : ObservableObject
 	private string quickFeedInfoText = "";
 
 	[ObservableProperty]
+	private bool isGuest;
+
+	[ObservableProperty]
+	private bool isOwnerOrFull;
+
+	[ObservableProperty]
 	private ObservableCollection<Schedule> activeSchedules = [];
 
 	private List<Schedule> _schedules = [];
@@ -99,6 +105,9 @@ public partial class PetDetailViewModel : ObservableObject
 	{
 		Pet = await _db.GetPetAsync(id);
 		if (Pet is null) return;
+
+		IsGuest = Pet.AccessLevel == "guest";
+		IsOwnerOrFull = Pet.AccessLevel != "guest";
 
 		DoseInfoText = Pet.CurrentDoseIU.HasValue
 			? $"Dose: {Pet.CurrentDoseIU.Value} IU ({Pet.InsulinConcentration ?? "U-40"})"

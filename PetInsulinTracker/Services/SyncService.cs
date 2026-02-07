@@ -16,11 +16,11 @@ public class SyncService : ISyncService
 		_http = http;
 	}
 
-	public async Task<string> GenerateShareCodeAsync(string petId)
+	public async Task<string> GenerateShareCodeAsync(string petId, string accessLevel = "full")
 	{
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
-			new ShareCodeRequest { PetId = petId });
+			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel });
 
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync<ShareCodeResponse>();
@@ -39,6 +39,8 @@ public class SyncService : ISyncService
 		var pet = new Pet
 		{
 			Id = data.Pet.Id,
+			OwnerId = data.Pet.OwnerId,
+			AccessLevel = data.Pet.AccessLevel,
 			Name = data.Pet.Name,
 			Species = data.Pet.Species,
 			Breed = data.Pet.Breed,
@@ -60,7 +62,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LastModified = l.LastModified, IsSynced = true
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -70,7 +72,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LastModified = l.LastModified, IsSynced = true
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -80,7 +82,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight,
 				Unit = l.Unit, RecordedAt = l.RecordedAt,
-				Notes = l.Notes, LastModified = l.LastModified, IsSynced = true
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -127,7 +129,8 @@ public class SyncService : ISyncService
 			LastSyncTimestamp = lastSync,
 			Pets = unsyncedPets.Select(p => new PetDto
 			{
-				Id = p.Id, Name = p.Name, Species = p.Species, Breed = p.Breed,
+				Id = p.Id, OwnerId = p.OwnerId, AccessLevel = p.AccessLevel,
+				Name = p.Name, Species = p.Species, Breed = p.Breed,
 				DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 				InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 				WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
@@ -137,18 +140,18 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
 			FeedingLogs = unsyncedFeeding.Select(l => new FeedingLogDto
 			{
 				Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LastModified = l.LastModified
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
 			WeightLogs = unsyncedWeight.Select(l => new WeightLogDto
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight, Unit = l.Unit,
-				RecordedAt = l.RecordedAt, Notes = l.Notes, LastModified = l.LastModified
+				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
 			}).ToList(),
 			VetInfos = unsyncedVetInfo.Select(v => new VetInfoDto
 			{
@@ -181,7 +184,8 @@ public class SyncService : ISyncService
 			{
 				await _db.SavePetAsync(new Pet
 				{
-					Id = p.Id, Name = p.Name, Species = p.Species, Breed = p.Breed,
+					Id = p.Id, OwnerId = p.OwnerId, AccessLevel = p.AccessLevel,
+					Name = p.Name, Species = p.Species, Breed = p.Breed,
 					DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
