@@ -84,7 +84,7 @@ public partial class FeedingLogViewModel : ObservableObject
 		// Filter for guest access — only show own logs
 		var pet = await _db.GetPetAsync(PetId);
 		if (pet?.AccessLevel == "guest")
-			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
 		Logs = new ObservableCollection<FeedingLog>(logList);
 	}
@@ -103,7 +103,8 @@ public partial class FeedingLogViewModel : ObservableObject
 			FoodType = FoodType,
 			FedAt = LogDate.Date + LogTime,
 			Notes = Notes,
-			LoggedBy = Constants.OwnerName
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
 		};
 
 		await _db.SaveFeedingLogAsync(log);

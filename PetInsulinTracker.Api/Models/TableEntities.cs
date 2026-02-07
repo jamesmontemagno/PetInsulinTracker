@@ -38,6 +38,7 @@ public class InsulinLogEntity : ITableEntity
 	public string? InjectionSite { get; set; }
 	public string? Notes { get; set; }
 	public string? LoggedBy { get; set; }
+	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -56,6 +57,7 @@ public class FeedingLogEntity : ITableEntity
 	public DateTime FedAt { get; set; }
 	public string? Notes { get; set; }
 	public string? LoggedBy { get; set; }
+	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 
@@ -72,6 +74,7 @@ public class WeightLogEntity : ITableEntity
 	public DateTime RecordedAt { get; set; }
 	public string? Notes { get; set; }
 	public string? LoggedBy { get; set; }
+	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 }
 

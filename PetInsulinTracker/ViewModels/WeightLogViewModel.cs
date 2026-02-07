@@ -70,7 +70,7 @@ public partial class WeightLogViewModel : ObservableObject
 
 		// Filter for guest access — only show own logs
 		if (pet?.AccessLevel == "guest")
-			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
 		Logs = new ObservableCollection<WeightLog>(logList);
 		UpdateTrend();
@@ -114,7 +114,8 @@ public partial class WeightLogViewModel : ObservableObject
 			Unit = Unit,
 			RecordedAt = LogDate,
 			Notes = Notes,
-			LoggedBy = Constants.OwnerName
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
 		};
 
 		await _db.SaveWeightLogAsync(log);

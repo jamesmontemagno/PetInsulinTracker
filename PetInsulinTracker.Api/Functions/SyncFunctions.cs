@@ -67,6 +67,7 @@ public class SyncFunctions
 				InjectionSite = log.InjectionSite,
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
+				LoggedById = log.LoggedById,
 				LastModified = log.LastModified
 			});
 		}
@@ -85,6 +86,7 @@ public class SyncFunctions
 				FedAt = log.FedAt,
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
+				LoggedById = log.LoggedById,
 				LastModified = log.LastModified
 			});
 		}
@@ -101,6 +103,7 @@ public class SyncFunctions
 				RecordedAt = log.RecordedAt,
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
+				LoggedById = log.LoggedById,
 				LastModified = log.LastModified
 			});
 		}
@@ -179,6 +182,7 @@ public class SyncFunctions
 				InjectionSite = l.InjectionSite,
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
+				LoggedById = l.LoggedById,
 				LastModified = l.LastModified
 			}).ToList(),
 			FeedingLogs = serverFeedingLogs.Select(l => new FeedingLogDto
@@ -192,6 +196,7 @@ public class SyncFunctions
 				FedAt = l.FedAt,
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
+				LoggedById = l.LoggedById,
 				LastModified = l.LastModified
 			}).ToList(),
 			WeightLogs = serverWeightLogs.Select(l => new WeightLogDto
@@ -203,6 +208,7 @@ public class SyncFunctions
 				RecordedAt = l.RecordedAt,
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
+				LoggedById = l.LoggedById,
 				LastModified = l.LastModified
 			}).ToList(),
 			VetInfos = serverVetInfos.Select(v => new VetInfoDto

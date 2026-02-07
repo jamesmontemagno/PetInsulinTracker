@@ -95,19 +95,19 @@ public class ShareFunctions
 			{
 				Id = l.RowKey, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			FeedingLogs = accessLevel == "guest" ? [] : feedingLogs.Select(l => new FeedingLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			WeightLogs = accessLevel == "guest" ? [] : weightLogs.Select(l => new WeightLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, Weight = l.Weight,
 				Unit = l.WeightUnit, RecordedAt = l.RecordedAt,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			VetInfo = vetInfos.Select(v => new VetInfoDto
 			{

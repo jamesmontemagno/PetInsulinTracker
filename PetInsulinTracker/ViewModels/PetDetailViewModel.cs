@@ -282,7 +282,8 @@ public partial class PetDetailViewModel : ObservableObject
 			PetId = Pet.Id,
 			DoseIU = Pet.CurrentDoseIU ?? 0,
 			AdministeredAt = DateTime.Now,
-			LoggedBy = Constants.OwnerName
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveInsulinLogAsync(log);
 		await LoadDataAsync(Pet.Id);
@@ -301,7 +302,8 @@ public partial class PetDetailViewModel : ObservableObject
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,
 			FedAt = DateTime.Now,
-			LoggedBy = Constants.OwnerName
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveFeedingLogAsync(log);
 		await LoadDataAsync(Pet.Id);

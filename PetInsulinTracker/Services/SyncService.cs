@@ -62,7 +62,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -72,7 +72,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -82,7 +82,7 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight,
 				Unit = l.Unit, RecordedAt = l.RecordedAt,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified, IsSynced = true
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified, IsSynced = true
 			});
 		}
 
@@ -140,18 +140,18 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			FeedingLogs = unsyncedFeeding.Select(l => new FeedingLogDto
 			{
 				Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			WeightLogs = unsyncedWeight.Select(l => new WeightLogDto
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight, Unit = l.Unit,
-				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LastModified = l.LastModified
+				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
 			VetInfos = unsyncedVetInfo.Select(v => new VetInfoDto
 			{

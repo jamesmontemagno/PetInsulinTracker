@@ -59,7 +59,7 @@ public partial class InsulinLogViewModel : ObservableObject
 
 		// Filter for guest access — only show own logs
 		if (pet?.AccessLevel == "guest")
-			logList = logList.Where(l => l.LoggedBy == Constants.OwnerName).ToList();
+			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
 		Logs = new ObservableCollection<InsulinLog>(logList);
 	}
@@ -76,7 +76,8 @@ public partial class InsulinLogViewModel : ObservableObject
 			AdministeredAt = LogDate.Date + LogTime,
 			InjectionSite = InjectionSite,
 			Notes = Notes,
-			LoggedBy = Constants.OwnerName
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
 		};
 
 		await _db.SaveInsulinLogAsync(log);
