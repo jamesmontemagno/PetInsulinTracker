@@ -263,6 +263,32 @@ public partial class WelcomePage : ContentPage
 	{
 		Preferences.Set("setup_complete", true);
 
+		// Auto-generate share code and sync new pet to backend
+		if (_savedPetId is not null)
+		{
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					var db = GetDatabaseService();
+					var syncService = IPlatformApplication.Current!.Services.GetRequiredService<ISyncService>();
+					var pet = await db.GetPetAsync(_savedPetId);
+					if (pet is not null && string.IsNullOrEmpty(pet.ShareCode))
+					{
+						var code = await syncService.GenerateShareCodeAsync(pet.Id, "full");
+						pet.FullAccessCode = code;
+						pet.ShareCode = code;
+						await db.SavePetAsync(pet);
+						await syncService.SyncAsync(code);
+					}
+				}
+				catch
+				{
+					// Will retry on next sync
+				}
+			});
+		}
+
 		if (Application.Current is not null)
 			Application.Current.Windows[0].Page = new AppShell();
 	}

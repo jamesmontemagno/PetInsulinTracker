@@ -263,7 +263,9 @@ public class DatabaseService : IDatabaseService
 	public async Task<Pet?> GetPetByShareCodeAsync(string shareCode)
 	{
 		var db = await GetConnectionAsync();
-		return await db.Table<Pet>().FirstOrDefaultAsync(p => p.ShareCode == shareCode && !p.IsDeleted);
+		return await db.Table<Pet>().FirstOrDefaultAsync(p =>
+			(p.ShareCode == shareCode || p.FullAccessCode == shareCode || p.GuestAccessCode == shareCode)
+			&& !p.IsDeleted);
 	}
 
 	public async Task<List<T>> GetUnsyncedAsync<T>() where T : new()

@@ -116,7 +116,8 @@ public partial class AddEditPetViewModel : ObservableObject
 	private async Task SaveAsync()
 	{
 		var pet = _existingPet ?? new Pet();
-		if (_existingPet is null)
+		var isNew = _existingPet is null;
+		if (isNew)
 			pet.OwnerId = Constants.OwnerName;
 		pet.Name = Name;
 		pet.Species = Species;
@@ -135,8 +136,29 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		await _db.SavePetAsync(pet);
 
-		if (!string.IsNullOrEmpty(pet.ShareCode))
+		// Auto-generate a share code for new pets so they sync to the backend
+		if (isNew && string.IsNullOrEmpty(pet.ShareCode))
+		{
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					var code = await _syncService.GenerateShareCodeAsync(pet.Id, "full");
+					pet.FullAccessCode = code;
+					pet.ShareCode = code;
+					await _db.SavePetAsync(pet);
+					await _syncService.SyncAsync(code);
+				}
+				catch
+				{
+					// Will retry on next sync
+				}
+			});
+		}
+		else if (!string.IsNullOrEmpty(pet.ShareCode))
+		{
 			_ = _syncService.SyncAsync(pet.ShareCode);
+		}
 
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
 		await Shell.Current.GoToAsync("..");

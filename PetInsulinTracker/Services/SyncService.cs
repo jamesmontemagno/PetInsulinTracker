@@ -335,12 +335,14 @@ public class SyncService : ISyncService
 	{
 		var pets = await _db.GetPetsAsync();
 		var syncTasks = pets
-			.Where(p => !string.IsNullOrEmpty(p.ShareCode))
-			.Select(async pet =>
+			.SelectMany(p => new[] { p.ShareCode, p.FullAccessCode, p.GuestAccessCode })
+			.Where(code => !string.IsNullOrEmpty(code))
+			.Distinct()
+			.Select(async code =>
 			{
 				try
 				{
-					await SyncAsync(pet.ShareCode!);
+					await SyncAsync(code!);
 				}
 				catch
 				{
