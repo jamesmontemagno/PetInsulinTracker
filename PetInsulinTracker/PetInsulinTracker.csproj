@@ -19,7 +19,7 @@
 		<Nullable>enable</Nullable>
 		
 		<!-- Fix XAML compilation issues with third-party controls in release builds -->
-		<MauiXamlCValidationLevel>Warning</MauiXamlCValidationLevel>
+		<MauiDisableXamlCValidation>true</MauiDisableXamlCValidation>
 
 		<!-- Display name -->
 		<ApplicationTitle>Insulog</ApplicationTitle>
