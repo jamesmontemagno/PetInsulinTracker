@@ -16,12 +16,13 @@ public class SyncService : ISyncService
 		_http = http;
 	}
 
-	public async Task<string> CreatePetAsync(Pet pet)
+	public async Task CreatePetAsync(Pet pet)
 	{
 		var request = new CreatePetRequest
 		{
 			Id = pet.Id,
 			DeviceUserId = Constants.DeviceUserId,
+			OwnerName = Constants.OwnerName,
 			Name = pet.Name,
 			Species = pet.Species,
 			Breed = pet.Breed,
@@ -35,8 +36,6 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request);
 		response.EnsureSuccessStatusCode();
-		var result = await response.Content.ReadFromJsonAsync<CreatePetResponse>();
-		return result?.ShareCode ?? throw new InvalidOperationException("No share code received");
 	}
 
 	public async Task<string> GenerateShareCodeAsync(string petId, string accessLevel = "full")
@@ -70,6 +69,7 @@ public class SyncService : ISyncService
 		{
 			Id = data.Pet.Id,
 			OwnerId = data.Pet.OwnerId,
+			OwnerName = data.Pet.OwnerName,
 			AccessLevel = data.Pet.AccessLevel,
 			Name = data.Pet.Name,
 			Species = data.Pet.Species,
@@ -80,7 +80,6 @@ public class SyncService : ISyncService
 			CurrentDoseIU = data.Pet.CurrentDoseIU,
 			WeightUnit = data.Pet.WeightUnit,
 			CurrentWeight = data.Pet.CurrentWeight,
-			ShareCode = shareCode,
 			LastModified = data.Pet.LastModified,
 			IsSynced = true
 		};
@@ -157,12 +156,12 @@ public class SyncService : ISyncService
 		response.EnsureSuccessStatusCode();
 	}
 
-	public async Task SyncAsync(string shareCode)
+	public async Task SyncAsync(string petId)
 	{
-		var pet = await _db.GetPetByShareCodeAsync(shareCode);
+		var pet = await _db.GetPetAsync(petId);
 		if (pet is null) return;
 
-		var lastSync = Preferences.Get($"lastSync_{shareCode}", DateTimeOffset.MinValue);
+		var lastSync = Preferences.Get($"lastSync_{petId}", DateTimeOffset.MinValue);
 
 		// Gather unsynced local data scoped to this pet
 		var unsyncedPets = await _db.GetUnsyncedAsync<Pet>(pet.Id);
@@ -174,17 +173,18 @@ public class SyncService : ISyncService
 
 		var request = new SyncRequest
 		{
-			ShareCode = shareCode,
+			PetId = petId,
 			DeviceUserId = Constants.DeviceUserId,
 			LastSyncTimestamp = lastSync,
 			Pets = unsyncedPets.Select(p => new PetDto
 			{
-				Id = p.Id, OwnerId = p.OwnerId, AccessLevel = p.AccessLevel,
+				Id = p.Id, OwnerId = p.OwnerId, OwnerName = p.OwnerName,
+				AccessLevel = p.AccessLevel,
 				Name = p.Name, Species = p.Species, Breed = p.Breed,
 				DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 				InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 				WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
-				ShareCode = p.ShareCode, LastModified = p.LastModified,
+				LastModified = p.LastModified,
 				IsDeleted = p.IsDeleted
 			}).ToList(),
 			InsulinLogs = unsyncedInsulin.Select(l => new InsulinLogDto
@@ -244,12 +244,13 @@ public class SyncService : ISyncService
 			{
 				await _db.SaveSyncedAsync(new Pet
 				{
-					Id = p.Id, OwnerId = p.OwnerId, AccessLevel = p.AccessLevel,
+					Id = p.Id, OwnerId = p.OwnerId, OwnerName = p.OwnerName,
+					AccessLevel = p.AccessLevel,
 					Name = p.Name, Species = p.Species, Breed = p.Breed,
 					DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
-					ShareCode = p.ShareCode, LastModified = p.LastModified, IsSynced = true,
+					LastModified = p.LastModified, IsSynced = true,
 					IsDeleted = p.IsDeleted
 				});
 			}
@@ -345,7 +346,7 @@ public class SyncService : ISyncService
 		foreach (var v in unsyncedVetInfo) await _db.MarkSyncedAsync<VetInfo>(v.Id);
 		foreach (var s in unsyncedSchedules) await _db.MarkSyncedAsync<Schedule>(s.Id);
 
-		Preferences.Set($"lastSync_{shareCode}", syncResponse.SyncTimestamp);
+		Preferences.Set($"lastSync_{petId}", syncResponse.SyncTimestamp);
 	}
 
 	public async Task DeleteShareCodeAsync(string shareCode)
@@ -357,21 +358,17 @@ public class SyncService : ISyncService
 	public async Task SyncAllAsync()
 	{
 		var pets = await _db.GetPetsAsync();
-		var syncTasks = pets
-			.SelectMany(p => new[] { p.ShareCode, p.FullAccessCode, p.GuestAccessCode })
-			.Where(code => !string.IsNullOrEmpty(code))
-			.Distinct()
-			.Select(async code =>
+		var syncTasks = pets.Select(async p =>
+		{
+			try
 			{
-				try
-				{
-					await SyncAsync(code!);
-				}
-				catch
-				{
-					// Silently fail for offline scenarios
-				}
-			});
+				await SyncAsync(p.Id);
+			}
+			catch
+			{
+				// Silently fail for offline scenarios
+			}
+		});
 		await Task.WhenAll(syncTasks);
 	}
 }

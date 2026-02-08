@@ -35,9 +35,13 @@ public class ShareFunctions
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
-		var existingCodes = await _storage.GetShareCodesByPetIdAsync(request.PetId);
-		var ownerCode = existingCodes.FirstOrDefault(c => !string.IsNullOrEmpty(c.OwnerId));
-		if (ownerCode is not null && ownerCode.OwnerId != request.OwnerId)
+		var pet = await _storage.GetPetAsync(request.PetId);
+		if (pet is null)
+		{
+			return req.CreateResponse(HttpStatusCode.NotFound);
+		}
+
+		if (pet.OwnerId != request.OwnerId)
 		{
 			_logger.LogWarning("Non-owner {RequesterId} attempted to generate share code for pet {PetId}", request.OwnerId, request.PetId);
 			return req.CreateResponse(HttpStatusCode.Forbidden);
@@ -84,19 +88,19 @@ public class ShareFunctions
 			await _storage.CreateRedemptionAsync(code, request.DeviceUserId, request.DisplayName, accessLevel);
 		}
 
-		// Get all data for this share code
-		var pets = await _storage.GetPetsByShareCodeAsync(code);
-		var pet = pets.FirstOrDefault(p => !p.IsDeleted);
-		if (pet is null)
+		// Get pet data by petId (partitioned by petId)
+		var petId = shareCode.PetId;
+		var pet = await _storage.GetPetAsync(petId);
+		if (pet is null || pet.IsDeleted)
 		{
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
 
-		var insulinLogs = await _storage.GetEntitiesByPartitionAsync<Models.InsulinLogEntity>("InsulinLogs", code);
-		var feedingLogs = await _storage.GetEntitiesByPartitionAsync<Models.FeedingLogEntity>("FeedingLogs", code);
-		var weightLogs = await _storage.GetEntitiesByPartitionAsync<Models.WeightLogEntity>("WeightLogs", code);
-		var vetInfos = await _storage.GetEntitiesByPartitionAsync<Models.VetInfoEntity>("VetInfos", code);
-		var schedules = await _storage.GetEntitiesByPartitionAsync<Models.ScheduleEntity>("Schedules", code);
+		var insulinLogs = await _storage.GetEntitiesByPartitionAsync<Models.InsulinLogEntity>("InsulinLogs", petId);
+		var feedingLogs = await _storage.GetEntitiesByPartitionAsync<Models.FeedingLogEntity>("FeedingLogs", petId);
+		var weightLogs = await _storage.GetEntitiesByPartitionAsync<Models.WeightLogEntity>("WeightLogs", petId);
+		var vetInfos = await _storage.GetEntitiesByPartitionAsync<Models.VetInfoEntity>("VetInfos", petId);
+		var schedules = await _storage.GetEntitiesByPartitionAsync<Models.ScheduleEntity>("Schedules", petId);
 
 		var result = new RedeemShareCodeResponse
 		{
@@ -104,6 +108,7 @@ public class ShareFunctions
 			{
 				Id = pet.RowKey,
 				OwnerId = pet.OwnerId,
+				OwnerName = pet.OwnerName,
 				AccessLevel = accessLevel,
 				Name = pet.Name,
 				Species = pet.Species,
@@ -114,7 +119,6 @@ public class ShareFunctions
 				CurrentDoseIU = pet.CurrentDoseIU,
 				WeightUnit = pet.WeightUnit,
 				CurrentWeight = pet.CurrentWeight,
-				ShareCode = code,
 				LastModified = pet.LastModified
 			},
 			InsulinLogs = accessLevel == "guest" ? [] : insulinLogs.Where(l => !l.IsDeleted).Select(l => new InsulinLogDto

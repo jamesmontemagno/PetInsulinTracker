@@ -2,7 +2,7 @@ namespace PetInsulinTracker.Shared.DTOs;
 
 public class SyncRequest
 {
-	public string ShareCode { get; set; } = string.Empty;
+	public string PetId { get; set; } = string.Empty;
 	public string DeviceUserId { get; set; } = string.Empty;
 	public DateTimeOffset LastSyncTimestamp { get; set; }
 	public List<PetDto> Pets { get; set; } = [];
@@ -78,6 +78,7 @@ public class CreatePetRequest
 {
 	public string Id { get; set; } = string.Empty;
 	public string DeviceUserId { get; set; } = string.Empty;
+	public string OwnerName { get; set; } = string.Empty;
 	public string Name { get; set; } = string.Empty;
 	public string Species { get; set; } = string.Empty;
 	public string Breed { get; set; } = string.Empty;
@@ -92,5 +93,4 @@ public class CreatePetRequest
 public class CreatePetResponse
 {
 	public PetDto Pet { get; set; } = new();
-	public string ShareCode { get; set; } = string.Empty;
 }

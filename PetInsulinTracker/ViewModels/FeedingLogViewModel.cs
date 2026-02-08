@@ -113,9 +113,7 @@ public partial class FeedingLogViewModel : ObservableObject
 
 		if (!string.IsNullOrEmpty(PetId))
 		{
-			var pet = await _db.GetPetAsync(PetId);
-			if (!string.IsNullOrEmpty(pet?.ShareCode))
-				_ = _syncService.SyncAsync(pet.ShareCode);
+			_ = _syncService.SyncAsync(PetId);
 		}
 
 		// Reset form to pet defaults

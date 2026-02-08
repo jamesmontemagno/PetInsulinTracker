@@ -118,7 +118,10 @@ public partial class AddEditPetViewModel : ObservableObject
 		var pet = _existingPet ?? new Pet();
 		var isNew = _existingPet is null;
 		if (isNew)
-			pet.OwnerId = Constants.OwnerName;
+		{
+			pet.OwnerId = Constants.DeviceUserId;
+			pet.OwnerName = Constants.OwnerName;
+		}
 		pet.Name = Name;
 		pet.Species = Species;
 		pet.Breed = Breed;
@@ -136,14 +139,13 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		await _db.SavePetAsync(pet);
 
-		// Create the pet in the backend and get a share code
+		// Create the pet in the backend
 		if (isNew)
 		{
 			try
 			{
-				var code = await _syncService.CreatePetAsync(pet);
-				pet.FullAccessCode = code;
-				pet.ShareCode = code;
+				await _syncService.CreatePetAsync(pet);
+				pet.IsSynced = true;
 				await _db.SavePetAsync(pet);
 			}
 			catch
@@ -151,9 +153,9 @@ public partial class AddEditPetViewModel : ObservableObject
 				// Will retry on next sync
 			}
 		}
-		else if (!string.IsNullOrEmpty(pet.ShareCode))
+		else
 		{
-			_ = _syncService.SyncAsync(pet.ShareCode);
+			_ = _syncService.SyncAsync(pet.Id);
 		}
 
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));

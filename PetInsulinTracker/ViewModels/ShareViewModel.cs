@@ -126,7 +126,7 @@ public partial class ShareViewModel : ObservableObject
 			// Sync pet data to the server so the code is redeemable
 			try
 			{
-				await _syncService.SyncAsync(code);
+				await _syncService.SyncAsync(Pet.Id);
 			}
 			catch
 			{

@@ -21,38 +21,28 @@ public class TableStorageService
 		return client;
 	}
 
-	// Pets
-	public async Task UpsertPetAsync(string shareCode, PetEntity entity)
+	// Pets — partitioned by petId
+	public async Task UpsertPetAsync(PetEntity entity)
 	{
 		var client = await GetTableClientAsync("Pets");
-		entity.PartitionKey = shareCode;
-		entity.RowKey = entity.RowKey.Length > 0 ? entity.RowKey : Guid.NewGuid().ToString();
+		var petId = entity.RowKey.Length > 0 ? entity.RowKey : Guid.NewGuid().ToString();
+		entity.PartitionKey = petId;
+		entity.RowKey = petId;
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}
 
-	public async Task<PetEntity?> GetPetAsync(string shareCode, string petId)
+	public async Task<PetEntity?> GetPetAsync(string petId)
 	{
 		var client = await GetTableClientAsync("Pets");
 		try
 		{
-			var response = await client.GetEntityAsync<PetEntity>(shareCode, petId);
+			var response = await client.GetEntityAsync<PetEntity>(petId, petId);
 			return response.Value;
 		}
 		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
 		{
 			return null;
 		}
-	}
-
-	public async Task<List<PetEntity>> GetPetsByShareCodeAsync(string shareCode)
-	{
-		var client = await GetTableClientAsync("Pets");
-		var results = new List<PetEntity>();
-		await foreach (var entity in client.QueryAsync<PetEntity>(e => e.PartitionKey == shareCode))
-		{
-			results.Add(entity);
-		}
-		return results;
 	}
 
 	// Generic log operations
@@ -85,12 +75,12 @@ public class TableStorageService
 		return results;
 	}
 
-	public async Task<List<PetEntity>> GetPetsModifiedSinceAsync(string shareCode, DateTimeOffset since)
+	public async Task<List<PetEntity>> GetPetsModifiedSinceAsync(string petId, DateTimeOffset since)
 	{
 		var client = await GetTableClientAsync("Pets");
 		var results = new List<PetEntity>();
 		await foreach (var entity in client.QueryAsync<PetEntity>(
-			e => e.PartitionKey == shareCode && e.Timestamp >= since))
+			e => e.PartitionKey == petId && e.Timestamp >= since))
 		{
 			results.Add(entity);
 		}

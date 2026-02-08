@@ -7,8 +7,11 @@ public class Pet
 	[PrimaryKey]
 	public string Id { get; set; } = Guid.NewGuid().ToString();
 
-	/// <summary>Name of the person who owns/created this pet</summary>
+	/// <summary>DeviceUserId (GUID) of the person who owns/created this pet</summary>
 	public string? OwnerId { get; set; }
+
+	/// <summary>Display name of the owner</summary>
+	public string? OwnerName { get; set; }
 
 	/// <summary>Access level: owner, full, or guest</summary>
 	public string AccessLevel { get; set; } = "owner";

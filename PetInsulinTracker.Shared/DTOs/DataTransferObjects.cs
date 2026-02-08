@@ -4,6 +4,7 @@ public class PetDto
 {
 	public string Id { get; set; } = string.Empty;
 	public string? OwnerId { get; set; }
+	public string? OwnerName { get; set; }
 	public string Name { get; set; } = string.Empty;
 	public string Species { get; set; } = string.Empty;
 	public string Breed { get; set; } = string.Empty;

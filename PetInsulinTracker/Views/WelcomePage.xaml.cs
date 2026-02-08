@@ -263,7 +263,7 @@ public partial class WelcomePage : ContentPage
 	{
 		Preferences.Set("setup_complete", true);
 
-		// Auto-generate share code and sync new pet to backend
+		// Create pet in backend and sync
 		if (_savedPetId is not null)
 		{
 			_ = Task.Run(async () =>
@@ -273,13 +273,11 @@ public partial class WelcomePage : ContentPage
 					var db = GetDatabaseService();
 					var syncService = IPlatformApplication.Current!.Services.GetRequiredService<ISyncService>();
 					var pet = await db.GetPetAsync(_savedPetId);
-					if (pet is not null && string.IsNullOrEmpty(pet.ShareCode))
+					if (pet is not null && !pet.IsSynced)
 					{
-						var code = await syncService.GenerateShareCodeAsync(pet.Id, "full");
-						pet.FullAccessCode = code;
-						pet.ShareCode = code;
+						await syncService.CreatePetAsync(pet);
+						pet.IsSynced = true;
 						await db.SavePetAsync(pet);
-						await syncService.SyncAsync(code);
 					}
 				}
 				catch

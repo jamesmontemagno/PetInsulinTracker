@@ -11,6 +11,7 @@ public class PetEntity : ITableEntity
 	public ETag ETag { get; set; }
 
 	public string? OwnerId { get; set; }
+	public string? OwnerName { get; set; }
 	public string AccessLevel { get; set; } = "owner";
 	public string Name { get; set; } = string.Empty;
 	public string Species { get; set; } = string.Empty;

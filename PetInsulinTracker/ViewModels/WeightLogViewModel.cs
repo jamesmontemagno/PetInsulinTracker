@@ -129,8 +129,8 @@ public partial class WeightLogViewModel : ObservableObject
 			pet.CurrentWeight = Weight;
 			await _db.SavePetAsync(pet);
 
-			if (!string.IsNullOrEmpty(pet.ShareCode))
-				_ = _syncService.SyncAsync(pet.ShareCode);
+			if (!string.IsNullOrEmpty(pet.Id))
+				_ = _syncService.SyncAsync(pet.Id);
 		}
 
 		// Reset form
