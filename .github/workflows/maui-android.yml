@@ -1,0 +1,135 @@
+name: Build & (Optionally) Package Android (MAUI)
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'PetInsulinTracker/**'
+      - 'PetInsulinTracker.Shared/**'
+      - '.github/workflows/maui-android.yml'
+  workflow_dispatch:
+    inputs:
+      build_release:
+        description: 'Build and sign release version (requires secrets & signing)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false','true']
+      base_version:
+        description: 'Base ApplicationDisplayVersion (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maui-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Android Build
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_VERSION: net10.0
+      PROJECT_PATH: PetInsulinTracker/PetInsulinTracker.csproj
+      CONFIGURATION: Release
+      RUNTIME_ID: android-arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: '21'
+
+      - name: Restore Workloads
+        run: dotnet workload restore ${{ env.PROJECT_PATH }}
+
+      - name: NuGet Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Set API Base URL
+        if: ${{ secrets.API_BASE_URL != '' }}
+        run: |
+          FILE=PetInsulinTracker/Helpers/Constants.cs
+          sed -i '' -E "s#public const string ApiBaseUrl = \"[^\"]+\"#public const string ApiBaseUrl = \"${{ secrets.API_BASE_URL }}\"#" "$FILE"
+          echo 'API URL patched:'
+          grep 'ApiBaseUrl' "$FILE"
+
+      - name: Compute Version Numbers
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        id: ver
+        run: |
+          BASE=${{ inputs.base_version }}
+          RUN=${{ github.run_number }}
+          DISPLAY_VERSION="$BASE"
+          APP_VERSION=$((100 + RUN))
+          echo "display_version=$DISPLAY_VERSION" >> $GITHUB_OUTPUT
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "Computed DISPLAY_VERSION=$DISPLAY_VERSION APP_VERSION=$APP_VERSION"
+
+      - name: Patch csproj with Version
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        run: |
+          FILE=${{ env.PROJECT_PATH }}
+          echo "Patching $FILE with Display=${{ steps.ver.outputs.display_version }} Version=${{ steps.ver.outputs.app_version }}"
+          sed -i '' -E "s#<ApplicationDisplayVersion>[^<]+</ApplicationDisplayVersion>#<ApplicationDisplayVersion>${{ steps.ver.outputs.display_version }}</ApplicationDisplayVersion>#" "$FILE"
+          sed -i '' -E "s#<ApplicationVersion>[^<]+</ApplicationVersion>#<ApplicationVersion>${{ steps.ver.outputs.app_version }}</ApplicationVersion>#" "$FILE"
+          echo 'Resulting version lines:'
+          grep -E 'ApplicationDisplayVersion|ApplicationVersion' "$FILE"
+
+      - name: Decode Keystore
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > ${{ runner.temp }}/petinsulintracker.keystore
+          echo "KEYSTORE_PATH=${{ runner.temp }}/petinsulintracker.keystore" >> $GITHUB_ENV
+
+      - name: Build Android
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: >-
+          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-android
+
+      - name: Publish Android
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: >-
+          dotnet publish ${{ env.PROJECT_PATH }} -c ${{ env.CONFIGURATION }} -f ${{ env.DOTNET_VERSION }}-android
+          -p:RuntimeIdentifier=${{ env.RUNTIME_ID }}
+          -p:AndroidPackageFormat=aab
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore=${{ env.KEYSTORE_PATH }}
+          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          -p:AndroidSigningKeyPass=env:KEYSTORE_PASSWORD
+          -p:AndroidSigningStorePass=env:KEYSTORE_PASSWORD
+
+      - name: Locate AAB
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        id: findaab
+        run: |
+          AAB_PATH=$(find PetInsulinTracker/bin/${{ env.CONFIGURATION }}/${{ env.DOTNET_VERSION }}-android/${{ env.RUNTIME_ID }}/publish -maxdepth 1 -name '*-Signed.aab' | head -n1)
+          if [ -z "$AAB_PATH" ]; then
+            echo 'Signed AAB not found' >&2
+            exit 1
+          fi
+          echo "aab=$AAB_PATH" >> $GITHUB_OUTPUT
+          echo "Found signed AAB at: $AAB_PATH"
+
+      - name: Upload Android Artifact
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: ${{ steps.findaab.outputs.aab }}

@@ -1,0 +1,154 @@
+name: Build & (Optionally) Deploy iOS (MAUI)
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'PetInsulinTracker/**'
+      - 'PetInsulinTracker.Shared/**'
+      - '.github/workflows/maui-ios.yml'
+  workflow_dispatch:
+    inputs:
+      upload_testflight:
+        description: 'Upload build to TestFlight (requires secrets & signing)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false','true']
+      base_version:
+        description: 'Base ApplicationDisplayVersion (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maui-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: iOS Build
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_VERSION: net10.0
+      PROJECT_PATH: PetInsulinTracker/PetInsulinTracker.csproj
+      BUNDLE_ID: com.companyname.petinsulintracker
+      CONFIGURATION: Release
+      RUNTIME_ID: ios-arm64
+      CODESIGN_KEY: ${{ secrets.APPSTORE_CODESIGN_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.2'
+
+      - name: Import Signing Certificate
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: apple-actions/import-codesign-certs@v4
+        with:
+          create-keychain: true
+          keychain-password: ${{ secrets.APPSTORE_CERTIFICATE_P12_PASSWORD }}
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATE_P12 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATE_P12_PASSWORD }}
+
+      - name: Download Provisioning Profiles
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ env.BUNDLE_ID }}
+          profile-type: 'IOS_APP_STORE'
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Workloads
+        run: dotnet workload restore ${{ env.PROJECT_PATH }}
+
+      - name: Install Workloads
+        run: dotnet workload install maui-ios
+
+      - name: NuGet Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Set API Base URL
+        if: ${{ secrets.API_BASE_URL != '' }}
+        run: |
+          FILE=PetInsulinTracker/Helpers/Constants.cs
+          sed -i '' -E "s#public const string ApiBaseUrl = \"[^\"]+\"#public const string ApiBaseUrl = \"${{ secrets.API_BASE_URL }}\"#" "$FILE"
+          echo 'API URL patched:'
+          grep 'ApiBaseUrl' "$FILE"
+
+      - name: Compute Version Numbers
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: ver
+        run: |
+          BASE=${{ inputs.base_version }}
+          RUN=${{ github.run_number }}
+          DISPLAY_VERSION="$BASE"
+          APP_VERSION=$((100 + RUN))
+          echo "display_version=$DISPLAY_VERSION" >> $GITHUB_OUTPUT
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "Computed DISPLAY_VERSION=$DISPLAY_VERSION APP_VERSION=$APP_VERSION"
+
+      - name: Patch csproj with Version
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          FILE=${{ env.PROJECT_PATH }}
+          echo "Patching $FILE with Display=${{ steps.ver.outputs.display_version }} Version=${{ steps.ver.outputs.app_version }}"
+          sed -i '' -E "s#<ApplicationDisplayVersion>[^<]+</ApplicationDisplayVersion>#<ApplicationDisplayVersion>${{ steps.ver.outputs.display_version }}</ApplicationDisplayVersion>#" "$FILE"
+          sed -i '' -E "s#<ApplicationVersion>[^<]+</ApplicationVersion>#<ApplicationVersion>${{ steps.ver.outputs.app_version }}</ApplicationVersion>#" "$FILE"
+          echo 'Resulting version lines:'
+          grep -E 'ApplicationDisplayVersion|ApplicationVersion' "$FILE"
+
+      - name: Build iOS
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: >-
+          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-ios
+
+      - name: Publish iOS
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: >-
+          dotnet publish ${{ env.PROJECT_PATH }} -c ${{ env.CONFIGURATION }} -f ${{ env.DOTNET_VERSION }}-ios
+          -p:ArchiveOnBuild=true -p:RuntimeIdentifier=${{ env.RUNTIME_ID }}
+          ${{ env.CODESIGN_KEY != '' && format('"/p:CodesignKey={0}"', env.CODESIGN_KEY) || '' }}
+
+      - name: Locate IPA
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: findipa
+        run: |
+          IPA_PATH=$(find PetInsulinTracker/bin/${{ env.CONFIGURATION }}/${{ env.DOTNET_VERSION }}-ios/${{ env.RUNTIME_ID }}/publish -maxdepth 1 -name '*.ipa' | head -n1)
+          if [ -z "$IPA_PATH" ]; then
+            echo 'IPA not found' >&2
+            exit 1
+          fi
+          echo "ipa=$IPA_PATH" >> $GITHUB_OUTPUT
+
+      - name: Upload to TestFlight
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_testflight == 'true' }}
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-type: ios
+          app-path: ${{ steps.findipa.outputs.ipa }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+
+      - name: Upload IPA Artifact
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: ${{ steps.findipa.outputs.ipa }}
