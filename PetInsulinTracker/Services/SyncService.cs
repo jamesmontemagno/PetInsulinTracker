@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
+using PetInsulinTracker.Shared;
 using PetInsulinTracker.Shared.DTOs;
 
 namespace PetInsulinTracker.Services;
@@ -40,7 +41,7 @@ public class SyncService : ISyncService
 			DefaultFoodType = pet.DefaultFoodType
 		};
 
-		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request);
+		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request, AppJsonSerializerContext.Default.CreatePetRequest);
 		response.EnsureSuccessStatusCode();
 	}
 
@@ -51,10 +52,11 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
-			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel, OwnerId = Constants.DeviceUserId });
+			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel, OwnerId = Constants.DeviceUserId },
+			AppJsonSerializerContext.Default.ShareCodeRequest);
 
 		response.EnsureSuccessStatusCode();
-		var result = await response.Content.ReadFromJsonAsync<ShareCodeResponse>();
+		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.ShareCodeResponse);
 		return result?.ShareCode ?? throw new InvalidOperationException("No share code received");
 	}
 
@@ -70,10 +72,10 @@ public class SyncService : ISyncService
 			DisplayName = Constants.OwnerName
 		};
 
-		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/share/redeem", request);
+		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/share/redeem", request, AppJsonSerializerContext.Default.RedeemShareCodeRequest);
 		response.EnsureSuccessStatusCode();
 
-		var data = await response.Content.ReadFromJsonAsync<RedeemShareCodeResponse>();
+		var data = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.RedeemShareCodeResponse);
 		if (data is null) throw new InvalidOperationException("No data received");
 
 		// Import pet
@@ -162,7 +164,7 @@ public class SyncService : ISyncService
 
 		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/users");
 		response.EnsureSuccessStatusCode();
-		var result = await response.Content.ReadFromJsonAsync<SharedUsersResponse>();
+		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.SharedUsersResponse);
 		return result?.Users ?? [];
 	}
 
@@ -172,7 +174,8 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/revoke",
-			new RevokeAccessRequest { PetId = petId, DeviceUserId = deviceUserId });
+			new RevokeAccessRequest { PetId = petId, DeviceUserId = deviceUserId },
+			AppJsonSerializerContext.Default.RevokeAccessRequest);
 		response.EnsureSuccessStatusCode();
 	}
 
@@ -183,7 +186,8 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/leave",
-			new LeavePetRequest { PetId = petId, DeviceUserId = Constants.DeviceUserId });
+			new LeavePetRequest { PetId = petId, DeviceUserId = Constants.DeviceUserId },
+			AppJsonSerializerContext.Default.LeavePetRequest);
 
 		response.EnsureSuccessStatusCode();
 	}
@@ -195,7 +199,8 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/pets/delete",
-			new DeletePetRequest { PetId = petId, OwnerId = Constants.DeviceUserId });
+			new DeletePetRequest { PetId = petId, OwnerId = Constants.DeviceUserId },
+			AppJsonSerializerContext.Default.DeletePetRequest);
 
 		response.EnsureSuccessStatusCode();
 	}
@@ -301,14 +306,14 @@ public class SyncService : ISyncService
 			}).ToList()
 		};
 
-		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/sync", request);
+		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/sync", request, AppJsonSerializerContext.Default.SyncRequest);
 
 		if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
 			throw new UnauthorizedAccessException("Access to this pet has been revoked.");
 
 		response.EnsureSuccessStatusCode();
 
-		var syncResponse = await response.Content.ReadFromJsonAsync<SyncResponse>();
+		var syncResponse = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.SyncResponse);
 		if (syncResponse is null) return;
 
 		// Apply server changes locally (last-write-wins by LastModified)
