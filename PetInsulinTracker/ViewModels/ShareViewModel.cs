@@ -1,7 +1,9 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
+using PetInsulinTracker.Shared.DTOs;
 
 namespace PetInsulinTracker.ViewModels;
 
@@ -36,10 +38,17 @@ public partial class ShareViewModel : ObservableObject
 	private bool isRedeeming;
 
 	[ObservableProperty]
+	private bool isLoadingUsers;
+
+	[ObservableProperty]
 	private string statusMessage = string.Empty;
 
 	[ObservableProperty]
 	private string shareCodeLabel = "Share Code";
+
+	public ObservableCollection<SharedUserDto> SharedUsers { get; } = [];
+
+	public bool IsOwner => Pet?.AccessLevel == "owner";
 
 	partial void OnPetIdChanged(string? value)
 	{
@@ -51,6 +60,10 @@ public partial class ShareViewModel : ObservableObject
 	{
 		Pet = await _db.GetPetAsync(id);
 		ShareCode = Pet?.ShareCode;
+		OnPropertyChanged(nameof(IsOwner));
+
+		if (IsOwner && !string.IsNullOrEmpty(ShareCode))
+			await LoadSharedUsersAsync();
 	}
 
 	[RelayCommand]
@@ -124,5 +137,52 @@ public partial class ShareViewModel : ObservableObject
 		if (string.IsNullOrEmpty(ShareCode)) return;
 		await Clipboard.Default.SetTextAsync(ShareCode);
 		StatusMessage = "Share code copied to clipboard!";
+	}
+
+	[RelayCommand]
+	private async Task LoadSharedUsersAsync()
+	{
+		if (string.IsNullOrEmpty(ShareCode)) return;
+
+		try
+		{
+			IsLoadingUsers = true;
+			var users = await _syncService.GetSharedUsersAsync(ShareCode);
+			SharedUsers.Clear();
+			foreach (var user in users)
+				SharedUsers.Add(user);
+		}
+		catch (Exception ex)
+		{
+			StatusMessage = $"Error loading shared users: {ex.Message}";
+		}
+		finally
+		{
+			IsLoadingUsers = false;
+		}
+	}
+
+	[RelayCommand]
+	private async Task RevokeAccessAsync(SharedUserDto user)
+	{
+		if (string.IsNullOrEmpty(ShareCode) || user is null) return;
+
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Revoke Access",
+			$"Are you sure you want to revoke access for {user.DisplayName}? They will no longer be able to sync this pet's data.",
+			"Revoke", "Cancel");
+
+		if (!confirm) return;
+
+		try
+		{
+			await _syncService.RevokeAccessAsync(ShareCode, user.DeviceUserId);
+			StatusMessage = $"Access revoked for {user.DisplayName}.";
+			await LoadSharedUsersAsync();
+		}
+		catch (Exception ex)
+		{
+			StatusMessage = $"Error: {ex.Message}";
+		}
 	}
 }

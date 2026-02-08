@@ -29,7 +29,14 @@ public class SyncService : ISyncService
 
 	public async Task RedeemShareCodeAsync(string shareCode)
 	{
-		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/redeem/{shareCode}");
+		var request = new RedeemShareCodeRequest
+		{
+			ShareCode = shareCode,
+			DeviceUserId = Constants.DeviceUserId,
+			DisplayName = Constants.OwnerName
+		};
+
+		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/share/redeem", request);
 		response.EnsureSuccessStatusCode();
 
 		var data = await response.Content.ReadFromJsonAsync<RedeemShareCodeResponse>();
@@ -111,6 +118,22 @@ public class SyncService : ISyncService
 		}
 	}
 
+	public async Task<List<SharedUserDto>> GetSharedUsersAsync(string shareCode)
+	{
+		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/{shareCode}/users");
+		response.EnsureSuccessStatusCode();
+		var result = await response.Content.ReadFromJsonAsync<SharedUsersResponse>();
+		return result?.Users ?? [];
+	}
+
+	public async Task RevokeAccessAsync(string shareCode, string deviceUserId)
+	{
+		var response = await _http.PostAsJsonAsync(
+			$"{Constants.ApiBaseUrl}/share/revoke",
+			new RevokeAccessRequest { ShareCode = shareCode, DeviceUserId = deviceUserId });
+		response.EnsureSuccessStatusCode();
+	}
+
 	public async Task SyncAsync(string shareCode)
 	{
 		var lastSync = Preferences.Get($"lastSync_{shareCode}", DateTimeOffset.MinValue);
@@ -126,6 +149,7 @@ public class SyncService : ISyncService
 		var request = new SyncRequest
 		{
 			ShareCode = shareCode,
+			DeviceUserId = Constants.DeviceUserId,
 			LastSyncTimestamp = lastSync,
 			Pets = unsyncedPets.Select(p => new PetDto
 			{
@@ -171,6 +195,10 @@ public class SyncService : ISyncService
 		};
 
 		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/sync", request);
+
+		if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+			throw new UnauthorizedAccessException("Access to this pet has been revoked.");
+
 		response.EnsureSuccessStatusCode();
 
 		var syncResponse = await response.Content.ReadFromJsonAsync<SyncResponse>();

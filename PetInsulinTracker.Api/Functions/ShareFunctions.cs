@@ -47,9 +47,15 @@ public class ShareFunctions
 
 	[Function("RedeemShareCode")]
 	public async Task<HttpResponseData> RedeemShareCode(
-		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/redeem/{code}")] HttpRequestData req,
-		string code)
+		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "share/redeem")] HttpRequestData req)
 	{
+		var request = await req.ReadFromJsonAsync<RedeemShareCodeRequest>();
+		if (request is null || string.IsNullOrEmpty(request.ShareCode))
+		{
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		var code = request.ShareCode;
 		var shareCode = await _storage.GetShareCodeAsync(code);
 		if (shareCode is null)
 		{
@@ -57,6 +63,12 @@ public class ShareFunctions
 		}
 
 		var accessLevel = shareCode.AccessLevel ?? "full";
+
+		// Record who redeemed
+		if (!string.IsNullOrEmpty(request.DeviceUserId))
+		{
+			await _storage.CreateRedemptionAsync(code, request.DeviceUserId, request.DisplayName, accessLevel);
+		}
 
 		// Get all data for this share code
 		var pets = await _storage.GetPetsByShareCodeAsync(code);
@@ -137,5 +149,54 @@ public class ShareFunctions
 		return new string(Enumerable.Range(0, length)
 			.Select(_ => ShareCodeChars[random.Next(ShareCodeChars.Length)])
 			.ToArray());
+	}
+
+	[Function("GetSharedUsers")]
+	public async Task<HttpResponseData> GetSharedUsers(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/{code}/users")] HttpRequestData req,
+		string code)
+	{
+		var shareCode = await _storage.GetShareCodeAsync(code);
+		if (shareCode is null)
+		{
+			return req.CreateResponse(HttpStatusCode.NotFound);
+		}
+
+		var redemptions = await _storage.GetRedemptionsAsync(code);
+		var result = new SharedUsersResponse
+		{
+			Users = redemptions.Select(r => new SharedUserDto
+			{
+				DeviceUserId = r.RowKey,
+				DisplayName = r.DisplayName,
+				AccessLevel = r.AccessLevel,
+				RedeemedAt = r.RedeemedAt,
+				IsRevoked = r.IsRevoked
+			}).ToList()
+		};
+
+		var response = req.CreateResponse(HttpStatusCode.OK);
+		await response.WriteAsJsonAsync(result);
+		return response;
+	}
+
+	[Function("RevokeAccess")]
+	public async Task<HttpResponseData> RevokeAccess(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "share/revoke")] HttpRequestData req)
+	{
+		var request = await req.ReadFromJsonAsync<RevokeAccessRequest>();
+		if (request is null || string.IsNullOrEmpty(request.ShareCode) || string.IsNullOrEmpty(request.DeviceUserId))
+		{
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		var revoked = await _storage.RevokeRedemptionAsync(request.ShareCode, request.DeviceUserId);
+		if (!revoked)
+		{
+			return req.CreateResponse(HttpStatusCode.NotFound);
+		}
+
+		_logger.LogInformation("Revoked access for {DeviceUserId} on share code {Code}", request.DeviceUserId, request.ShareCode);
+		return req.CreateResponse(HttpStatusCode.OK);
 	}
 }

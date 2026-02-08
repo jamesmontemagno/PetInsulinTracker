@@ -19,6 +19,8 @@
                          Color="{DynamicResource CurrentDivider}" />
                 <BoxView x:Name="Dot4" WidthRequest="8" HeightRequest="8" CornerRadius="4"
                          Color="{DynamicResource CurrentDivider}" />
+                <BoxView x:Name="Dot5" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                         Color="{DynamicResource CurrentDivider}" />
             </HorizontalStackLayout>
 
             <!-- ===== STEP 1: Theme + Name ===== -->
@@ -109,8 +111,59 @@
                         Clicked="OnStep1Next" />
             </VerticalStackLayout>
 
-            <!-- ===== STEP 2: Add First Pet (Optional) ===== -->
-            <VerticalStackLayout x:Name="Step2" Spacing="16" IsVisible="False">
+            <!-- ===== STEP 2: Owner or Pet Sitter ===== -->
+            <VerticalStackLayout x:Name="Step2" Spacing="20" IsVisible="False">
+
+                <mi:MauiIcon Icon="{mi:Fluent People24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+
+                <Label Text="How will you use PawCare?"
+                       FontSize="24" FontFamily="OpenSansSemibold"
+                       TextColor="{DynamicResource PageText}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Label Text="Are you managing your own pet's care, or were you given a share code by someone else?"
+                       FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Button Text="I'm a Pet Owner"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnRoleOwner" />
+
+                <Button Text="I Have a Share Code"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnRoleSitter" />
+
+                <!-- Pet sitter redeem section (hidden until tapped) -->
+                <VerticalStackLayout x:Name="SitterRedeemSection" Spacing="12" IsVisible="False">
+                    <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />
+
+                    <Label Text="Enter the share code you received:"
+                           FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                    <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <Entry x:Name="SitterRedeemCodeEntry" Placeholder="e.g., ABC123"
+                                   CharacterSpacing="4" FontSize="22" FontFamily="OpenSansSemibold"
+                                   HorizontalTextAlignment="Center" MaxLength="6" />
+                            <Button x:Name="SitterRedeemButton" Text="Import Pet"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    HorizontalOptions="Fill"
+                                    Clicked="OnSitterRedeem" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label x:Name="SitterStatusLabel" FontSize="14" FontFamily="OpenSansSemibold"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{DynamicResource CurrentPrimary}"
+                           IsVisible="False" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- ===== STEP 3: Add First Pet (Optional) ===== -->
+            <VerticalStackLayout x:Name="Step3" Spacing="16" IsVisible="False">
 
                 <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
@@ -269,16 +322,16 @@
                     <Button Grid.Column="0" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep2Skip" />
+                            Clicked="OnStep3Skip" />
                     <Button Grid.Column="1" Text="Next"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep2Next" />
+                            Clicked="OnStep3Next" />
                 </Grid>
             </VerticalStackLayout>
 
-            <!-- ===== STEP 3: Schedule Setup (Optional) ===== -->
-            <VerticalStackLayout x:Name="Step3" Spacing="16" IsVisible="False">
+            <!-- ===== STEP 4: Schedule Setup (Optional) ===== -->
+            <VerticalStackLayout x:Name="Step4" Spacing="16" IsVisible="False">
 
                 <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
@@ -383,16 +436,16 @@
                     <Button Grid.Column="0" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep3Skip" />
+                            Clicked="OnStep4Skip" />
                     <Button Grid.Column="1" Text="Next"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep3Next" />
+                            Clicked="OnStep4Next" />
                 </Grid>
             </VerticalStackLayout>
 
-            <!-- ===== STEP 4: Vet Info (Optional) ===== -->
-            <VerticalStackLayout x:Name="Step4" Spacing="16" IsVisible="False">
+            <!-- ===== STEP 5: Vet Info (Optional) ===== -->
+            <VerticalStackLayout x:Name="Step5" Spacing="16" IsVisible="False">
 
                 <mi:MauiIcon Icon="{mi:Fluent Stethoscope24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
@@ -434,11 +487,11 @@
                     <Button Grid.Column="0" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep4Skip" />
+                            Clicked="OnStep5Skip" />
                     <Button Grid.Column="1" Text="Get Started"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
-                            Clicked="OnStep4Done" />
+                            Clicked="OnStep5Done" />
                 </Grid>
             </VerticalStackLayout>
 

@@ -33,6 +33,17 @@ public class SyncFunctions
 		var shareCode = syncRequest.ShareCode;
 		_logger.LogInformation("Sync request for share code {ShareCode}", shareCode);
 
+		// Check if the user has been revoked
+		if (!string.IsNullOrEmpty(syncRequest.DeviceUserId))
+		{
+			var redemption = await _storage.GetRedemptionAsync(shareCode, syncRequest.DeviceUserId);
+			if (redemption?.IsRevoked == true)
+			{
+				_logger.LogWarning("Revoked user {DeviceUserId} attempted sync for {ShareCode}", syncRequest.DeviceUserId, shareCode);
+				return req.CreateResponse(HttpStatusCode.Forbidden);
+			}
+		}
+
 		// Upload client changes
 		foreach (var pet in syncRequest.Pets)
 		{

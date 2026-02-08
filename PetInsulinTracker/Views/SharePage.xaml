@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:dto="clr-namespace:PetInsulinTracker.Shared.DTOs;assembly=PetInsulinTracker.Shared"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.SharePage"
              x:DataType="vm:ShareViewModel"
@@ -74,6 +75,78 @@
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </Border>
+
+            <!-- People with Access (owner only) -->
+            <VerticalStackLayout Spacing="12"
+                                 IsVisible="{Binding IsOwner}">
+                <BoxView Style="{StaticResource DividerStyle}" Margin="0,8" />
+                <Label Text="PEOPLE WITH ACCESS" Style="{StaticResource OverlineStyle}" />
+
+                <ActivityIndicator IsRunning="{Binding IsLoadingUsers}"
+                                   IsVisible="{Binding IsLoadingUsers}"
+                                   HorizontalOptions="Center" />
+
+                <Label Text="No one has redeemed your share code yet."
+                       Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="False">
+                    <Label.Triggers>
+                        <MultiTrigger TargetType="Label">
+                            <MultiTrigger.Conditions>
+                                <BindingCondition Binding="{Binding SharedUsers.Count}" Value="0" />
+                                <BindingCondition Binding="{Binding IsLoadingUsers}" Value="False" />
+                                <BindingCondition Binding="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="IsVisible" Value="True" />
+                        </MultiTrigger>
+                    </Label.Triggers>
+                </Label>
+
+                <CollectionView ItemsSource="{Binding SharedUsers}"
+                                IsVisible="{Binding IsLoadingUsers, Converter={StaticResource InvertedBoolConverter}}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dto:SharedUserDto">
+                            <Border Style="{StaticResource CardStyle}" Margin="0,4">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Padding="4" ColumnSpacing="12">
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding DisplayName}"
+                                           FontSize="16" FontFamily="OpenSansSemibold"
+                                           SemanticProperties.HeadingLevel="Level3" />
+                                    <Label Grid.Row="1" Grid.Column="0"
+                                           FontSize="12">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding AccessLevel}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding RedeemedAt, StringFormat='{0:MMM d, yyyy}'}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                            Text="Revoke"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, Path=RevokeAccessCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource QuickActionButtonStyle}"
+                                            VerticalOptions="Center"
+                                            IsEnabled="{Binding IsRevoked, Converter={StaticResource InvertedBoolConverter}}">
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsRevoked}" Value="True">
+                                                <Setter Property="Text" Value="Revoked" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="Refresh"
+                        Command="{Binding LoadSharedUsersCommand}"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+            </VerticalStackLayout>
 
             <!-- Status -->
             <Label Text="{Binding StatusMessage}" FontSize="14" FontFamily="OpenSansSemibold"

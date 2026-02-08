@@ -48,10 +48,12 @@ public partial class WelcomePage : ContentPage
 		Step2.IsVisible = step == 2;
 		Step3.IsVisible = step == 3;
 		Step4.IsVisible = step == 4;
+		Step5.IsVisible = step == 5;
 		Dot1.Color = step >= 1 ? GetPrimaryColor() : GetDividerColor();
 		Dot2.Color = step >= 2 ? GetPrimaryColor() : GetDividerColor();
 		Dot3.Color = step >= 3 ? GetPrimaryColor() : GetDividerColor();
 		Dot4.Color = step >= 4 ? GetPrimaryColor() : GetDividerColor();
+		Dot5.Color = step >= 5 ? GetPrimaryColor() : GetDividerColor();
 	}
 
 	private static Color GetPrimaryColor() =>
@@ -62,7 +64,7 @@ public partial class WelcomePage : ContentPage
 		Application.Current?.Resources.TryGetValue("CurrentDivider", out var c) == true && c is Color color
 			? color : Color.FromArgb("#E8D0D8");
 
-	// Step 1 → Step 2
+	// Step 1 → Step 2 (role selection)
 	private async void OnStep1Next(object? sender, EventArgs e)
 	{
 		var name = NameEntry.Text?.Trim();
@@ -75,8 +77,50 @@ public partial class WelcomePage : ContentPage
 		GoToStep(2);
 	}
 
-	// Step 2: Save pet and continue to schedules
-	private async void OnStep2Next(object? sender, EventArgs e)
+	// Step 2: Owner → go to pet setup (Step 3)
+	private void OnRoleOwner(object? sender, EventArgs e)
+	{
+		GoToStep(3);
+	}
+
+	// Step 2: Pet sitter → show redeem section
+	private void OnRoleSitter(object? sender, EventArgs e)
+	{
+		SitterRedeemSection.IsVisible = true;
+	}
+
+	// Step 2: Pet sitter redeems share code → finish
+	private async void OnSitterRedeem(object? sender, EventArgs e)
+	{
+		var code = SitterRedeemCodeEntry.Text?.Trim().ToUpperInvariant();
+		if (string.IsNullOrWhiteSpace(code))
+		{
+			await DisplayAlertAsync("Code Required", "Please enter the share code you received.", "OK");
+			return;
+		}
+
+		try
+		{
+			SitterRedeemButton.IsEnabled = false;
+			SitterStatusLabel.Text = "Importing pet data...";
+			SitterStatusLabel.IsVisible = true;
+
+			var syncService = IPlatformApplication.Current!.Services.GetRequiredService<ISyncService>();
+			await syncService.RedeemShareCodeAsync(code);
+
+			SitterStatusLabel.Text = "Pet imported successfully!";
+			await Task.Delay(1000);
+			FinishOnboarding();
+		}
+		catch (Exception ex)
+		{
+			SitterStatusLabel.Text = $"Error: {ex.Message}";
+			SitterRedeemButton.IsEnabled = true;
+		}
+	}
+
+	// Step 3: Save pet and continue to schedules
+	private async void OnStep3Next(object? sender, EventArgs e)
 	{
 		var petName = PetNameEntry.Text?.Trim();
 		if (string.IsNullOrWhiteSpace(petName))
@@ -86,37 +130,37 @@ public partial class WelcomePage : ContentPage
 		}
 
 		await SavePetAsync(petName);
-		GoToStep(3);
+		GoToStep(4);
 	}
 
-	// Step 2 skip → finish (no pet = no schedules/vet needed)
-	private void OnStep2Skip(object? sender, EventArgs e)
+	// Step 3 skip → finish (no pet = no schedules/vet needed)
+	private void OnStep3Skip(object? sender, EventArgs e)
 	{
 		FinishOnboarding();
 	}
 
-	// Step 3: Save schedules → Step 4
-	private async void OnStep3Next(object? sender, EventArgs e)
+	// Step 4: Save schedules → Step 5
+	private async void OnStep4Next(object? sender, EventArgs e)
 	{
 		await SaveSchedulesAsync();
-		GoToStep(4);
+		GoToStep(5);
 	}
 
-	// Step 3 skip → Step 4
-	private void OnStep3Skip(object? sender, EventArgs e)
+	// Step 4 skip → Step 5
+	private void OnStep4Skip(object? sender, EventArgs e)
 	{
-		GoToStep(4);
+		GoToStep(5);
 	}
 
-	// Step 4 done (save vet + finish)
-	private async void OnStep4Done(object? sender, EventArgs e)
+	// Step 5 done (save vet + finish)
+	private async void OnStep5Done(object? sender, EventArgs e)
 	{
 		await SaveVetInfoAsync();
 		FinishOnboarding();
 	}
 
-	// Step 4 skip → finish
-	private void OnStep4Skip(object? sender, EventArgs e)
+	// Step 5 skip → finish
+	private void OnStep5Skip(object? sender, EventArgs e)
 	{
 		FinishOnboarding();
 	}

@@ -112,4 +112,54 @@ public class TableStorageService
 		};
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}
+
+	// Share redemptions
+	public async Task CreateRedemptionAsync(string shareCode, string deviceUserId, string displayName, string accessLevel)
+	{
+		var client = await GetTableClientAsync("ShareRedemptions");
+		var entity = new ShareRedemptionEntity
+		{
+			PartitionKey = shareCode,
+			RowKey = deviceUserId,
+			DisplayName = displayName,
+			AccessLevel = accessLevel
+		};
+		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
+	}
+
+	public async Task<List<ShareRedemptionEntity>> GetRedemptionsAsync(string shareCode)
+	{
+		var client = await GetTableClientAsync("ShareRedemptions");
+		var results = new List<ShareRedemptionEntity>();
+		await foreach (var entity in client.QueryAsync<ShareRedemptionEntity>(e => e.PartitionKey == shareCode))
+		{
+			results.Add(entity);
+		}
+		return results;
+	}
+
+	public async Task<ShareRedemptionEntity?> GetRedemptionAsync(string shareCode, string deviceUserId)
+	{
+		var client = await GetTableClientAsync("ShareRedemptions");
+		try
+		{
+			var response = await client.GetEntityAsync<ShareRedemptionEntity>(shareCode, deviceUserId);
+			return response.Value;
+		}
+		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
+		{
+			return null;
+		}
+	}
+
+	public async Task<bool> RevokeRedemptionAsync(string shareCode, string deviceUserId)
+	{
+		var entity = await GetRedemptionAsync(shareCode, deviceUserId);
+		if (entity is null) return false;
+
+		entity.IsRevoked = true;
+		var client = await GetTableClientAsync("ShareRedemptions");
+		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
+		return true;
+	}
 }

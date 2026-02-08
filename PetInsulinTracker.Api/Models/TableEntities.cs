@@ -123,3 +123,16 @@ public class ShareCodeEntity : ITableEntity
 	public string AccessLevel { get; set; } = "full";
 	public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
+
+public class ShareRedemptionEntity : ITableEntity
+{
+	public string PartitionKey { get; set; } = string.Empty; // Share code
+	public string RowKey { get; set; } = string.Empty; // Redeemer's DeviceUserId
+	public DateTimeOffset? Timestamp { get; set; }
+	public ETag ETag { get; set; }
+
+	public string DisplayName { get; set; } = string.Empty;
+	public string AccessLevel { get; set; } = "full";
+	public DateTimeOffset RedeemedAt { get; set; } = DateTimeOffset.UtcNow;
+	public bool IsRevoked { get; set; }
+}
