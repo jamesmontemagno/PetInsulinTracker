@@ -129,8 +129,16 @@ dotnet build PetInsulinTracker.Api/PetInsulinTracker.Api.csproj
 
 ### Offline-First Sync
 - SQLite for local persistence with full CRUD
-- `IsSynced` flag and `LastModified` timestamp on every model
 - Azure Table Storage as cloud store (partitioned by share code)
+
+## 🔐 CI/CD Secrets
+
+GitHub Actions workflows rely on these repository secrets:
+- Azure Functions deploy ([.github/workflows/main_petinsulintracker.yml](.github/workflows/main_petinsulintracker.yml)): `AZUREAPPSERVICE_CLIENTID_95BD0AE70DA5486DB584273BD3C00BD4`, `AZUREAPPSERVICE_TENANTID_2F54073DBFA7478F9B2E7345654A59CE`, `AZUREAPPSERVICE_SUBSCRIPTIONID_8D56788940EF406B846605A315DCE`.
+- Android release build & signing ([.github/workflows/maui-android.yml](.github/workflows/maui-android.yml)): optional `API_BASE_URL` override; release signing requires `ANDROID_KEYSTORE` (base64), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`.
+- iOS TestFlight build & signing ([.github/workflows/maui-ios.yml](.github/workflows/maui-ios.yml)): optional `API_BASE_URL`; signing requires `APPSTORE_CERTIFICATE_P12` (base64), `APPSTORE_CERTIFICATE_P12_PASSWORD`, `APPSTORE_CODESIGN_KEY` (App Store signing identity), and App Store Connect API keys `APPSTORE_ISSUER_ID`, `APPSTORE_KEY_ID`, `APPSTORE_PRIVATE_KEY`.
+- GitHub Pages deploy ([.github/workflows/pages.yml](.github/workflows/pages.yml)): no secrets required.
+
 - Last-write-wins conflict resolution
 - Sync triggered manually from Settings
 

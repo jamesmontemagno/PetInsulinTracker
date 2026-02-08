@@ -22,7 +22,7 @@
 		<ApplicationTitle>Insulog</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.petinsulintracker</ApplicationId>
+		<ApplicationId>com.refractored.insulog</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
