@@ -1,3 +1,4 @@
+using MauiIcons.Core;
 using PetInsulinTracker.ViewModels;
 
 namespace PetInsulinTracker.Views;
@@ -7,6 +8,7 @@ public partial class SharePage : ContentPage
 	public SharePage(ShareViewModel viewModel)
 	{
 		InitializeComponent();
+		_ = new MauiIcon(); // Workaround for MauiIcons XAML compilation
 		BindingContext = viewModel;
 	}
 

@@ -1,3 +1,4 @@
+using MauiIcons.Core;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
@@ -13,6 +14,7 @@ public partial class WelcomePage : ContentPage
 	public WelcomePage()
 	{
 		InitializeComponent();
+		_ = new MauiIcon(); // Workaround for MauiIcons XAML compilation
 
 		_themes =
 		[

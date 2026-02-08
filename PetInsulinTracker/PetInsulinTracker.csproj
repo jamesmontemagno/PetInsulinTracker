@@ -18,8 +18,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		
-		<!-- Fix XAML compilation issues with third-party controls in release builds -->
-		<MauiDisableXamlCValidation>true</MauiDisableXamlCValidation>
+		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
 		<!-- Display name -->
 		<ApplicationTitle>Insulog</ApplicationTitle>
