@@ -17,6 +17,9 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		
+		<!-- Fix XAML compilation issues with third-party controls in release builds -->
+		<MauiXamlCValidationLevel>Warning</MauiXamlCValidationLevel>
 
 		<!-- Display name -->
 		<ApplicationTitle>Insulog</ApplicationTitle>
