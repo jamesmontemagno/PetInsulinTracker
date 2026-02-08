@@ -19,7 +19,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>PawCare</ApplicationTitle>
+		<ApplicationTitle>Insulog</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.petinsulintracker</ApplicationId>

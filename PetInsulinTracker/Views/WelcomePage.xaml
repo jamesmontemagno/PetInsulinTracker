@@ -29,7 +29,7 @@
 
                 <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="56" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-                <Label Text="Welcome to PawCare"
+                <Label Text="Welcome to Insulog"
                        FontSize="26" FontFamily="OpenSansSemibold"
                        TextColor="{DynamicResource PageText}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
@@ -55,7 +55,7 @@
                                 <Grid RowDefinitions="44,*,Auto" Padding="0">
                                     <BoxView Grid.Row="0" Color="{Binding Shell}"
                                              CornerRadius="16,16,0,0" />
-                                    <Label Grid.Row="0" Text="PawCare" FontSize="13"
+                                    <Label Grid.Row="0" Text="Insulog" FontSize="13"
                                            FontFamily="OpenSansSemibold" TextColor="White"
                                            VerticalOptions="Center" Margin="14,0,0,0" />
                                     <VerticalStackLayout Grid.Row="1" Spacing="8" Padding="14,10">
@@ -117,7 +117,7 @@
 
                 <mi:MauiIcon Icon="{mi:Fluent People24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-                <Label Text="How will you use PawCare?"
+                <Label Text="How will you use Insulog?"
                        FontSize="24" FontFamily="OpenSansSemibold"
                        TextColor="{DynamicResource PageText}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />

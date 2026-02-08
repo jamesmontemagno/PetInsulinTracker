@@ -1,8 +1,8 @@
-# 🐾 PawCare — Pet Insulin & Wellness Tracker
+# 🐾 Insulog — Pet Insulin & Wellness Tracker
 
-> **[🌐 Visit the PawCare website](https://jamesmontemagno.github.io/PetInsulinTracker/)**
+> **[🌐 Visit the Insulog website](https://jamesmontemagno.github.io/PetInsulinTracker/)**
 
-**PawCare** is a cross-platform .NET MAUI app designed to help pet owners manage their diabetic pet's insulin regimen, feeding schedule, weight tracking, and overall wellness. Built with love for the furry family members who depend on us.
+**Insulog** is a cross-platform .NET MAUI app designed to help pet owners manage their diabetic pet's insulin regimen, feeding schedule, weight tracking, and overall wellness. Built with love for the furry family members who depend on us.
 
 ---
 

@@ -74,7 +74,7 @@
                                 </SwipeItems>
                             </SwipeView.RightItems>
                             <Border Style="{StaticResource CardStyle}">
-                                <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
                                     <Border Grid.Column="0"
                                             BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
                                             StrokeThickness="0" StrokeShape="RoundRectangle 10"
@@ -94,6 +94,14 @@
                                                    IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
+                                    <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                 Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
+                                                 IconColor="{DynamicResource CurrentSuccess}"
+                                                 IsVisible="{Binding IsSynced}" />
+                                    <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                 Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
+                                                 IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
+                                                 IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
                                 </Grid>
                             </Border>
                         </SwipeView>
