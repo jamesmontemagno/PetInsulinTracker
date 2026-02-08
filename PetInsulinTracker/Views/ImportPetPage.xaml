@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             x:Class="PetInsulinTracker.Views.ImportPetPage"
+             x:DataType="vm:ImportPetViewModel"
+             Title="Import Pet"
+             BackgroundColor="{DynamicResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="24" VerticalOptions="Center">
+
+            <mi:MauiIcon Icon="{mi:Fluent PeopleAdd24}" IconSize="64"
+                         IconColor="{DynamicResource CurrentPrimary}"
+                         HorizontalOptions="Center" />
+
+            <Label Text="Import a Shared Pet"
+                   FontSize="24" FontFamily="OpenSansSemibold"
+                   HorizontalOptions="Center"
+                   TextColor="{DynamicResource PageText}"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <Label Text="Enter the share code you received from the pet's owner to import their pet into your app."
+                   Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                   HorizontalTextAlignment="Center" />
+
+            <Border Style="{StaticResource CardStyleElevated}" Padding="24">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="Share Code" Style="{StaticResource FormLabelStyle}" />
+                    <Entry Text="{Binding RedeemCode}" Placeholder="e.g., ABC123"
+                           CharacterSpacing="4" FontSize="22" FontFamily="OpenSansSemibold"
+                           HorizontalTextAlignment="Center" MaxLength="6"
+                           SemanticProperties.Description="Enter the share code" />
+                    <Button Text="Import Pet" Command="{Binding RedeemShareCodeCommand}"
+                            IsEnabled="{Binding IsRedeeming, Converter={StaticResource InvertedBoolConverter}}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Status -->
+            <Label Text="{Binding StatusMessage}" FontSize="14" FontFamily="OpenSansSemibold"
+                   HorizontalTextAlignment="Center"
+                   TextColor="{DynamicResource CurrentPrimary}"
+                   IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

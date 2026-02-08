@@ -175,7 +175,10 @@ public class SyncService : ISyncService
 		var pet = await _db.GetPetAsync(petId);
 		if (pet is null) return;
 
-		var lastSync = Preferences.Get($"lastSync_{petId}", DateTimeOffset.MinValue);
+		var lastSyncStr = Preferences.Get($"lastSync_{petId}", string.Empty);
+		var lastSync = string.IsNullOrEmpty(lastSyncStr)
+			? DateTimeOffset.MinValue
+			: DateTimeOffset.Parse(lastSyncStr);
 
 		// Gather unsynced local data scoped to this pet
 		var unsyncedPets = await _db.GetUnsyncedAsync<Pet>(pet.Id);
@@ -378,7 +381,7 @@ public class SyncService : ISyncService
 		foreach (var v in unsyncedVetInfo) await _db.MarkSyncedAsync<VetInfo>(v.Id);
 		foreach (var s in unsyncedSchedules) await _db.MarkSyncedAsync<Schedule>(s.Id);
 
-		Preferences.Set($"lastSync_{petId}", syncResponse.SyncTimestamp);
+		Preferences.Set($"lastSync_{petId}", syncResponse.SyncTimestamp.ToString("O"));
 	}
 
 	public async Task DeleteShareCodeAsync(string shareCode)

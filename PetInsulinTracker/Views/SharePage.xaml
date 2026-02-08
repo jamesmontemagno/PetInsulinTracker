@@ -94,24 +94,6 @@
                    Style="{StaticResource SubtleTextStyle}" FontSize="12"
                    HorizontalTextAlignment="Center" />
 
-            <!-- Redeem Code -->
-            <BoxView Style="{StaticResource DividerStyle}" Margin="0,8" />
-            <Label Text="IMPORT A PET" Style="{StaticResource OverlineStyle}" />
-
-            <Border Style="{StaticResource CardStyle}">
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="Enter a share code to import someone else's pet:"
-                           Style="{StaticResource SubtleTextStyle}" FontSize="14" />
-                    <Entry Text="{Binding RedeemCode}" Placeholder="e.g., ABC123"
-                           CharacterSpacing="4" FontSize="22" FontFamily="OpenSansSemibold"
-                           HorizontalTextAlignment="Center" MaxLength="6" />
-                    <Button Text="Import Pet" Command="{Binding RedeemShareCodeCommand}"
-                            IsEnabled="{Binding IsRedeeming, Converter={StaticResource InvertedBoolConverter}}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            HorizontalOptions="Fill" />
-                </VerticalStackLayout>
-            </Border>
-
             <!-- People with Access (owner only) -->
             <VerticalStackLayout Spacing="12"
                                  IsVisible="{Binding IsOwner}">

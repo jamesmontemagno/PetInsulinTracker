@@ -35,13 +35,7 @@ public partial class ShareViewModel : ObservableObject
 	private string? guestAccessCode;
 
 	[ObservableProperty]
-	private string? redeemCode;
-
-	[ObservableProperty]
 	private bool isGenerating;
-
-	[ObservableProperty]
-	private bool isRedeeming;
 
 	[ObservableProperty]
 	private bool isLoadingUsers;
@@ -144,30 +138,6 @@ public partial class ShareViewModel : ObservableObject
 		finally
 		{
 			IsGenerating = false;
-		}
-	}
-
-	[RelayCommand]
-	private async Task RedeemShareCodeAsync()
-	{
-		if (string.IsNullOrWhiteSpace(RedeemCode)) return;
-
-		try
-		{
-			IsRedeeming = true;
-			StatusMessage = "Importing pet data...";
-
-			await _syncService.RedeemShareCodeAsync(RedeemCode.Trim().ToUpperInvariant());
-			StatusMessage = "Pet imported successfully!";
-			RedeemCode = null;
-		}
-		catch (Exception ex)
-		{
-			StatusMessage = $"Error: {ex.Message}";
-		}
-		finally
-		{
-			IsRedeeming = false;
 		}
 	}
 

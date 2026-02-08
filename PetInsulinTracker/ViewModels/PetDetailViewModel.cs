@@ -84,6 +84,9 @@ public partial class PetDetailViewModel : ObservableObject
 	private bool isOwnerOrFull;
 
 	[ObservableProperty]
+	private bool isOwner;
+
+	[ObservableProperty]
 	private ObservableCollection<Schedule> activeSchedules = [];
 
 	[ObservableProperty]
@@ -116,6 +119,7 @@ public partial class PetDetailViewModel : ObservableObject
 
 		IsGuest = Pet.AccessLevel == "guest";
 		IsOwnerOrFull = Pet.AccessLevel != "guest";
+		IsOwner = Pet.AccessLevel == "owner";
 
 		DoseInfoText = Pet.CurrentDoseIU.HasValue
 			? $"Dose: {Pet.CurrentDoseIU.Value} IU ({Pet.InsulinConcentration ?? "U-40"})"

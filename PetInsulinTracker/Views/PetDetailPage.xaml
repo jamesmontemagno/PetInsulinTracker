@@ -216,7 +216,7 @@
                     <Button Grid.Row="1" Grid.Column="0" Text="Share"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToShareCommand}"
-                            IsVisible="{Binding IsOwnerOrFull}" />
+                            IsVisible="{Binding IsOwner}" />
                     <Button Grid.Row="1" Grid.Column="1" Text="Settings"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToSettingsCommand}" />

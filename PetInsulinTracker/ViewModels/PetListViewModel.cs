@@ -41,7 +41,18 @@ public partial class PetListViewModel : ObservableObject
 	[RelayCommand]
 	private async Task GoToAddPetAsync()
 	{
-		await Shell.Current.GoToAsync(nameof(Views.AddEditPetPage));
+		var action = await Shell.Current.DisplayActionSheetAsync(
+			"Add a Pet", "Cancel", null, "Add New Pet", "Import Shared Pet");
+
+		switch (action)
+		{
+			case "Add New Pet":
+				await Shell.Current.GoToAsync(nameof(Views.AddEditPetPage));
+				break;
+			case "Import Shared Pet":
+				await Shell.Current.GoToAsync(nameof(Views.ImportPetPage));
+				break;
+		}
 	}
 
 	[RelayCommand]
