@@ -89,6 +89,9 @@ public partial class PetDetailViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isSyncing;
 
+	[ObservableProperty]
+	private string syncStatus = "Not synced";
+
 	private List<Schedule> _schedules = [];
 
 	partial void OnPetIdChanged(string? value)
@@ -316,16 +319,27 @@ public partial class PetDetailViewModel : ObservableObject
 		await LoadDataAsync(Pet.Id);
 	}
 
+	[RelayCommand]
+	private async Task SyncNowAsync()
+	{
+		if (Pet is null) return;
+		await SyncInBackgroundAsync(Pet.Id);
+		await LoadDataAsync(Pet.Id);
+	}
+
 	private async Task SyncInBackgroundAsync(string petId)
 	{
 		try
 		{
 			IsSyncing = true;
+			SyncStatus = "Syncing…";
 			await _syncService.SyncAsync(petId);
+			SyncStatus = $"Last synced: {DateTime.Now:g}";
 		}
 		catch (Exception ex)
 		{
 			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+			SyncStatus = $"Sync failed: {ex.Message}";
 		}
 		finally
 		{

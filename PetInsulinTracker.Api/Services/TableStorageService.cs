@@ -8,6 +8,11 @@ public class TableStorageService
 	private readonly TableServiceClient _serviceClient;
 	private readonly HashSet<string> _createdTables = [];
 
+	/// <summary>Azure Table Storage minimum supported date.</summary>
+	private static readonly DateTimeOffset MinTableDate = new(1601, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+	private static DateTimeOffset ClampDate(DateTimeOffset d) => d < MinTableDate ? MinTableDate : d;
+
 	public TableStorageService()
 	{
 		var connectionString = Environment.GetEnvironmentVariable("StorageConnectionString")
@@ -77,9 +82,10 @@ public class TableStorageService
 	public async Task<List<T>> GetEntitiesModifiedSinceAsync<T>(string tableName, string partitionKey, DateTimeOffset since) where T : class, ITableEntity, new()
 	{
 		var client = await GetTableClientAsync(tableName);
+		var clampedSince = ClampDate(since);
 		var results = new List<T>();
 		await foreach (var entity in client.QueryAsync<T>(
-			e => e.PartitionKey == partitionKey && e.Timestamp >= since))
+			e => e.PartitionKey == partitionKey && e.Timestamp >= clampedSince))
 		{
 			results.Add(entity);
 		}
@@ -89,9 +95,10 @@ public class TableStorageService
 	public async Task<List<PetEntity>> GetPetsModifiedSinceAsync(string petId, DateTimeOffset since)
 	{
 		var client = await GetTableClientAsync("Pets");
+		var clampedSince = ClampDate(since);
 		var results = new List<PetEntity>();
 		await foreach (var entity in client.QueryAsync<PetEntity>(
-			e => e.RowKey == petId && e.Timestamp >= since))
+			e => e.RowKey == petId && e.Timestamp >= clampedSince))
 		{
 			results.Add(entity);
 		}

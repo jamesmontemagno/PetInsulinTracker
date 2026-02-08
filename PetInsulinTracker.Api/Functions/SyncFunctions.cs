@@ -19,6 +19,17 @@ public class SyncFunctions
 		_storage = storage;
 	}
 
+	private static DateTimeOffset ClampLastModified(DateTimeOffset d)
+	{
+		var min = new DateTimeOffset(1601, 1, 1, 0, 0, 0, TimeSpan.Zero);
+		return d < min ? DateTimeOffset.UtcNow : d;
+	}
+
+	/// <summary>
+	/// Azure Table Storage minimum supported DateTime is 1601-01-01.
+	/// </summary>
+	private static readonly DateTimeOffset AzureTableMinDate = new(1601, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
 	/// <summary>
 	/// Azure Table Storage requires DateTime values to be UTC.
 	/// Preserves the numeric value by re-specifying the Kind as UTC.
@@ -92,7 +103,7 @@ public class SyncFunctions
 				CurrentDoseIU = petData.CurrentDoseIU,
 				WeightUnit = petData.WeightUnit,
 				CurrentWeight = petData.CurrentWeight,
-				LastModified = petData.LastModified,
+				LastModified = ClampLastModified(petData.LastModified),
 				IsDeleted = petData.IsDeleted
 			});
 			pet = await _storage.GetPetAsync(petId);
@@ -151,7 +162,7 @@ public class SyncFunctions
 					CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit,
 					CurrentWeight = p.CurrentWeight,
-					LastModified = p.LastModified,
+				LastModified = ClampLastModified(p.LastModified),
 					IsDeleted = p.IsDeleted
 				});
 			}
@@ -164,7 +175,7 @@ public class SyncFunctions
 					VetName = info.VetName, ClinicName = info.ClinicName,
 					Phone = info.Phone, EmergencyPhone = info.EmergencyPhone,
 					Address = info.Address, Email = info.Email, Notes = info.Notes,
-					LastModified = info.LastModified, IsDeleted = info.IsDeleted
+				LastModified = ClampLastModified(info.LastModified), IsDeleted = info.IsDeleted
 				});
 			}
 
@@ -176,7 +187,7 @@ public class SyncFunctions
 					ScheduleType = s.ScheduleType, Label = s.Label,
 					TimeTicks = s.TimeTicks, IsEnabled = s.IsEnabled,
 					ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
-					LastModified = s.LastModified, IsDeleted = s.IsDeleted
+				LastModified = ClampLastModified(s.LastModified), IsDeleted = s.IsDeleted
 				});
 			}
 		}
@@ -191,7 +202,7 @@ public class SyncFunctions
 					PartitionKey = petId, RowKey = log.Id, PetId = log.PetId,
 					Weight = log.Weight, WeightUnit = log.Unit, RecordedAt = EnsureUtc(log.RecordedAt),
 					Notes = log.Notes, LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
-					LastModified = log.LastModified, IsDeleted = log.IsDeleted
+				LastModified = ClampLastModified(log.LastModified), IsDeleted = log.IsDeleted
 				});
 			}
 		}
@@ -207,7 +218,7 @@ public class SyncFunctions
 				DoseIU = log.DoseIU, AdministeredAt = EnsureUtc(log.AdministeredAt),
 				InjectionSite = log.InjectionSite, Notes = log.Notes,
 				LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
-				LastModified = log.LastModified, IsDeleted = log.IsDeleted
+				LastModified = ClampLastModified(log.LastModified), IsDeleted = log.IsDeleted
 			});
 		}
 
@@ -219,13 +230,13 @@ public class SyncFunctions
 				FoodName = log.FoodName, Amount = log.Amount, Unit = log.Unit,
 				FoodType = log.FoodType, FedAt = EnsureUtc(log.FedAt), Notes = log.Notes,
 				LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
-				LastModified = log.LastModified, IsDeleted = log.IsDeleted
+				LastModified = ClampLastModified(log.LastModified), IsDeleted = log.IsDeleted
 			});
 		}
 
 		// Download server changes since last sync
 		_logger.LogInformation("Upload complete for pet {PetId}, downloading server changes since {Since}", petId, syncRequest.LastSyncTimestamp);
-		var since = syncRequest.LastSyncTimestamp;
+		var since = syncRequest.LastSyncTimestamp < AzureTableMinDate ? AzureTableMinDate : syncRequest.LastSyncTimestamp;
 		var now = DateTimeOffset.UtcNow;
 
 		var serverPets = await _storage.GetPetsModifiedSinceAsync(petId, since);
