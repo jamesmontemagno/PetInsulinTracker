@@ -37,7 +37,7 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_VERSION: net10.0
       PROJECT_PATH: PetInsulinTracker/PetInsulinTracker.csproj
-      BUNDLE_ID: com.companyname.petinsulintracker
+      BUNDLE_ID: com.refractored.insulog
       CONFIGURATION: Release
       RUNTIME_ID: ios-arm64
       CODESIGN_KEY: ${{ secrets.APPSTORE_CODESIGN_KEY }}
