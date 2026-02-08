@@ -136,24 +136,20 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		await _db.SavePetAsync(pet);
 
-		// Auto-generate a share code for new pets so they sync to the backend
-		if (isNew && string.IsNullOrEmpty(pet.ShareCode))
+		// Create the pet in the backend and get a share code
+		if (isNew)
 		{
-			_ = Task.Run(async () =>
+			try
 			{
-				try
-				{
-					var code = await _syncService.GenerateShareCodeAsync(pet.Id, "full");
-					pet.FullAccessCode = code;
-					pet.ShareCode = code;
-					await _db.SavePetAsync(pet);
-					await _syncService.SyncAsync(code);
-				}
-				catch
-				{
-					// Will retry on next sync
-				}
-			});
+				var code = await _syncService.CreatePetAsync(pet);
+				pet.FullAccessCode = code;
+				pet.ShareCode = code;
+				await _db.SavePetAsync(pet);
+			}
+			catch
+			{
+				// Will retry on next sync
+			}
 		}
 		else if (!string.IsNullOrEmpty(pet.ShareCode))
 		{

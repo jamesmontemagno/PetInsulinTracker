@@ -126,6 +126,18 @@ public class TableStorageService
 		}
 	}
 
+	public async Task<List<ShareCodeEntity>> GetShareCodesByPetIdAsync(string petId)
+	{
+		var client = await GetTableClientAsync("ShareCodes");
+		var results = new List<ShareCodeEntity>();
+		await foreach (var entity in client.QueryAsync<ShareCodeEntity>(
+			e => e.PartitionKey == "ShareCodes" && e.PetId == petId))
+		{
+			results.Add(entity);
+		}
+		return results;
+	}
+
 	public async Task CreateShareCodeAsync(string code, string petId, string accessLevel = "full", string? ownerId = null)
 	{
 		var client = await GetTableClientAsync("ShareCodes");

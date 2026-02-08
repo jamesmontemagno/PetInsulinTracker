@@ -16,6 +16,29 @@ public class SyncService : ISyncService
 		_http = http;
 	}
 
+	public async Task<string> CreatePetAsync(Pet pet)
+	{
+		var request = new CreatePetRequest
+		{
+			Id = pet.Id,
+			DeviceUserId = Constants.DeviceUserId,
+			Name = pet.Name,
+			Species = pet.Species,
+			Breed = pet.Breed,
+			DateOfBirth = pet.DateOfBirth,
+			InsulinType = pet.InsulinType,
+			InsulinConcentration = pet.InsulinConcentration,
+			CurrentDoseIU = pet.CurrentDoseIU,
+			WeightUnit = pet.WeightUnit,
+			CurrentWeight = pet.CurrentWeight
+		};
+
+		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request);
+		response.EnsureSuccessStatusCode();
+		var result = await response.Content.ReadFromJsonAsync<CreatePetResponse>();
+		return result?.ShareCode ?? throw new InvalidOperationException("No share code received");
+	}
+
 	public async Task<string> GenerateShareCodeAsync(string petId, string accessLevel = "full")
 	{
 		var response = await _http.PostAsJsonAsync(

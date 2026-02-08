@@ -29,6 +29,20 @@ public class ShareFunctions
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
+		// Verify the requester is the pet owner
+		if (string.IsNullOrEmpty(request.OwnerId))
+		{
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		var existingCodes = await _storage.GetShareCodesByPetIdAsync(request.PetId);
+		var ownerCode = existingCodes.FirstOrDefault(c => !string.IsNullOrEmpty(c.OwnerId));
+		if (ownerCode is not null && ownerCode.OwnerId != request.OwnerId)
+		{
+			_logger.LogWarning("Non-owner {RequesterId} attempted to generate share code for pet {PetId}", request.OwnerId, request.PetId);
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+		}
+
 		// Generate a unique 6-character code (no ambiguous chars)
 		string code;
 		do

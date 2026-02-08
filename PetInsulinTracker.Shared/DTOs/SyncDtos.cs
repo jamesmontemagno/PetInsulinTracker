@@ -73,3 +73,24 @@ public class RevokeAccessRequest
 	public string ShareCode { get; set; } = string.Empty;
 	public string DeviceUserId { get; set; } = string.Empty;
 }
+
+public class CreatePetRequest
+{
+	public string Id { get; set; } = string.Empty;
+	public string DeviceUserId { get; set; } = string.Empty;
+	public string Name { get; set; } = string.Empty;
+	public string Species { get; set; } = string.Empty;
+	public string Breed { get; set; } = string.Empty;
+	public DateTime? DateOfBirth { get; set; }
+	public string? InsulinType { get; set; }
+	public string? InsulinConcentration { get; set; }
+	public double? CurrentDoseIU { get; set; }
+	public string WeightUnit { get; set; } = "lbs";
+	public double? CurrentWeight { get; set; }
+}
+
+public class CreatePetResponse
+{
+	public PetDto Pet { get; set; } = new();
+	public string ShareCode { get; set; } = string.Empty;
+}
