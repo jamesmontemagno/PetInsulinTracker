@@ -32,6 +32,8 @@ namespace PetInsulinTracker.Shared;
 [JsonSerializable(typeof(DeletePetRequest))]
 [JsonSerializable(typeof(CreatePetRequest))]
 [JsonSerializable(typeof(CreatePetResponse))]
+[JsonSerializable(typeof(PetPhotoUploadRequest))]
+[JsonSerializable(typeof(PetPhotoUploadResponse))]
 // Collections
 [JsonSerializable(typeof(List<PetDto>))]
 [JsonSerializable(typeof(List<InsulinLogDto>))]

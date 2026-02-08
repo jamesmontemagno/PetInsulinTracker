@@ -98,6 +98,7 @@ public class SyncFunctions
 				Species = petData.Species,
 				Breed = petData.Breed,
 				DateOfBirth = EnsureUtc(petData.DateOfBirth),
+				PhotoUrl = petData.PhotoUrl,
 				InsulinType = petData.InsulinType,
 				InsulinConcentration = petData.InsulinConcentration,
 				CurrentDoseIU = petData.CurrentDoseIU,
@@ -151,6 +152,8 @@ public class SyncFunctions
 				syncRequest.Pets.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
 			foreach (var p in syncRequest.Pets)
 			{
+				// Preserve the server's PhotoUrl — it is set exclusively by the photo upload endpoint
+				var serverPet = await _storage.GetPetAsync(p.Id);
 				await _storage.UpsertPetAsync(new PetEntity
 				{
 					RowKey = p.Id,
@@ -161,6 +164,7 @@ public class SyncFunctions
 					Species = p.Species,
 					Breed = p.Breed,
 					DateOfBirth = EnsureUtc(p.DateOfBirth),
+					PhotoUrl = serverPet?.PhotoUrl,
 					InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration,
 					CurrentDoseIU = p.CurrentDoseIU,
@@ -170,7 +174,7 @@ public class SyncFunctions
 					DefaultFoodAmount = p.DefaultFoodAmount,
 					DefaultFoodUnit = p.DefaultFoodUnit,
 					DefaultFoodType = p.DefaultFoodType,
-				LastModified = ClampLastModified(p.LastModified),
+					LastModified = ClampLastModified(p.LastModified),
 					IsDeleted = p.IsDeleted
 				});
 			}
@@ -282,6 +286,7 @@ public class SyncFunctions
 				Id = p.RowKey, OwnerId = p.OwnerId, OwnerName = p.OwnerName,
 				AccessLevel = p.AccessLevel, Name = p.Name, Species = p.Species,
 				Breed = p.Breed, DateOfBirth = p.DateOfBirth,
+				PhotoUrl = p.PhotoUrl,
 				InsulinType = p.InsulinType, InsulinConcentration = p.InsulinConcentration,
 				CurrentDoseIU = p.CurrentDoseIU, WeightUnit = p.WeightUnit,
 				CurrentWeight = p.CurrentWeight,
