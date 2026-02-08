@@ -42,6 +42,9 @@ public partial class InsulinLogViewModel : ObservableObject
 	[ObservableProperty]
 	private string? notes;
 
+	[ObservableProperty]
+	private bool isSyncing;
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -86,7 +89,7 @@ public partial class InsulinLogViewModel : ObservableObject
 
 		if (!string.IsNullOrEmpty(PetId))
 		{
-			_ = _syncService.SyncAsync(PetId);
+			_ = SyncInBackgroundAsync(PetId);
 		}
 
 		// Reset form
@@ -105,5 +108,22 @@ public partial class InsulinLogViewModel : ObservableObject
 	{
 		await _db.DeleteInsulinLogAsync(log);
 		Logs.Remove(log);
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 }

@@ -10,10 +10,12 @@ namespace PetInsulinTracker.ViewModels;
 public partial class ScheduleViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 
-	public ScheduleViewModel(IDatabaseService db)
+	public ScheduleViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 	}
 
 	[ObservableProperty]
@@ -35,6 +37,9 @@ public partial class ScheduleViewModel : ObservableObject
 
 	[ObservableProperty]
 	private int reminderLeadTimeMinutes = 15;
+
+	[ObservableProperty]
+	private bool isSyncing;
 
 	public List<string> ScheduleTypeOptions { get; } = ["Insulin", "Feeding"];
 
@@ -69,6 +74,9 @@ public partial class ScheduleViewModel : ObservableObject
 
 		await _db.SaveScheduleAsync(schedule);
 
+		if (!string.IsNullOrEmpty(PetId))
+			_ = SyncInBackgroundAsync(PetId);
+
 		// Reset form
 		Label = string.Empty;
 
@@ -82,6 +90,10 @@ public partial class ScheduleViewModel : ObservableObject
 	{
 		schedule.IsEnabled = !schedule.IsEnabled;
 		await _db.SaveScheduleAsync(schedule);
+
+		if (!string.IsNullOrEmpty(PetId))
+			_ = SyncInBackgroundAsync(PetId);
+
 		await LoadSchedulesAsync();
 	}
 
@@ -90,5 +102,25 @@ public partial class ScheduleViewModel : ObservableObject
 	{
 		await _db.DeleteScheduleAsync(schedule);
 		Schedules.Remove(schedule);
+
+		if (!string.IsNullOrEmpty(PetId))
+			_ = SyncInBackgroundAsync(PetId);
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 }

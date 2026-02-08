@@ -102,7 +102,7 @@ public class SyncFunctions
 				await _storage.UpsertPetAsync(new PetEntity
 				{
 					RowKey = p.Id,
-					OwnerId = p.OwnerId,
+					OwnerId = deviceUserId,
 					OwnerName = p.OwnerName,
 					AccessLevel = p.AccessLevel,
 					Name = p.Name,

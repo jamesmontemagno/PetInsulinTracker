@@ -47,6 +47,11 @@
                     <Button Text="Save" Command="{Binding SaveLogCommand}"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill" />
+                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}" HorizontalOptions="Center">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
+                                           Color="{DynamicResource Primary}" />
+                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

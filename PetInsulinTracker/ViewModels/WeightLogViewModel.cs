@@ -53,6 +53,9 @@ public partial class WeightLogViewModel : ObservableObject
 	[ObservableProperty]
 	private List<string> chartLabels = [];
 
+	[ObservableProperty]
+	private bool isSyncing;
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -130,7 +133,7 @@ public partial class WeightLogViewModel : ObservableObject
 			await _db.SavePetAsync(pet);
 
 			if (!string.IsNullOrEmpty(pet.Id))
-				_ = _syncService.SyncAsync(pet.Id);
+				_ = SyncInBackgroundAsync(pet.Id);
 		}
 
 		// Reset form
@@ -149,5 +152,22 @@ public partial class WeightLogViewModel : ObservableObject
 		await _db.DeleteWeightLogAsync(log);
 		Logs.Remove(log);
 		UpdateTrend();
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 }

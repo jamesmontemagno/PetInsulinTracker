@@ -12,10 +12,12 @@ namespace PetInsulinTracker.ViewModels;
 public partial class PetDetailViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 
-	public PetDetailViewModel(IDatabaseService db)
+	public PetDetailViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (r, msg) =>
 		{
 			var vm = (PetDetailViewModel)r;
@@ -83,6 +85,9 @@ public partial class PetDetailViewModel : ObservableObject
 
 	[ObservableProperty]
 	private ObservableCollection<Schedule> activeSchedules = [];
+
+	[ObservableProperty]
+	private bool isSyncing;
 
 	private List<Schedule> _schedules = [];
 
@@ -286,6 +291,7 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveInsulinLogAsync(log);
+		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 
@@ -306,7 +312,25 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveFeedingLogAsync(log);
+		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 
 	[RelayCommand]

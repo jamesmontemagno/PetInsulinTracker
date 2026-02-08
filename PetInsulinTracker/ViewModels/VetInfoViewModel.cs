@@ -9,11 +9,13 @@ namespace PetInsulinTracker.ViewModels;
 public partial class VetInfoViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 	private VetInfo? _existingInfo;
 
-	public VetInfoViewModel(IDatabaseService db)
+	public VetInfoViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 	}
 
 	[ObservableProperty]
@@ -39,6 +41,9 @@ public partial class VetInfoViewModel : ObservableObject
 
 	[ObservableProperty]
 	private string? vetNotes;
+
+	[ObservableProperty]
+	private bool isSyncing;
 
 	partial void OnPetIdChanged(string? value)
 	{
@@ -78,7 +83,28 @@ public partial class VetInfoViewModel : ObservableObject
 		info.Notes = VetNotes;
 
 		await _db.SaveVetInfoAsync(info);
+
+		if (!string.IsNullOrEmpty(PetId))
+			_ = SyncInBackgroundAsync(PetId);
+
 		await Shell.Current.GoToAsync("..");
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 
 	[RelayCommand]

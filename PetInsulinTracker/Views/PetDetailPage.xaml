@@ -24,28 +24,35 @@
 
             <!-- Pet Info Overlay (overlaps hero) -->
             <Border Style="{StaticResource CardStyleElevated}" Margin="20,-60,20,0">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="{Binding Pet.Name}" FontSize="24" FontFamily="OpenSansSemibold"
-                               SemanticProperties.HeadingLevel="Level1" />
-                        <Label Style="{StaticResource SubtleTextStyle}">
-                            <Label.Text>
-                                <MultiBinding StringFormat="{}{0} · {1}">
-                                    <Binding Path="Pet.Species" />
-                                    <Binding Path="Pet.Breed" />
-                                </MultiBinding>
-                            </Label.Text>
-                        </Label>
-                        <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
-                               Style="{StaticResource SubtleTextStyle}" />
-                        <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" />
-                    </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="Edit"
-                            Style="{StaticResource GhostButtonStyle}"
-                            Command="{Binding GoToEditPetCommand}"
-                            IsVisible="{Binding IsOwnerOrFull}"
-                            SemanticProperties.Hint="Edit pet" />
-                </Grid>
+                <VerticalStackLayout Spacing="4">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Pet.Name}" FontSize="24" FontFamily="OpenSansSemibold"
+                                   SemanticProperties.HeadingLevel="Level1" />
+                            <Label Style="{StaticResource SubtleTextStyle}">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0} · {1}">
+                                        <Binding Path="Pet.Species" />
+                                        <Binding Path="Pet.Breed" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                            <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Text="Edit"
+                                Style="{StaticResource GhostButtonStyle}"
+                                Command="{Binding GoToEditPetCommand}"
+                                IsVisible="{Binding IsOwnerOrFull}"
+                                SemanticProperties.Hint="Edit pet" />
+                    </Grid>
+                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
+                                           Color="{DynamicResource Primary}" />
+                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource CardStyle}" Margin="20,8,20,0"

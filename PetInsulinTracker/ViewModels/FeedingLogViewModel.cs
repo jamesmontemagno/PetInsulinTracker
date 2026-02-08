@@ -48,6 +48,9 @@ public partial class FeedingLogViewModel : ObservableObject
 	[ObservableProperty]
 	private string? notes;
 
+	[ObservableProperty]
+	private bool isSyncing;
+
 	public List<string> UnitOptions { get; } = ["cups", "grams", "oz", "cans"];
 	public List<string> FoodTypeOptions { get; } = ["Dry", "Wet", "Treat"];
 
@@ -113,7 +116,7 @@ public partial class FeedingLogViewModel : ObservableObject
 
 		if (!string.IsNullOrEmpty(PetId))
 		{
-			_ = _syncService.SyncAsync(PetId);
+			_ = SyncInBackgroundAsync(PetId);
 		}
 
 		// Reset form to pet defaults
@@ -131,5 +134,22 @@ public partial class FeedingLogViewModel : ObservableObject
 	{
 		await _db.DeleteFeedingLogAsync(log);
 		Logs.Remove(log);
+	}
+
+	private async Task SyncInBackgroundAsync(string petId)
+	{
+		try
+		{
+			IsSyncing = true;
+			await _syncService.SyncAsync(petId);
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
+		}
+		finally
+		{
+			IsSyncing = false;
+		}
 	}
 }
