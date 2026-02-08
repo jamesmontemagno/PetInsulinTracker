@@ -26,14 +26,18 @@ public class ShareFunctions
 		var request = await req.ReadFromJsonAsync<ShareCodeRequest>();
 		if (request is null || string.IsNullOrEmpty(request.PetId))
 		{
+			_logger.LogWarning("GenerateShareCode rejected: missing PetId");
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
 		// Verify the requester is the pet owner
 		if (string.IsNullOrEmpty(request.OwnerId))
 		{
+			_logger.LogWarning("GenerateShareCode rejected: missing OwnerId for pet {PetId}", request.PetId);
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
+
+		_logger.LogInformation("GenerateShareCode for pet {PetId} by owner {OwnerId}, access={AccessLevel}", request.PetId, request.OwnerId, request.AccessLevel);
 
 		var pet = await _storage.GetPetAsync(request.PetId);
 		if (pet is null)
@@ -70,15 +74,21 @@ public class ShareFunctions
 		var request = await req.ReadFromJsonAsync<RedeemShareCodeRequest>();
 		if (request is null || string.IsNullOrEmpty(request.ShareCode))
 		{
+			_logger.LogWarning("RedeemShareCode rejected: missing ShareCode");
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
+
+		_logger.LogInformation("RedeemShareCode request: Code={Code}, DeviceUserId={DeviceUserId}", request.ShareCode, request.DeviceUserId);
 
 		var code = request.ShareCode;
 		var shareCode = await _storage.GetShareCodeAsync(code);
 		if (shareCode is null)
 		{
+			_logger.LogWarning("Share code {Code} not found", code);
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
+
+		_logger.LogDebug("Share code {Code} found: PetId={PetId}, AccessLevel={AccessLevel}", code, shareCode.PetId, shareCode.AccessLevel);
 
 		var accessLevel = shareCode.AccessLevel ?? "full";
 		var petId = shareCode.PetId;
@@ -155,6 +165,10 @@ public class ShareFunctions
 				LastModified = s.LastModified
 			}).ToList()
 		};
+
+		_logger.LogInformation(
+			"RedeemShareCode success: Pet={PetId}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, Schedules={ScheduleCount}",
+			petId, result.InsulinLogs.Count, result.FeedingLogs.Count, result.WeightLogs.Count, result.Schedules.Count);
 
 		var response = req.CreateResponse(HttpStatusCode.OK);
 		await response.WriteAsJsonAsync(result);

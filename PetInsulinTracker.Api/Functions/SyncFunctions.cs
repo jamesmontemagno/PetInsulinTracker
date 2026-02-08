@@ -19,30 +19,60 @@ public class SyncFunctions
 		_storage = storage;
 	}
 
+	/// <summary>
+	/// Azure Table Storage requires DateTime values to be UTC.
+	/// Preserves the numeric value by re-specifying the Kind as UTC.
+	/// </summary>
+	private static DateTime EnsureUtc(DateTime dt) =>
+		DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+
+	private static DateTime? EnsureUtc(DateTime? dt) =>
+		dt.HasValue ? DateTime.SpecifyKind(dt.Value, DateTimeKind.Utc) : null;
+
 	[Function("Sync")]
 	public async Task<HttpResponseData> Sync(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "sync")] HttpRequestData req)
 	{
-		var syncRequest = await req.ReadFromJsonAsync<SyncRequest>();
+		SyncRequest? syncRequest;
+		try
+		{
+			syncRequest = await req.ReadFromJsonAsync<SyncRequest>();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Failed to deserialize sync request body");
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
 		if (syncRequest is null || string.IsNullOrEmpty(syncRequest.PetId) || string.IsNullOrEmpty(syncRequest.DeviceUserId))
 		{
+			_logger.LogWarning("Sync request rejected: missing PetId or DeviceUserId");
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
 		var petId = syncRequest.PetId;
 		var deviceUserId = syncRequest.DeviceUserId;
-		_logger.LogInformation("Sync request for pet {PetId} from {DeviceUserId}", petId, deviceUserId);
+		_logger.LogInformation(
+			"Sync request for pet {PetId} from {DeviceUserId} — LastSync={LastSync}, Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
+			petId, deviceUserId, syncRequest.LastSyncTimestamp,
+			syncRequest.Pets.Count, syncRequest.InsulinLogs.Count, syncRequest.FeedingLogs.Count,
+			syncRequest.WeightLogs.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
 
+		try
+		{
 		// Determine access level
+		_logger.LogDebug("Looking up pet {PetId} in storage", petId);
 		var pet = await _storage.GetPetAsync(petId);
 		string accessLevel;
 
 		if (pet is null)
 		{
+			_logger.LogInformation("Pet {PetId} not found on server, checking sync payload for creation data", petId);
 			// Pet doesn't exist on server yet — create from sync data if provided
 			var petData = syncRequest.Pets.FirstOrDefault(p => p.Id == petId);
 			if (petData is null)
 			{
+				_logger.LogWarning("Pet {PetId} not found on server and not included in sync payload — returning 404", petId);
 				return req.CreateResponse(HttpStatusCode.NotFound);
 			}
 
@@ -56,7 +86,7 @@ public class SyncFunctions
 				Name = petData.Name,
 				Species = petData.Species,
 				Breed = petData.Breed,
-				DateOfBirth = petData.DateOfBirth,
+				DateOfBirth = EnsureUtc(petData.DateOfBirth),
 				InsulinType = petData.InsulinType,
 				InsulinConcentration = petData.InsulinConcentration,
 				CurrentDoseIU = petData.CurrentDoseIU,
@@ -72,10 +102,12 @@ public class SyncFunctions
 		else if (pet.OwnerId == deviceUserId)
 		{
 			accessLevel = "owner";
+			_logger.LogDebug("User {DeviceUserId} is owner of pet {PetId}", deviceUserId, petId);
 		}
 		else
 		{
 			// Single point read: PK=petId, RK=deviceUserId
+			_logger.LogDebug("User {DeviceUserId} is not owner (owner={OwnerId}), checking redemption", deviceUserId, pet.OwnerId);
 			var redemption = await _storage.GetRedemptionAsync(petId, deviceUserId);
 
 			if (redemption is null)
@@ -91,12 +123,17 @@ public class SyncFunctions
 			}
 
 			accessLevel = redemption.AccessLevel;
+			_logger.LogDebug("User {DeviceUserId} has access level {AccessLevel} for pet {PetId}", deviceUserId, accessLevel, petId);
 		}
+
+		_logger.LogInformation("Uploading client changes for pet {PetId} with access level {AccessLevel}", petId, accessLevel);
 
 		// Upload client changes based on access level
 		if (accessLevel == "owner")
 		{
 			// Owner can upload everything
+			_logger.LogDebug("Upserting {Count} pets, {VetCount} vet infos, {ScheduleCount} schedules",
+				syncRequest.Pets.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
 			foreach (var p in syncRequest.Pets)
 			{
 				await _storage.UpsertPetAsync(new PetEntity
@@ -108,7 +145,7 @@ public class SyncFunctions
 					Name = p.Name,
 					Species = p.Species,
 					Breed = p.Breed,
-					DateOfBirth = p.DateOfBirth,
+					DateOfBirth = EnsureUtc(p.DateOfBirth),
 					InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration,
 					CurrentDoseIU = p.CurrentDoseIU,
@@ -152,7 +189,7 @@ public class SyncFunctions
 				await _storage.UpsertEntityAsync("WeightLogs", new WeightLogEntity
 				{
 					PartitionKey = petId, RowKey = log.Id, PetId = log.PetId,
-					Weight = log.Weight, WeightUnit = log.Unit, RecordedAt = log.RecordedAt,
+					Weight = log.Weight, WeightUnit = log.Unit, RecordedAt = EnsureUtc(log.RecordedAt),
 					Notes = log.Notes, LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
 					LastModified = log.LastModified, IsDeleted = log.IsDeleted
 				});
@@ -160,12 +197,14 @@ public class SyncFunctions
 		}
 
 		// All access levels can upload insulin and feeding logs
+		_logger.LogDebug("Upserting {InsulinCount} insulin logs and {FeedingCount} feeding logs",
+			syncRequest.InsulinLogs.Count, syncRequest.FeedingLogs.Count);
 		foreach (var log in syncRequest.InsulinLogs)
 		{
 			await _storage.UpsertEntityAsync("InsulinLogs", new InsulinLogEntity
 			{
 				PartitionKey = petId, RowKey = log.Id, PetId = log.PetId,
-				DoseIU = log.DoseIU, AdministeredAt = log.AdministeredAt,
+				DoseIU = log.DoseIU, AdministeredAt = EnsureUtc(log.AdministeredAt),
 				InjectionSite = log.InjectionSite, Notes = log.Notes,
 				LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
 				LastModified = log.LastModified, IsDeleted = log.IsDeleted
@@ -178,13 +217,14 @@ public class SyncFunctions
 			{
 				PartitionKey = petId, RowKey = log.Id, PetId = log.PetId,
 				FoodName = log.FoodName, Amount = log.Amount, Unit = log.Unit,
-				FoodType = log.FoodType, FedAt = log.FedAt, Notes = log.Notes,
+				FoodType = log.FoodType, FedAt = EnsureUtc(log.FedAt), Notes = log.Notes,
 				LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
 				LastModified = log.LastModified, IsDeleted = log.IsDeleted
 			});
 		}
 
 		// Download server changes since last sync
+		_logger.LogInformation("Upload complete for pet {PetId}, downloading server changes since {Since}", petId, syncRequest.LastSyncTimestamp);
 		var since = syncRequest.LastSyncTimestamp;
 		var now = DateTimeOffset.UtcNow;
 
@@ -266,8 +306,23 @@ public class SyncFunctions
 			}).ToList()
 		};
 
+		_logger.LogInformation(
+			"Sync complete for pet {PetId} — returning Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
+			petId, syncResponse.Pets.Count, syncResponse.InsulinLogs.Count,
+			syncResponse.FeedingLogs.Count, syncResponse.WeightLogs.Count,
+			syncResponse.VetInfos.Count, syncResponse.Schedules.Count);
+
 		var response = req.CreateResponse(HttpStatusCode.OK);
 		await response.WriteAsJsonAsync(syncResponse);
 		return response;
+
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Sync failed for pet {PetId} from {DeviceUserId}. Exception: {ExMessage}", petId, deviceUserId, ex.Message);
+			var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
+			await errorResponse.WriteAsJsonAsync(new { error = ex.Message, stackTrace = ex.StackTrace });
+			return errorResponse;
+		}
 	}
 }

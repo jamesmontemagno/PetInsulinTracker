@@ -394,17 +394,22 @@ public class SyncService : ISyncService
 		if (Constants.IsOfflineMode) return;
 
 		var pets = await _db.GetPetsAsync();
+		var exceptions = new List<Exception>();
 		var syncTasks = pets.Select(async p =>
 		{
 			try
 			{
 				await SyncAsync(p.Id);
 			}
-			catch
+			catch (Exception ex)
 			{
-				// Silently fail for offline scenarios
+				System.Diagnostics.Debug.WriteLine($"Sync failed for pet {p.Id}: {ex.Message}");
+				lock (exceptions) exceptions.Add(ex);
 			}
 		});
 		await Task.WhenAll(syncTasks);
+
+		if (exceptions.Count > 0)
+			throw new AggregateException("One or more pet syncs failed.", exceptions);
 	}
 }

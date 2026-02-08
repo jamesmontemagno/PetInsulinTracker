@@ -19,16 +19,31 @@ public class PetFunctions
 		_storage = storage;
 	}
 
+	private static DateTime? EnsureUtc(DateTime? dt) =>
+		dt.HasValue ? DateTime.SpecifyKind(dt.Value, DateTimeKind.Utc) : null;
+
 	[Function("CreatePet")]
 	public async Task<HttpResponseData> CreatePet(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "pets")] HttpRequestData req)
 	{
-		var request = await req.ReadFromJsonAsync<CreatePetRequest>();
-		if (request is null || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.DeviceUserId))
+		CreatePetRequest? request;
+		try
 		{
+			request = await req.ReadFromJsonAsync<CreatePetRequest>();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Failed to deserialize CreatePet request body");
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
+		if (request is null || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.DeviceUserId))
+		{
+			_logger.LogWarning("CreatePet rejected: missing Name or DeviceUserId");
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		_logger.LogInformation("CreatePet request: Name={Name}, DeviceUserId={DeviceUserId}", request.Name, request.DeviceUserId);
 		var petId = string.IsNullOrEmpty(request.Id) ? Guid.NewGuid().ToString() : request.Id;
 		var now = DateTimeOffset.UtcNow;
 
@@ -41,7 +56,7 @@ public class PetFunctions
 			Name = request.Name,
 			Species = request.Species,
 			Breed = request.Breed,
-			DateOfBirth = request.DateOfBirth,
+			DateOfBirth = EnsureUtc(request.DateOfBirth),
 			InsulinType = request.InsulinType,
 			InsulinConcentration = request.InsulinConcentration,
 			CurrentDoseIU = request.CurrentDoseIU,
