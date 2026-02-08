@@ -103,6 +103,10 @@ public class SyncFunctions
 				CurrentDoseIU = petData.CurrentDoseIU,
 				WeightUnit = petData.WeightUnit,
 				CurrentWeight = petData.CurrentWeight,
+				DefaultFoodName = petData.DefaultFoodName,
+				DefaultFoodAmount = petData.DefaultFoodAmount,
+				DefaultFoodUnit = petData.DefaultFoodUnit,
+				DefaultFoodType = petData.DefaultFoodType,
 				LastModified = ClampLastModified(petData.LastModified),
 				IsDeleted = petData.IsDeleted
 			});
@@ -162,6 +166,10 @@ public class SyncFunctions
 					CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit,
 					CurrentWeight = p.CurrentWeight,
+					DefaultFoodName = p.DefaultFoodName,
+					DefaultFoodAmount = p.DefaultFoodAmount,
+					DefaultFoodUnit = p.DefaultFoodUnit,
+					DefaultFoodType = p.DefaultFoodType,
 				LastModified = ClampLastModified(p.LastModified),
 					IsDeleted = p.IsDeleted
 				});
@@ -179,6 +187,10 @@ public class SyncFunctions
 				});
 			}
 
+		}
+
+		if (accessLevel is "owner" or "full")
+		{
 			foreach (var s in syncRequest.Schedules)
 			{
 				await _storage.UpsertEntityAsync("Schedules", new ScheduleEntity
@@ -255,14 +267,12 @@ public class SyncFunctions
 			? await _storage.GetEntitiesModifiedSinceAsync<WeightLogEntity>("WeightLogs", petId, since)
 			: [];
 
-		// Vet info and schedules: all can see, only owner can modify (handled above in upload)
+		// Vet info and schedules: all can see, only owner can modify vet info; owner/full can modify schedules
 		var serverVetInfos = accessLevel is "owner" or "full"
 			? await _storage.GetEntitiesModifiedSinceAsync<VetInfoEntity>("VetInfos", petId, since)
 			: [];
 
-		var serverSchedules = accessLevel == "owner"
-			? await _storage.GetEntitiesModifiedSinceAsync<ScheduleEntity>("Schedules", petId, since)
-			: [];
+		var serverSchedules = await _storage.GetEntitiesModifiedSinceAsync<ScheduleEntity>("Schedules", petId, since);
 
 		var syncResponse = new SyncResponse
 		{
@@ -275,6 +285,10 @@ public class SyncFunctions
 				InsulinType = p.InsulinType, InsulinConcentration = p.InsulinConcentration,
 				CurrentDoseIU = p.CurrentDoseIU, WeightUnit = p.WeightUnit,
 				CurrentWeight = p.CurrentWeight,
+				DefaultFoodName = p.DefaultFoodName,
+				DefaultFoodAmount = p.DefaultFoodAmount,
+				DefaultFoodUnit = p.DefaultFoodUnit,
+				DefaultFoodType = p.DefaultFoodType,
 				LastModified = p.LastModified, IsDeleted = p.IsDeleted
 			}).ToList(),
 			InsulinLogs = serverInsulinLogs.Select(l => new InsulinLogDto

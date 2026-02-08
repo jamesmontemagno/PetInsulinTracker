@@ -13,11 +13,13 @@ public partial class PetDetailViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private readonly INotificationService _notifications;
 
-	public PetDetailViewModel(IDatabaseService db, ISyncService syncService)
+	public PetDetailViewModel(IDatabaseService db, ISyncService syncService, INotificationService notifications)
 	{
 		_db = db;
 		_syncService = syncService;
+		_notifications = notifications;
 		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (r, msg) =>
 		{
 			var vm = (PetDetailViewModel)r;
@@ -148,7 +150,7 @@ public partial class PetDetailViewModel : ObservableObject
 			: "No feeding logged yet";
 
 		_schedules = await _db.GetSchedulesAsync(id);
-		ActiveSchedules = new ObservableCollection<Schedule>(_schedules.Where(s => s.IsEnabled));
+		ActiveSchedules = new ObservableCollection<Schedule>(_schedules);
 
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
@@ -159,17 +161,17 @@ public partial class PetDetailViewModel : ObservableObject
 
 	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType)
 	{
-		var enabled = schedules
-			.Where(s => s.ScheduleType == scheduleType && s.IsEnabled)
+		var matching = schedules
+			.Where(s => s.ScheduleType == scheduleType)
 			.OrderBy(s => s.TimeOfDay)
 			.ToList();
-		if (enabled.Count == 0) return null;
+		if (matching.Count == 0) return null;
 
 		var now = DateTime.Now;
 		var today = now.Date;
 
 		// Find the next upcoming time today
-		foreach (var s in enabled)
+		foreach (var s in matching)
 		{
 			var candidate = today + s.TimeOfDay;
 			if (candidate > now)
@@ -177,7 +179,7 @@ public partial class PetDetailViewModel : ObservableObject
 		}
 
 		// All times today have passed — use the first one tomorrow
-		return today.AddDays(1) + enabled[0].TimeOfDay;
+		return today.AddDays(1) + matching[0].TimeOfDay;
 	}
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
@@ -404,5 +406,59 @@ public partial class PetDetailViewModel : ObservableObject
 	private static async Task GoToSettingsAsync()
 	{
 		await Shell.Current.GoToAsync(nameof(Views.SettingsPage));
+	}
+
+	[RelayCommand]
+	private async Task LeavePetAsync()
+	{
+		if (Pet is null) return;
+
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Leave Pet",
+			$"Remove {Pet.Name} from your list? You can rejoin later with a new share code.",
+			"Leave",
+			"Cancel");
+
+		if (!confirm) return;
+
+		try
+		{
+			await _syncService.LeavePetAsync(Pet.Id);
+			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
+			await _db.PurgePetDataAsync(Pet.Id);
+			Preferences.Remove($"lastSync_{Pet.Id}");
+			await Shell.Current.GoToAsync("..");
+		}
+		catch (Exception ex)
+		{
+			await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+		}
+	}
+
+	[RelayCommand]
+	private async Task DeletePetAsync()
+	{
+		if (Pet is null) return;
+
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Delete Pet",
+			$"This permanently deletes {Pet.Name}, all data, and all share codes. This cannot be undone.",
+			"Delete",
+			"Cancel");
+
+		if (!confirm) return;
+
+		try
+		{
+			await _syncService.DeletePetAsync(Pet.Id);
+			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
+			await _db.PurgePetDataAsync(Pet.Id);
+			Preferences.Remove($"lastSync_{Pet.Id}");
+			await Shell.Current.GoToAsync("..");
+		}
+		catch (Exception ex)
+		{
+			await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+		}
 	}
 }

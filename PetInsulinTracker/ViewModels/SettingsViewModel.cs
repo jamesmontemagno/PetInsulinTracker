@@ -10,11 +10,14 @@ public partial class SettingsViewModel : ObservableObject
 {
 	private readonly ISyncService _syncService;
 	private readonly IDatabaseService _db;
+	private readonly INotificationService _notifications;
+	private bool _suppressNotificationsChange;
 
-	public SettingsViewModel(ISyncService syncService, IDatabaseService db)
+	public SettingsViewModel(ISyncService syncService, IDatabaseService db, INotificationService notifications)
 	{
 		_syncService = syncService;
 		_db = db;
+		_notifications = notifications;
 		selectedThemeName = Themes.ThemeService.CurrentTheme switch
 		{
 			Themes.AppTheme.Warm => "Warm & Earthy",
@@ -29,7 +32,7 @@ public partial class SettingsViewModel : ObservableObject
 	private string ownerName = Preferences.Get(Constants.OwnerNameKey, string.Empty);
 
 	[ObservableProperty]
-	private bool notificationsEnabled = Preferences.Get("notifications_enabled", true);
+	private bool notificationsEnabled = Preferences.Get(Constants.NotificationsEnabledKey, true);
 
 	[ObservableProperty]
 	private bool offlineMode = Preferences.Get(Constants.OfflineModeKey, false);
@@ -57,7 +60,34 @@ public partial class SettingsViewModel : ObservableObject
 
 	partial void OnNotificationsEnabledChanged(bool value)
 	{
-		Preferences.Set("notifications_enabled", value);
+		if (_suppressNotificationsChange)
+			return;
+
+		_ = HandleNotificationsChangedAsync(value);
+	}
+
+	private async Task HandleNotificationsChangedAsync(bool value)
+	{
+		if (value)
+		{
+			var granted = await _notifications.EnsurePermissionAsync();
+			if (!granted)
+			{
+				_suppressNotificationsChange = true;
+				NotificationsEnabled = false;
+				_suppressNotificationsChange = false;
+				Preferences.Set(Constants.NotificationsEnabledKey, false);
+				return;
+			}
+
+			Preferences.Set(Constants.NotificationsEnabledKey, true);
+			await _notifications.RescheduleAllAsync();
+		}
+		else
+		{
+			Preferences.Set(Constants.NotificationsEnabledKey, false);
+			await _notifications.CancelAllAsync();
+		}
 	}
 
 	partial void OnOfflineModeChanged(bool value)

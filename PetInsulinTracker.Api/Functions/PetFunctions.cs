@@ -62,6 +62,10 @@ public class PetFunctions
 			CurrentDoseIU = request.CurrentDoseIU,
 			WeightUnit = request.WeightUnit,
 			CurrentWeight = request.CurrentWeight,
+			DefaultFoodName = request.DefaultFoodName,
+			DefaultFoodAmount = request.DefaultFoodAmount,
+			DefaultFoodUnit = request.DefaultFoodUnit,
+			DefaultFoodType = request.DefaultFoodType,
 			LastModified = now,
 			IsDeleted = false
 		};
@@ -86,6 +90,10 @@ public class PetFunctions
 				CurrentDoseIU = request.CurrentDoseIU,
 				WeightUnit = request.WeightUnit,
 				CurrentWeight = request.CurrentWeight,
+				DefaultFoodName = request.DefaultFoodName,
+				DefaultFoodAmount = request.DefaultFoodAmount,
+				DefaultFoodUnit = request.DefaultFoodUnit,
+				DefaultFoodType = request.DefaultFoodType,
 				LastModified = now
 			}
 		};
@@ -93,5 +101,30 @@ public class PetFunctions
 		var response = req.CreateResponse(HttpStatusCode.Created);
 		await response.WriteAsJsonAsync(result);
 		return response;
+	}
+
+	[Function("DeletePet")]
+	public async Task<HttpResponseData> DeletePet(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "pets/delete")] HttpRequestData req)
+	{
+		var request = await req.ReadFromJsonAsync<DeletePetRequest>();
+		if (request is null || string.IsNullOrEmpty(request.PetId) || string.IsNullOrEmpty(request.OwnerId))
+		{
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		var pet = await _storage.GetPetAsync(request.PetId);
+		if (pet is null)
+			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		if (!string.Equals(pet.OwnerId, request.OwnerId, StringComparison.Ordinal))
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+
+		var deleted = await _storage.DeletePetAsync(request.PetId);
+		if (!deleted)
+			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		_logger.LogInformation("Deleted pet {PetId} by owner {OwnerId}", request.PetId, request.OwnerId);
+		return req.CreateResponse(HttpStatusCode.OK);
 	}
 }

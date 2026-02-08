@@ -7,6 +7,8 @@ public interface ISyncService
 	Task RedeemShareCodeAsync(string shareCode);
 	Task<List<PetInsulinTracker.Shared.DTOs.SharedUserDto>> GetSharedUsersAsync(string petId);
 	Task RevokeAccessAsync(string petId, string deviceUserId);
+	Task LeavePetAsync(string petId);
+	Task DeletePetAsync(string petId);
 	Task SyncAsync(string petId);
 	Task DeleteShareCodeAsync(string shareCode);
 	Task SyncAllAsync();

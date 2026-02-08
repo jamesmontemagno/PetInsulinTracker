@@ -22,6 +22,10 @@ public class PetEntity : ITableEntity
 	public double? CurrentDoseIU { get; set; }
 	public string WeightUnit { get; set; } = "lbs";
 	public double? CurrentWeight { get; set; }
+	public string? DefaultFoodName { get; set; }
+	public double? DefaultFoodAmount { get; set; }
+	public string DefaultFoodUnit { get; set; } = "cups";
+	public string DefaultFoodType { get; set; } = "Dry";
 	public string? ShareCode { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 	public bool IsDeleted { get; set; }

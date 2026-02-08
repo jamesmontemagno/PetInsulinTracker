@@ -1,3 +1,4 @@
+using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using Plugin.LocalNotification;
 
@@ -12,15 +13,29 @@ public class NotificationService : INotificationService
 		_db = db;
 	}
 
+	public async Task<bool> EnsurePermissionAsync()
+	{
+		if (!LocalNotificationCenter.Current.IsSupported)
+			return false;
+
+		if (await LocalNotificationCenter.Current.AreNotificationsEnabled())
+			return true;
+
+		return await LocalNotificationCenter.Current.RequestNotificationPermission();
+	}
+
 	public async Task ScheduleNotificationsForPetAsync(string petId)
 	{
+		if (!Preferences.Get(Constants.NotificationsEnabledKey, true))
+			return;
+
 		await CancelNotificationsForPetAsync(petId);
 
 		var schedules = await _db.GetSchedulesAsync(petId);
 		var pet = await _db.GetPetAsync(petId);
 		if (pet is null) return;
 
-		foreach (var schedule in schedules.Where(s => s.IsEnabled))
+		foreach (var schedule in schedules)
 		{
 			var notificationId = GenerateNotificationId(petId, schedule.Id);
 			var notifyTime = DateTime.Today.Add(schedule.TimeOfDay)
@@ -59,12 +74,24 @@ public class NotificationService : INotificationService
 
 	public async Task RescheduleAllAsync()
 	{
+		if (!Preferences.Get(Constants.NotificationsEnabledKey, true))
+		{
+			LocalNotificationCenter.Current.CancelAll();
+			return;
+		}
+
 		LocalNotificationCenter.Current.CancelAll();
 		var pets = await _db.GetPetsAsync();
 		foreach (var pet in pets)
 		{
 			await ScheduleNotificationsForPetAsync(pet.Id);
 		}
+	}
+
+	public Task CancelAllAsync()
+	{
+		LocalNotificationCenter.Current.CancelAll();
+		return Task.CompletedTask;
 	}
 
 	// Generate a stable int ID from pet+schedule string IDs

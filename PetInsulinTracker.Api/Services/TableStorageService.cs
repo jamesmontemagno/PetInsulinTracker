@@ -209,4 +209,49 @@ public class TableStorageService
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 		return true;
 	}
+
+	public async Task<bool> DeleteRedemptionAsync(string petId, string deviceUserId)
+	{
+		var entity = await GetRedemptionAsync(petId, deviceUserId);
+		if (entity is null) return false;
+
+		var client = await GetTableClientAsync("ShareRedemptions");
+		try
+		{
+			await client.DeleteEntityAsync(entity.PartitionKey, entity.RowKey);
+			return true;
+		}
+		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
+		{
+			return false;
+		}
+	}
+
+	public async Task<bool> DeletePetAsync(string petId)
+	{
+		var pet = await GetPetAsync(petId);
+		if (pet is null)
+			return false;
+
+		await DeleteEntitiesByPartitionAsync("InsulinLogs", petId);
+		await DeleteEntitiesByPartitionAsync("FeedingLogs", petId);
+		await DeleteEntitiesByPartitionAsync("WeightLogs", petId);
+		await DeleteEntitiesByPartitionAsync("VetInfos", petId);
+		await DeleteEntitiesByPartitionAsync("Schedules", petId);
+		await DeleteEntitiesByPartitionAsync("ShareCodes", petId);
+		await DeleteEntitiesByPartitionAsync("ShareRedemptions", petId);
+
+		var petClient = await GetTableClientAsync("Pets");
+		await petClient.DeleteEntityAsync(pet.PartitionKey, pet.RowKey);
+		return true;
+	}
+
+	private async Task DeleteEntitiesByPartitionAsync(string tableName, string partitionKey)
+	{
+		var client = await GetTableClientAsync(tableName);
+		await foreach (var entity in client.QueryAsync<TableEntity>(e => e.PartitionKey == partitionKey))
+		{
+			await client.DeleteEntityAsync(entity.PartitionKey, entity.RowKey);
+		}
+	}
 }

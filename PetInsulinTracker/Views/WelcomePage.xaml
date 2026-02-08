@@ -366,7 +366,7 @@
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
                             <Switch x:Name="MorningInsulinEnabled" IsToggled="True" />
-                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                            <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
@@ -388,7 +388,7 @@
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
                             <Switch x:Name="EveningInsulinEnabled" IsToggled="True" />
-                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                            <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
@@ -410,7 +410,7 @@
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
                             <Switch x:Name="MorningFeedingEnabled" IsToggled="True" />
-                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                            <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
@@ -432,7 +432,20 @@
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
                             <Switch x:Name="EveningFeedingEnabled" IsToggled="True" />
-                            <Label Text="Enable this schedule" VerticalOptions="Center"
+                            <Label Text="Add this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Notifications" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Label Text="Get reminders for the schedules you add on this device."
+                               Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="NotificationsEnabledSwitch" IsToggled="True" />
+                            <Label Text="Enable notifications" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>

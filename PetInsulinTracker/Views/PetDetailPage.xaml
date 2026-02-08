@@ -207,8 +207,7 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Button Grid.Row="0" Grid.Column="0" Text="Schedules"
                             Style="{StaticResource OutlineButtonStyle}"
-                            Command="{Binding GoToScheduleCommand}"
-                            IsVisible="{Binding IsOwnerOrFull}" />
+                            Command="{Binding GoToScheduleCommand}" />
                     <Button Grid.Row="0" Grid.Column="1" Text="Vet Info"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToVetInfoCommand}"
@@ -221,6 +220,17 @@
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToSettingsCommand}" />
                 </Grid>
+
+                <Button Text="Leave Pet"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        TextColor="Red"
+                        Command="{Binding LeavePetCommand}"
+                        IsVisible="{Binding IsOwner, Converter={StaticResource InvertedBoolConverter}}" />
+                <Button Text="Delete Pet"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        TextColor="Red"
+                        Command="{Binding DeletePetCommand}"
+                        IsVisible="{Binding IsOwner}" />
 
                 <Button Text="Sync Now"
                         Style="{StaticResource OutlineButtonStyle}"

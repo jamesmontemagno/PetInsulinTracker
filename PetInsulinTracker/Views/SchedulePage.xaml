@@ -13,37 +13,47 @@
         <VerticalStackLayout Padding="20" Spacing="12">
 
             <!-- Add New Schedule -->
-            <Label Text="ADD SCHEDULE" Style="{StaticResource OverlineStyle}" />
+                <VerticalStackLayout IsVisible="{Binding CanEdit}" Spacing="12">
+                    <Label Text="SCHEDULE DETAILS" Style="{StaticResource OverlineStyle}" />
 
-            <Border Style="{StaticResource CardStyle}">
-                <VerticalStackLayout Spacing="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Label" Style="{StaticResource FormLabelStyle}" />
-                        <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
-                    </VerticalStackLayout>
+                    <Border Style="{StaticResource CardStyle}">
+                        <VerticalStackLayout Spacing="12">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Label" Style="{StaticResource FormLabelStyle}" />
+                                <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
+                            </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
-                        <Picker ItemsSource="{Binding ScheduleTypeOptions}"
-                                SelectedItem="{Binding ScheduleType}" />
-                    </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Type" Style="{StaticResource FormLabelStyle}" />
+                                <Picker ItemsSource="{Binding ScheduleTypeOptions}"
+                                        SelectedItem="{Binding ScheduleType}" />
+                            </VerticalStackLayout>
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                            <TimePicker Time="{Binding TimeOfDay}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                    <TimePicker Time="{Binding TimeOfDay}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                    <Entry Text="{Binding ReminderLeadTimeMinutes}" Keyboard="Numeric" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <Button Text="{Binding SaveButtonText}" Command="{Binding SaveScheduleCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    HorizontalOptions="Fill" />
+
+                            <Button Text="Cancel" Command="{Binding CancelEditCommand}"
+                                    Style="{StaticResource OutlineButtonStyle}"
+                                    HorizontalOptions="Fill"
+                                    IsVisible="{Binding IsEditing}" />
                         </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="4">
-                            <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
-                            <Entry Text="{Binding ReminderLeadTimeMinutes}" Keyboard="Numeric" />
-                        </VerticalStackLayout>
-                    </Grid>
-
-                    <Button Text="Add Schedule" Command="{Binding SaveScheduleCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            HorizontalOptions="Fill" />
+                    </Border>
                 </VerticalStackLayout>
-            </Border>
+
+                <Label Text="View-only access" Style="{StaticResource SubtleTextStyle}" FontSize="12"
+                       IsVisible="{Binding CanEdit, Converter={StaticResource InvertedBoolConverter}}" />
 
             <!-- Existing Schedules -->
             <Label Text="ACTIVE SCHEDULES" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
@@ -55,16 +65,21 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Schedule">
-                        <SwipeView>
+                        <SwipeView IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=CanEdit}">
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="Delete"
                                                BackgroundColor="{DynamicResource CurrentDanger}"
                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=DeleteScheduleCommand}"
-                                               CommandParameter="{Binding .}" />
+                                               CommandParameter="{Binding .}"
+                                               IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=CanEdit}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
                             <Border Style="{StaticResource CardStyle}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=EditScheduleCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
                                 <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
                                     <Border Grid.Column="0"
                                             BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
@@ -87,8 +102,10 @@
                                             </Label.Text>
                                         </Label>
                                     </VerticalStackLayout>
-                                    <Switch Grid.Column="2" IsToggled="{Binding IsEnabled}"
-                                            VerticalOptions="Center" />
+                                    <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent Edit24}" IconSize="18"
+                                                 IconColor="{DynamicResource PageTextSecondary}"
+                                                 VerticalOptions="Center"
+                                                 IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:ScheduleViewModel}}, Path=CanEdit}" />
                                 </Grid>
                             </Border>
                         </SwipeView>

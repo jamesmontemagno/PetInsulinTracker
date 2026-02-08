@@ -59,6 +59,17 @@ public class DatabaseService : IDatabaseService
 		return await db.UpdateAsync(pet);
 	}
 
+	public async Task PurgePetDataAsync(string petId)
+	{
+		var db = await GetConnectionAsync();
+		await db.ExecuteAsync("DELETE FROM [InsulinLog] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [FeedingLog] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [WeightLog] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [VetInfo] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [Schedule] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [Pet] WHERE [Id] = ?", petId);
+	}
+
 	// Insulin Logs
 
 	public async Task<List<InsulinLog>> GetInsulinLogsAsync(string petId)
@@ -234,7 +245,7 @@ public class DatabaseService : IDatabaseService
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<Schedule>()
-			.Where(s => s.IsEnabled && !s.IsDeleted)
+			.Where(s => !s.IsDeleted)
 			.ToListAsync();
 	}
 

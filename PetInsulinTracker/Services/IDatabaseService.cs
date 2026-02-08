@@ -9,6 +9,7 @@ public interface IDatabaseService
 	Task<Pet?> GetPetAsync(string id);
 	Task<int> SavePetAsync(Pet pet);
 	Task<int> DeletePetAsync(Pet pet);
+	Task PurgePetDataAsync(string petId);
 
 	// Insulin Logs
 	Task<List<InsulinLog>> GetInsulinLogsAsync(string petId);

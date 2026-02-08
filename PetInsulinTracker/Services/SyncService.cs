@@ -33,7 +33,11 @@ public class SyncService : ISyncService
 			InsulinConcentration = pet.InsulinConcentration,
 			CurrentDoseIU = pet.CurrentDoseIU,
 			WeightUnit = pet.WeightUnit,
-			CurrentWeight = pet.CurrentWeight
+			CurrentWeight = pet.CurrentWeight,
+			DefaultFoodName = pet.DefaultFoodName,
+			DefaultFoodAmount = pet.DefaultFoodAmount,
+			DefaultFoodUnit = pet.DefaultFoodUnit,
+			DefaultFoodType = pet.DefaultFoodType
 		};
 
 		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request);
@@ -88,6 +92,10 @@ public class SyncService : ISyncService
 			CurrentDoseIU = data.Pet.CurrentDoseIU,
 			WeightUnit = data.Pet.WeightUnit,
 			CurrentWeight = data.Pet.CurrentWeight,
+			DefaultFoodName = data.Pet.DefaultFoodName,
+			DefaultFoodAmount = data.Pet.DefaultFoodAmount,
+			DefaultFoodUnit = data.Pet.DefaultFoodUnit,
+			DefaultFoodType = data.Pet.DefaultFoodType,
 			LastModified = data.Pet.LastModified,
 			IsSynced = true
 		};
@@ -168,6 +176,30 @@ public class SyncService : ISyncService
 		response.EnsureSuccessStatusCode();
 	}
 
+	public async Task LeavePetAsync(string petId)
+	{
+		if (Constants.IsOfflineMode)
+			throw new InvalidOperationException("Leaving a shared pet is not available in offline mode.");
+
+		var response = await _http.PostAsJsonAsync(
+			$"{Constants.ApiBaseUrl}/share/leave",
+			new LeavePetRequest { PetId = petId, DeviceUserId = Constants.DeviceUserId });
+
+		response.EnsureSuccessStatusCode();
+	}
+
+	public async Task DeletePetAsync(string petId)
+	{
+		if (Constants.IsOfflineMode)
+			throw new InvalidOperationException("Deleting a pet is not available in offline mode.");
+
+		var response = await _http.PostAsJsonAsync(
+			$"{Constants.ApiBaseUrl}/pets/delete",
+			new DeletePetRequest { PetId = petId, OwnerId = Constants.DeviceUserId });
+
+		response.EnsureSuccessStatusCode();
+	}
+
 	public async Task SyncAsync(string petId)
 	{
 		if (Constants.IsOfflineMode) return;
@@ -197,6 +229,10 @@ public class SyncService : ISyncService
 			DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 			InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 			WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
+			DefaultFoodName = p.DefaultFoodName,
+			DefaultFoodAmount = p.DefaultFoodAmount,
+			DefaultFoodUnit = p.DefaultFoodUnit,
+			DefaultFoodType = p.DefaultFoodType,
 			LastModified = p.LastModified,
 			IsDeleted = p.IsDeleted
 		}).ToList();
@@ -211,6 +247,10 @@ public class SyncService : ISyncService
 				DateOfBirth = pet.DateOfBirth, InsulinType = pet.InsulinType,
 				InsulinConcentration = pet.InsulinConcentration, CurrentDoseIU = pet.CurrentDoseIU,
 				WeightUnit = pet.WeightUnit, CurrentWeight = pet.CurrentWeight,
+				DefaultFoodName = pet.DefaultFoodName,
+				DefaultFoodAmount = pet.DefaultFoodAmount,
+				DefaultFoodUnit = pet.DefaultFoodUnit,
+				DefaultFoodType = pet.DefaultFoodType,
 				LastModified = pet.LastModified,
 				IsDeleted = pet.IsDeleted
 			});
@@ -285,6 +325,10 @@ public class SyncService : ISyncService
 					DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
+					DefaultFoodName = p.DefaultFoodName,
+					DefaultFoodAmount = p.DefaultFoodAmount,
+					DefaultFoodUnit = p.DefaultFoodUnit,
+					DefaultFoodType = p.DefaultFoodType,
 					LastModified = p.LastModified, IsSynced = true,
 					IsDeleted = p.IsDeleted
 				});

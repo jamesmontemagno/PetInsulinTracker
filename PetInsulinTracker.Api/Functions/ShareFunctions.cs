@@ -129,6 +129,10 @@ public class ShareFunctions
 				CurrentDoseIU = pet.CurrentDoseIU,
 				WeightUnit = pet.WeightUnit,
 				CurrentWeight = pet.CurrentWeight,
+				DefaultFoodName = pet.DefaultFoodName,
+				DefaultFoodAmount = pet.DefaultFoodAmount,
+				DefaultFoodUnit = pet.DefaultFoodUnit,
+				DefaultFoodType = pet.DefaultFoodType,
 				LastModified = pet.LastModified
 			},
 			InsulinLogs = accessLevel == "guest" ? [] : insulinLogs.Where(l => !l.IsDeleted).Select(l => new InsulinLogDto
@@ -223,6 +227,24 @@ public class ShareFunctions
 		}
 
 		_logger.LogInformation("Revoked access for {DeviceUserId} on pet {PetId}", request.DeviceUserId, request.PetId);
+		return req.CreateResponse(HttpStatusCode.OK);
+	}
+
+	[Function("LeavePet")]
+	public async Task<HttpResponseData> LeavePet(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "share/leave")] HttpRequestData req)
+	{
+		var request = await req.ReadFromJsonAsync<LeavePetRequest>();
+		if (request is null || string.IsNullOrEmpty(request.PetId) || string.IsNullOrEmpty(request.DeviceUserId))
+		{
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+		}
+
+		var removed = await _storage.DeleteRedemptionAsync(request.PetId, request.DeviceUserId);
+		if (!removed)
+			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		_logger.LogInformation("Removed redemption for {DeviceUserId} on pet {PetId}", request.DeviceUserId, request.PetId);
 		return req.CreateResponse(HttpStatusCode.OK);
 	}
 

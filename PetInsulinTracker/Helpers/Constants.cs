@@ -8,6 +8,7 @@ public static class Constants
 	public const string OwnerNameKey = "owner_name";
 	public const string DeviceUserIdKey = "device_user_id";
 	public const string OfflineModeKey = "offline_mode";
+	public const string NotificationsEnabledKey = "notifications_enabled";
 
 	/// <summary>Whether the app is in fully offline mode (no cloud sync).</summary>
 	public static bool IsOfflineMode => Preferences.Get(OfflineModeKey, false);

@@ -74,6 +74,18 @@ public class RevokeAccessRequest
 	public string DeviceUserId { get; set; } = string.Empty;
 }
 
+public class LeavePetRequest
+{
+	public string PetId { get; set; } = string.Empty;
+	public string DeviceUserId { get; set; } = string.Empty;
+}
+
+public class DeletePetRequest
+{
+	public string PetId { get; set; } = string.Empty;
+	public string OwnerId { get; set; } = string.Empty;
+}
+
 public class CreatePetRequest
 {
 	public string Id { get; set; } = string.Empty;
@@ -88,6 +100,10 @@ public class CreatePetRequest
 	public double? CurrentDoseIU { get; set; }
 	public string WeightUnit { get; set; } = "lbs";
 	public double? CurrentWeight { get; set; }
+	public string? DefaultFoodName { get; set; }
+	public double? DefaultFoodAmount { get; set; }
+	public string DefaultFoodUnit { get; set; } = "cups";
+	public string DefaultFoodType { get; set; } = "Dry";
 }
 
 public class CreatePetResponse

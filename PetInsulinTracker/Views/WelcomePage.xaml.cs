@@ -29,6 +29,7 @@ public partial class WelcomePage : ContentPage
 
 		// Default weight unit from preferences
 		WeightUnitPicker.SelectedItem = Preferences.Get("default_weight_unit", "lbs");
+		NotificationsEnabledSwitch.IsToggled = Preferences.Get(Constants.NotificationsEnabledKey, true);
 	}
 
 	private void OnThemeCarouselChanged(object? sender, CurrentItemChangedEventArgs e)
@@ -188,6 +189,9 @@ public partial class WelcomePage : ContentPage
 				SavingStatusLabel.Text = "Saving schedules…";
 				await SaveSchedulesAsync(db);
 
+				SavingStatusLabel.Text = "Setting up notifications…";
+				await ApplyNotificationsAsync();
+
 				SavingStatusLabel.Text = "Saving vet info…";
 				await SaveVetInfoAsync(db);
 
@@ -295,6 +299,29 @@ public partial class WelcomePage : ContentPage
 		await db.SaveScheduleAsync(schedule);
 	}
 
+	private async Task ApplyNotificationsAsync()
+	{
+		var notifications = GetNotificationService();
+		var enabled = NotificationsEnabledSwitch.IsToggled;
+		Preferences.Set(Constants.NotificationsEnabledKey, enabled);
+
+		if (!enabled)
+		{
+			await notifications.CancelAllAsync();
+			return;
+		}
+
+		var granted = await notifications.EnsurePermissionAsync();
+		if (!granted)
+		{
+			Preferences.Set(Constants.NotificationsEnabledKey, false);
+			return;
+		}
+
+		if (_savedPetId is not null)
+			await notifications.ScheduleNotificationsForPetAsync(_savedPetId);
+	}
+
 	private async Task SaveVetInfoAsync(IDatabaseService db)
 	{
 		if (_savedPetId is null) return;
@@ -315,6 +342,9 @@ public partial class WelcomePage : ContentPage
 
 	private static IDatabaseService GetDatabaseService() =>
 		IPlatformApplication.Current!.Services.GetRequiredService<IDatabaseService>();
+
+	private static INotificationService GetNotificationService() =>
+		IPlatformApplication.Current!.Services.GetRequiredService<INotificationService>();
 
 	private void FinishOnboarding()
 	{
