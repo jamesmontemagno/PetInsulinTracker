@@ -12,10 +12,12 @@ namespace PetInsulinTracker.ViewModels;
 public partial class WeightLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 
-	public WeightLogViewModel(IDatabaseService db)
+	public WeightLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (r, m) =>
 		{
 			((WeightLogViewModel)r).Unit = m.Value;
@@ -126,6 +128,9 @@ public partial class WeightLogViewModel : ObservableObject
 		{
 			pet.CurrentWeight = Weight;
 			await _db.SavePetAsync(pet);
+
+			if (!string.IsNullOrEmpty(pet.ShareCode))
+				_ = _syncService.SyncAsync(pet.ShareCode);
 		}
 
 		// Reset form

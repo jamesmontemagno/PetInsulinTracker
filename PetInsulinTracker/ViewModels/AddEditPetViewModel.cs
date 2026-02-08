@@ -14,11 +14,13 @@ public sealed class WeightUnitChangedMessage(string unit) : CommunityToolkit.Mvv
 public partial class AddEditPetViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 	private Pet? _existingPet;
 
-	public AddEditPetViewModel(IDatabaseService db)
+	public AddEditPetViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 	}
 
 	[ObservableProperty]
@@ -132,6 +134,9 @@ public partial class AddEditPetViewModel : ObservableObject
 		pet.PhotoPath = PhotoPath;
 
 		await _db.SavePetAsync(pet);
+
+		if (!string.IsNullOrEmpty(pet.ShareCode))
+			_ = _syncService.SyncAsync(pet.ShareCode);
 
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
 		await Shell.Current.GoToAsync("..");

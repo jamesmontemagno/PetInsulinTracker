@@ -127,6 +127,7 @@ public class ShareCodeEntity : ITableEntity
 
 	public string PetId { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
+	public string? OwnerId { get; set; }
 	public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 

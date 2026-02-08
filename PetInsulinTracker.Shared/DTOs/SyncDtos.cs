@@ -28,6 +28,7 @@ public class ShareCodeRequest
 {
 	public string PetId { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
+	public string OwnerId { get; set; } = string.Empty;
 }
 
 public class ShareCodeResponse

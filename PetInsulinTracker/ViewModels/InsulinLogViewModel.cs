@@ -11,10 +11,12 @@ namespace PetInsulinTracker.ViewModels;
 public partial class InsulinLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 
-	public InsulinLogViewModel(IDatabaseService db)
+	public InsulinLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 	}
 
 	[ObservableProperty]
@@ -81,6 +83,13 @@ public partial class InsulinLogViewModel : ObservableObject
 		};
 
 		await _db.SaveInsulinLogAsync(log);
+
+		if (!string.IsNullOrEmpty(PetId))
+		{
+			var pet = await _db.GetPetAsync(PetId);
+			if (!string.IsNullOrEmpty(pet?.ShareCode))
+				_ = _syncService.SyncAsync(pet.ShareCode);
+		}
 
 		// Reset form
 		InjectionSite = null;

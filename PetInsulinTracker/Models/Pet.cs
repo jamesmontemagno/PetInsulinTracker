@@ -51,7 +51,13 @@ public class Pet
 	/// <summary>Wet, Dry, or Treat</summary>
 	public string DefaultFoodType { get; set; } = "Dry";
 
-	/// <summary>Share code for syncing with others</summary>
+	/// <summary>Share code for syncing with others (full access)</summary>
+	public string? FullAccessCode { get; set; }
+
+	/// <summary>Share code for guest/pet-sitter access</summary>
+	public string? GuestAccessCode { get; set; }
+
+	/// <summary>Active share code used for syncing (either full or guest)</summary>
 	public string? ShareCode { get; set; }
 
 	public DateTimeOffset LastModified { get; set; } = DateTimeOffset.UtcNow;

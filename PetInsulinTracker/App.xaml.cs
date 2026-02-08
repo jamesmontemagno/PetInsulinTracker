@@ -1,4 +1,5 @@
-﻿using PetInsulinTracker.Themes;
+﻿using PetInsulinTracker.Services;
+using PetInsulinTracker.Themes;
 using PetInsulinTracker.Views;
 
 namespace PetInsulinTracker;
@@ -20,5 +21,23 @@ public partial class App : Application
 	{
 		var setupComplete = Preferences.Get("setup_complete", false);
 		return new Window(setupComplete ? new AppShell() : new WelcomePage());
+	}
+
+	protected override void OnResume()
+	{
+		base.OnResume();
+		_ = Task.Run(async () =>
+		{
+			try
+			{
+				var syncService = IPlatformApplication.Current?.Services.GetService<ISyncService>();
+				if (syncService is not null)
+					await syncService.SyncAllAsync();
+			}
+			catch
+			{
+				// Silently fail for offline scenarios
+			}
+		});
 	}
 }

@@ -112,7 +112,21 @@ public class TableStorageService
 		}
 	}
 
-	public async Task CreateShareCodeAsync(string code, string petId, string accessLevel = "full")
+	public async Task<bool> DeleteShareCodeAsync(string code)
+	{
+		var client = await GetTableClientAsync("ShareCodes");
+		try
+		{
+			await client.DeleteEntityAsync("ShareCodes", code);
+			return true;
+		}
+		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
+		{
+			return false;
+		}
+	}
+
+	public async Task CreateShareCodeAsync(string code, string petId, string accessLevel = "full", string? ownerId = null)
 	{
 		var client = await GetTableClientAsync("ShareCodes");
 		var entity = new ShareCodeEntity
@@ -120,7 +134,8 @@ public class TableStorageService
 			PartitionKey = "ShareCodes",
 			RowKey = code,
 			PetId = petId,
-			AccessLevel = accessLevel
+			AccessLevel = accessLevel,
+			OwnerId = ownerId
 		};
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}

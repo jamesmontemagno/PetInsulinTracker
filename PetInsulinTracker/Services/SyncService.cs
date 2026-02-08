@@ -20,7 +20,7 @@ public class SyncService : ISyncService
 	{
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
-			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel });
+			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel, OwnerId = Constants.DeviceUserId });
 
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync<ShareCodeResponse>();
@@ -323,6 +323,12 @@ public class SyncService : ISyncService
 		foreach (var s in unsyncedSchedules) await _db.MarkSyncedAsync<Schedule>(s.Id);
 
 		Preferences.Set($"lastSync_{shareCode}", syncResponse.SyncTimestamp);
+	}
+
+	public async Task DeleteShareCodeAsync(string shareCode)
+	{
+		var response = await _http.DeleteAsync($"{Constants.ApiBaseUrl}/share/{shareCode}");
+		response.EnsureSuccessStatusCode();
 	}
 
 	public async Task SyncAllAsync()

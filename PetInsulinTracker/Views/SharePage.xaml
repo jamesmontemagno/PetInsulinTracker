@@ -12,14 +12,15 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
-            <!-- Share Code Ticket -->
-            <Label Text="SHARE CODE" Style="{StaticResource OverlineStyle}" />
+            <!-- Share Codes Section -->
+            <Label Text="SHARE CODES" Style="{StaticResource OverlineStyle}" />
 
+            <!-- Full Access Code Card -->
             <Border Style="{StaticResource CardStyleElevated}"
                     Padding="24"
-                    IsVisible="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                    IsVisible="{Binding FullAccessCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
                 <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="{Binding ShareCodeLabel}" Style="{StaticResource SubtleTextStyle}"
+                    <Label Text="Full Access Code" Style="{StaticResource SubtleTextStyle}"
                            HorizontalOptions="Center" />
                     <Border BackgroundColor="{DynamicResource CurrentSurface}"
                             StrokeThickness="2"
@@ -27,17 +28,52 @@
                             StrokeShape="RoundRectangle 12"
                             Padding="24,16"
                             HorizontalOptions="Center">
-                        <Label Text="{Binding ShareCode}" FontSize="36" FontFamily="OpenSansSemibold"
+                        <Label Text="{Binding FullAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
                                LetterSpacing="6" HorizontalOptions="Center"
                                TextColor="{DynamicResource CurrentPrimary}"
-                               SemanticProperties.Description="Share code" />
+                               SemanticProperties.Description="Full access share code" />
                     </Border>
-                    <Button Text="Copy Code" Command="{Binding CopyShareCodeCommand}"
+                    <Button Text="Copy Code" Command="{Binding CopyFullAccessCodeCommand}"
                             Style="{StaticResource QuickActionButtonStyle}"
                             HorizontalOptions="Center" />
-                    <Label Text="Share this code with family members or pet sitters so they can view and update your pet's records."
+                    <Label Text="For family members — full access to all logs and pet info."
                            Style="{StaticResource SubtleTextStyle}" FontSize="13"
                            HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Button Text="Delete Code" Command="{Binding DeleteFullAccessCodeCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Center"
+                            TextColor="Red" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Guest Access Code Card -->
+            <Border Style="{StaticResource CardStyleElevated}"
+                    Padding="24"
+                    IsVisible="{Binding GuestAccessCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="Guest Access Code" Style="{StaticResource SubtleTextStyle}"
+                           HorizontalOptions="Center" />
+                    <Border BackgroundColor="{DynamicResource CurrentSurface}"
+                            StrokeThickness="2"
+                            Stroke="{DynamicResource CurrentPrimary}"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="24,16"
+                            HorizontalOptions="Center">
+                        <Label Text="{Binding GuestAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
+                               LetterSpacing="6" HorizontalOptions="Center"
+                               TextColor="{DynamicResource CurrentPrimary}"
+                               SemanticProperties.Description="Guest access share code" />
+                    </Border>
+                    <Button Text="Copy Code" Command="{Binding CopyGuestAccessCodeCommand}"
+                            Style="{StaticResource QuickActionButtonStyle}"
+                            HorizontalOptions="Center" />
+                    <Label Text="For pet sitters — can view pet info and log entries, but not other people's logs."
+                           Style="{StaticResource SubtleTextStyle}" FontSize="13"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    <Button Text="Delete Code" Command="{Binding DeleteGuestAccessCodeCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Center"
+                            TextColor="Red" />
                 </VerticalStackLayout>
             </Border>
 
@@ -144,8 +180,7 @@
                 <Button Text="Refresh"
                         Command="{Binding LoadSharedUsersCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
-                        HorizontalOptions="Center"
-                        IsVisible="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                        HorizontalOptions="Center" />
             </VerticalStackLayout>
 
             <!-- Status -->

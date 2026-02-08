@@ -37,7 +37,7 @@ public class ShareFunctions
 		}
 		while (await _storage.GetShareCodeAsync(code) is not null);
 
-		await _storage.CreateShareCodeAsync(code, request.PetId, request.AccessLevel);
+		await _storage.CreateShareCodeAsync(code, request.PetId, request.AccessLevel, request.OwnerId);
 		_logger.LogInformation("Generated share code {Code} for pet {PetId}", code, request.PetId);
 
 		var response = req.CreateResponse(HttpStatusCode.OK);
@@ -197,6 +197,21 @@ public class ShareFunctions
 		}
 
 		_logger.LogInformation("Revoked access for {DeviceUserId} on share code {Code}", request.DeviceUserId, request.ShareCode);
+		return req.CreateResponse(HttpStatusCode.OK);
+	}
+
+	[Function("DeleteShareCode")]
+	public async Task<HttpResponseData> DeleteShareCode(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "share/{code}")] HttpRequestData req,
+		string code)
+	{
+		var deleted = await _storage.DeleteShareCodeAsync(code);
+		if (!deleted)
+		{
+			return req.CreateResponse(HttpStatusCode.NotFound);
+		}
+
+		_logger.LogInformation("Deleted share code {Code}", code);
 		return req.CreateResponse(HttpStatusCode.OK);
 	}
 }
