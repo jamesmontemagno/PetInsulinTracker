@@ -29,7 +29,7 @@
                             Padding="24,16"
                             HorizontalOptions="Center">
                         <Label Text="{Binding FullAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
-                               LetterSpacing="6" HorizontalOptions="Center"
+                               CharacterSpacing="6" HorizontalOptions="Center"
                                TextColor="{DynamicResource CurrentPrimary}"
                                SemanticProperties.Description="Full access share code" />
                     </Border>
@@ -60,7 +60,7 @@
                             Padding="24,16"
                             HorizontalOptions="Center">
                         <Label Text="{Binding GuestAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
-                               LetterSpacing="6" HorizontalOptions="Center"
+                               CharacterSpacing="6" HorizontalOptions="Center"
                                TextColor="{DynamicResource CurrentPrimary}"
                                SemanticProperties.Description="Guest access share code" />
                     </Border>
