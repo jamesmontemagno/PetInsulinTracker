@@ -6,6 +6,7 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{DynamicResource PageBackground}">
 
+    <Grid>
     <ScrollView>
         <VerticalStackLayout VerticalOptions="Center" Spacing="20" Padding="32,48,32,32">
 
@@ -356,7 +357,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningInsulinTime" Time="07:00:00" />
+                                <TimePicker x:Name="MorningInsulinTime" Time="08:00:00" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -378,7 +379,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningInsulinTime" Time="19:00:00" />
+                                <TimePicker x:Name="EveningInsulinTime" Time="20:00:00" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -400,7 +401,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningFeedingTime" Time="07:00:00" />
+                                <TimePicker x:Name="MorningFeedingTime" Time="08:00:00" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -422,7 +423,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningFeedingTime" Time="19:00:00" />
+                                <TimePicker x:Name="EveningFeedingTime" Time="20:00:00" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -502,5 +503,18 @@
 
         </VerticalStackLayout>
     </ScrollView>
+
+    <!-- Saving overlay -->
+    <Grid x:Name="SavingOverlay" IsVisible="False"
+          BackgroundColor="{AppThemeBinding Light=#CC000000, Dark=#CC000000}">
+        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
+            <ActivityIndicator IsRunning="True" HeightRequest="48" WidthRequest="48"
+                               Color="{DynamicResource CurrentPrimary}" />
+            <Label x:Name="SavingStatusLabel" Text="Saving…"
+                   TextColor="White" FontSize="16" FontFamily="OpenSansSemibold"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+    </Grid>
+    </Grid>
 
 </ContentPage>

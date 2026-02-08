@@ -126,7 +126,7 @@ public partial class WelcomePage : ContentPage
 		}
 	}
 
-	// Step 3: Save pet and continue to schedules
+	// Step 3: Collect pet info and continue to schedules
 	private async void OnStep3Next(object? sender, EventArgs e)
 	{
 		var petName = PetNameEntry.Text?.Trim();
@@ -136,20 +136,18 @@ public partial class WelcomePage : ContentPage
 			return;
 		}
 
-		await SavePetAsync(petName);
 		GoToStep(4);
 	}
 
 	// Step 3 skip → finish (no pet = no schedules/vet needed)
-	private void OnStep3Skip(object? sender, EventArgs e)
+	private async void OnStep3Skip(object? sender, EventArgs e)
 	{
-		FinishOnboarding();
+		await SaveAllAndFinishAsync();
 	}
 
-	// Step 4: Save schedules → Step 5
-	private async void OnStep4Next(object? sender, EventArgs e)
+	// Step 4: Continue to Step 5
+	private void OnStep4Next(object? sender, EventArgs e)
 	{
-		await SaveSchedulesAsync();
 		GoToStep(5);
 	}
 
@@ -159,27 +157,81 @@ public partial class WelcomePage : ContentPage
 		GoToStep(5);
 	}
 
-	// Step 5 done (save vet + finish)
+	// Step 5 done
 	private async void OnStep5Done(object? sender, EventArgs e)
 	{
-		await SaveVetInfoAsync();
-		FinishOnboarding();
+		await SaveAllAndFinishAsync();
 	}
 
 	// Step 5 skip → finish
-	private void OnStep5Skip(object? sender, EventArgs e)
+	private async void OnStep5Skip(object? sender, EventArgs e)
 	{
+		await SaveAllAndFinishAsync();
+	}
+
+	private async Task SaveAllAndFinishAsync()
+	{
+		// Show saving overlay
+		SavingOverlay.IsVisible = true;
+
+		try
+		{
+			var db = GetDatabaseService();
+
+			// Save pet if one was entered
+			var petName = PetNameEntry.Text?.Trim();
+			if (!string.IsNullOrWhiteSpace(petName))
+			{
+				SavingStatusLabel.Text = "Creating pet profile…";
+				await SavePetAsync(db, petName);
+
+				SavingStatusLabel.Text = "Saving schedules…";
+				await SaveSchedulesAsync(db);
+
+				SavingStatusLabel.Text = "Saving vet info…";
+				await SaveVetInfoAsync(db);
+
+				// Sync to backend
+				if (!Constants.IsOfflineMode && _savedPetId is not null)
+				{
+					SavingStatusLabel.Text = "Syncing to cloud…";
+					try
+					{
+						var syncService = IPlatformApplication.Current!.Services.GetRequiredService<ISyncService>();
+						var pet = await db.GetPetAsync(_savedPetId);
+						if (pet is not null)
+						{
+							await syncService.CreatePetAsync(pet);
+							pet.IsSynced = true;
+							await db.SavePetAsync(pet);
+						}
+					}
+					catch
+					{
+						// Will retry on next sync
+					}
+				}
+			}
+
+			SavingStatusLabel.Text = "All set!";
+			await Task.Delay(500);
+		}
+		catch (Exception ex)
+		{
+			SavingStatusLabel.Text = $"Error: {ex.Message}";
+			await Task.Delay(2000);
+		}
+
 		FinishOnboarding();
 	}
 
-	private async Task SavePetAsync(string petName)
+	private async Task SavePetAsync(IDatabaseService db, string petName)
 	{
-		var db = GetDatabaseService();
-
 		var pet = new Pet
 		{
 			Name = petName,
-			OwnerId = Helpers.Constants.OwnerName,
+			OwnerId = Constants.DeviceUserId,
+			OwnerName = Constants.OwnerName,
 			Species = SpeciesPicker.SelectedItem as string ?? "Dog",
 			Breed = BreedEntry.Text?.Trim() ?? "",
 			InsulinType = InsulinTypePicker.SelectedItem as string,
@@ -203,10 +255,9 @@ public partial class WelcomePage : ContentPage
 		_savedPetId = pet.Id;
 	}
 
-	private async Task SaveSchedulesAsync()
+	private async Task SaveSchedulesAsync(IDatabaseService db)
 	{
 		if (_savedPetId is null) return;
-		var db = GetDatabaseService();
 
 		if (MorningInsulinEnabled.IsToggled)
 			await SaveScheduleAsync(db, "Morning Insulin", "Insulin",
@@ -244,13 +295,12 @@ public partial class WelcomePage : ContentPage
 		await db.SaveScheduleAsync(schedule);
 	}
 
-	private async Task SaveVetInfoAsync()
+	private async Task SaveVetInfoAsync(IDatabaseService db)
 	{
 		if (_savedPetId is null) return;
 		var vetName = VetNameEntry.Text?.Trim();
 		if (string.IsNullOrWhiteSpace(vetName)) return;
 
-		var db = GetDatabaseService();
 		var vet = new VetInfo
 		{
 			PetId = _savedPetId,
@@ -269,30 +319,6 @@ public partial class WelcomePage : ContentPage
 	private void FinishOnboarding()
 	{
 		Preferences.Set("setup_complete", true);
-
-		// Create pet in backend and sync
-		if (_savedPetId is not null)
-		{
-			_ = Task.Run(async () =>
-			{
-				try
-				{
-					var db = GetDatabaseService();
-					var syncService = IPlatformApplication.Current!.Services.GetRequiredService<ISyncService>();
-					var pet = await db.GetPetAsync(_savedPetId);
-					if (pet is not null && !pet.IsSynced)
-					{
-						await syncService.CreatePetAsync(pet);
-						pet.IsSynced = true;
-						await db.SavePetAsync(pet);
-					}
-				}
-				catch
-				{
-					// Will retry on next sync
-				}
-			});
-		}
 
 		if (Application.Current is not null)
 			Application.Current.Windows[0].Page = new AppShell();

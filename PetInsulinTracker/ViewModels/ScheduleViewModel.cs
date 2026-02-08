@@ -33,7 +33,7 @@ public partial class ScheduleViewModel : ObservableObject
 	private string scheduleType = "Insulin";
 
 	[ObservableProperty]
-	private TimeSpan timeOfDay = new(7, 0, 0);
+	private TimeSpan timeOfDay = new(8, 0, 0);
 
 	[ObservableProperty]
 	private int reminderLeadTimeMinutes = 15;
