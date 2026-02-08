@@ -35,26 +35,48 @@ public class SyncFunctions
 
 		// Determine access level
 		var pet = await _storage.GetPetAsync(petId);
+		string accessLevel;
+
 		if (pet is null)
 		{
-			return req.CreateResponse(HttpStatusCode.NotFound);
-		}
+			// Pet doesn't exist on server yet — create from sync data if provided
+			var petData = syncRequest.Pets.FirstOrDefault(p => p.Id == petId);
+			if (petData is null)
+			{
+				return req.CreateResponse(HttpStatusCode.NotFound);
+			}
 
-		string accessLevel;
-		if (pet.OwnerId == deviceUserId)
+			// The sender becomes the owner
+			await _storage.UpsertPetAsync(new PetEntity
+			{
+				RowKey = petId,
+				OwnerId = deviceUserId,
+				OwnerName = petData.OwnerName,
+				AccessLevel = "owner",
+				Name = petData.Name,
+				Species = petData.Species,
+				Breed = petData.Breed,
+				DateOfBirth = petData.DateOfBirth,
+				InsulinType = petData.InsulinType,
+				InsulinConcentration = petData.InsulinConcentration,
+				CurrentDoseIU = petData.CurrentDoseIU,
+				WeightUnit = petData.WeightUnit,
+				CurrentWeight = petData.CurrentWeight,
+				LastModified = petData.LastModified,
+				IsDeleted = petData.IsDeleted
+			});
+			pet = await _storage.GetPetAsync(petId);
+			accessLevel = "owner";
+			_logger.LogInformation("Auto-created pet {PetId} for owner {OwnerId} during sync", petId, deviceUserId);
+		}
+		else if (pet.OwnerId == deviceUserId)
 		{
 			accessLevel = "owner";
 		}
 		else
 		{
-			// Look up redemption across all share codes for this pet
-			var shareCodes = await _storage.GetShareCodesByPetIdAsync(petId);
-			ShareRedemptionEntity? redemption = null;
-			foreach (var sc in shareCodes)
-			{
-				redemption = await _storage.GetRedemptionAsync(sc.RowKey, deviceUserId);
-				if (redemption is not null) break;
-			}
+			// Single point read: PK=petId, RK=deviceUserId
+			var redemption = await _storage.GetRedemptionAsync(petId, deviceUserId);
 
 			if (redemption is null)
 			{

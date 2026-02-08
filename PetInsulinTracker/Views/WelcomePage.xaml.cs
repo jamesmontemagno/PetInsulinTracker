@@ -83,6 +83,13 @@ public partial class WelcomePage : ContentPage
 		GoToStep(3);
 	}
 
+	// Step 2: Offline only → set preference and go to pet setup (Step 3)
+	private void OnRoleOffline(object? sender, EventArgs e)
+	{
+		Preferences.Set(Constants.OfflineModeKey, true);
+		GoToStep(3);
+	}
+
 	// Step 2: Pet sitter → show redeem section
 	private void OnRoleSitter(object? sender, EventArgs e)
 	{

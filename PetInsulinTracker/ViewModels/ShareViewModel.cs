@@ -208,17 +208,10 @@ public partial class ShareViewModel : ObservableObject
 			IsLoadingUsers = true;
 			SharedUsers.Clear();
 
-			if (!string.IsNullOrEmpty(FullAccessCode))
+			if (Pet is not null)
 			{
-				var fullUsers = await _syncService.GetSharedUsersAsync(FullAccessCode);
-				foreach (var user in fullUsers)
-					SharedUsers.Add(user);
-			}
-
-			if (!string.IsNullOrEmpty(GuestAccessCode))
-			{
-				var guestUsers = await _syncService.GetSharedUsersAsync(GuestAccessCode);
-				foreach (var user in guestUsers)
+				var users = await _syncService.GetSharedUsersAsync(Pet.Id);
+				foreach (var user in users)
 					SharedUsers.Add(user);
 			}
 		}
@@ -235,10 +228,7 @@ public partial class ShareViewModel : ObservableObject
 	[RelayCommand]
 	private async Task RevokeAccessAsync(SharedUserDto user)
 	{
-		if (user is null) return;
-
-		var code = user.AccessLevel == "guest" ? GuestAccessCode : FullAccessCode;
-		if (string.IsNullOrEmpty(code)) return;
+		if (user is null || Pet is null) return;
 
 		var confirm = await Shell.Current.DisplayAlertAsync(
 			"Revoke Access",
@@ -249,7 +239,7 @@ public partial class ShareViewModel : ObservableObject
 
 		try
 		{
-			await _syncService.RevokeAccessAsync(code, user.DeviceUserId);
+			await _syncService.RevokeAccessAsync(Pet.Id, user.DeviceUserId);
 			StatusMessage = $"Access revoked for {user.DisplayName}.";
 			await LoadAllSharedUsersAsync();
 		}

@@ -18,6 +18,8 @@ public class SyncService : ISyncService
 
 	public async Task CreatePetAsync(Pet pet)
 	{
+		if (Constants.IsOfflineMode) return;
+
 		var request = new CreatePetRequest
 		{
 			Id = pet.Id,
@@ -40,6 +42,9 @@ public class SyncService : ISyncService
 
 	public async Task<string> GenerateShareCodeAsync(string petId, string accessLevel = "full")
 	{
+		if (Constants.IsOfflineMode)
+			throw new InvalidOperationException("Share codes are not available in offline mode.");
+
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
 			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel, OwnerId = Constants.DeviceUserId });
@@ -51,6 +56,9 @@ public class SyncService : ISyncService
 
 	public async Task RedeemShareCodeAsync(string shareCode)
 	{
+		if (Constants.IsOfflineMode)
+			throw new InvalidOperationException("Share codes are not available in offline mode.");
+
 		var request = new RedeemShareCodeRequest
 		{
 			ShareCode = shareCode,
@@ -140,24 +148,30 @@ public class SyncService : ISyncService
 		}
 	}
 
-	public async Task<List<SharedUserDto>> GetSharedUsersAsync(string shareCode)
+	public async Task<List<SharedUserDto>> GetSharedUsersAsync(string petId)
 	{
-		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/{shareCode}/users");
+		if (Constants.IsOfflineMode) return [];
+
+		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/users");
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync<SharedUsersResponse>();
 		return result?.Users ?? [];
 	}
 
-	public async Task RevokeAccessAsync(string shareCode, string deviceUserId)
+	public async Task RevokeAccessAsync(string petId, string deviceUserId)
 	{
+		if (Constants.IsOfflineMode) return;
+
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/revoke",
-			new RevokeAccessRequest { ShareCode = shareCode, DeviceUserId = deviceUserId });
+			new RevokeAccessRequest { PetId = petId, DeviceUserId = deviceUserId });
 		response.EnsureSuccessStatusCode();
 	}
 
 	public async Task SyncAsync(string petId)
 	{
+		if (Constants.IsOfflineMode) return;
+
 		var pet = await _db.GetPetAsync(petId);
 		if (pet is null) return;
 
@@ -171,22 +185,40 @@ public class SyncService : ISyncService
 		var unsyncedVetInfo = await _db.GetUnsyncedAsync<VetInfo>(pet.Id);
 		var unsyncedSchedules = await _db.GetUnsyncedAsync<Schedule>(pet.Id);
 
+		// Always include the pet so the server can auto-create if needed
+		var petDtos = unsyncedPets.Select(p => new PetDto
+		{
+			Id = p.Id, OwnerId = p.OwnerId, OwnerName = p.OwnerName,
+			AccessLevel = p.AccessLevel,
+			Name = p.Name, Species = p.Species, Breed = p.Breed,
+			DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
+			InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
+			WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
+			LastModified = p.LastModified,
+			IsDeleted = p.IsDeleted
+		}).ToList();
+
+		if (!petDtos.Any(p => p.Id == pet.Id))
+		{
+			petDtos.Add(new PetDto
+			{
+				Id = pet.Id, OwnerId = pet.OwnerId, OwnerName = pet.OwnerName,
+				AccessLevel = pet.AccessLevel,
+				Name = pet.Name, Species = pet.Species, Breed = pet.Breed,
+				DateOfBirth = pet.DateOfBirth, InsulinType = pet.InsulinType,
+				InsulinConcentration = pet.InsulinConcentration, CurrentDoseIU = pet.CurrentDoseIU,
+				WeightUnit = pet.WeightUnit, CurrentWeight = pet.CurrentWeight,
+				LastModified = pet.LastModified,
+				IsDeleted = pet.IsDeleted
+			});
+		}
+
 		var request = new SyncRequest
 		{
 			PetId = petId,
 			DeviceUserId = Constants.DeviceUserId,
 			LastSyncTimestamp = lastSync,
-			Pets = unsyncedPets.Select(p => new PetDto
-			{
-				Id = p.Id, OwnerId = p.OwnerId, OwnerName = p.OwnerName,
-				AccessLevel = p.AccessLevel,
-				Name = p.Name, Species = p.Species, Breed = p.Breed,
-				DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
-				InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
-				WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
-				LastModified = p.LastModified,
-				IsDeleted = p.IsDeleted
-			}).ToList(),
+			Pets = petDtos,
 			InsulinLogs = unsyncedInsulin.Select(l => new InsulinLogDto
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
@@ -351,12 +383,16 @@ public class SyncService : ISyncService
 
 	public async Task DeleteShareCodeAsync(string shareCode)
 	{
+		if (Constants.IsOfflineMode) return;
+
 		var response = await _http.DeleteAsync($"{Constants.ApiBaseUrl}/share/{shareCode}");
 		response.EnsureSuccessStatusCode();
 	}
 
 	public async Task SyncAllAsync()
 	{
+		if (Constants.IsOfflineMode) return;
+
 		var pets = await _db.GetPetsAsync();
 		var syncTasks = pets.Select(async p =>
 		{

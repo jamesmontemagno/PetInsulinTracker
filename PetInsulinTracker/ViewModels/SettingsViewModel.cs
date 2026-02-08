@@ -32,6 +32,9 @@ public partial class SettingsViewModel : ObservableObject
 	private bool notificationsEnabled = Preferences.Get("notifications_enabled", true);
 
 	[ObservableProperty]
+	private bool offlineMode = Preferences.Get(Constants.OfflineModeKey, false);
+
+	[ObservableProperty]
 	private string weightUnit = Preferences.Get("default_weight_unit", "lbs");
 
 	[ObservableProperty]
@@ -56,6 +59,14 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		Preferences.Set("notifications_enabled", value);
 	}
+
+	partial void OnOfflineModeChanged(bool value)
+	{
+		Preferences.Set(Constants.OfflineModeKey, value);
+		OnPropertyChanged(nameof(IsSyncVisible));
+	}
+
+	public bool IsSyncVisible => !OfflineMode;
 
 	partial void OnWeightUnitChanged(string value)
 	{

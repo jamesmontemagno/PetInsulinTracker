@@ -135,6 +135,11 @@
                         HorizontalOptions="Fill"
                         Clicked="OnRoleSitter" />
 
+                <Button Text="Use Offline Only"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnRoleOffline" />
+
                 <!-- Pet sitter redeem section (hidden until tapped) -->
                 <VerticalStackLayout x:Name="SitterRedeemSection" Spacing="12" IsVisible="False">
                     <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />

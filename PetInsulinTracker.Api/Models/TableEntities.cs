@@ -121,7 +121,7 @@ public class ScheduleEntity : ITableEntity
 
 public class ShareCodeEntity : ITableEntity
 {
-	public string PartitionKey { get; set; } = string.Empty; // "ShareCodes"
+	public string PartitionKey { get; set; } = string.Empty; // PetId
 	public string RowKey { get; set; } = string.Empty; // The share code itself
 	public DateTimeOffset? Timestamp { get; set; }
 	public ETag ETag { get; set; }
@@ -134,11 +134,12 @@ public class ShareCodeEntity : ITableEntity
 
 public class ShareRedemptionEntity : ITableEntity
 {
-	public string PartitionKey { get; set; } = string.Empty; // Share code
+	public string PartitionKey { get; set; } = string.Empty; // PetId
 	public string RowKey { get; set; } = string.Empty; // Redeemer's DeviceUserId
 	public DateTimeOffset? Timestamp { get; set; }
 	public ETag ETag { get; set; }
 
+	public string ShareCode { get; set; } = string.Empty;
 	public string DisplayName { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
 	public DateTimeOffset RedeemedAt { get; set; } = DateTimeOffset.UtcNow;

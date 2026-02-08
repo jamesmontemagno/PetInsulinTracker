@@ -81,15 +81,15 @@ public class ShareFunctions
 		}
 
 		var accessLevel = shareCode.AccessLevel ?? "full";
+		var petId = shareCode.PetId;
 
 		// Record who redeemed
 		if (!string.IsNullOrEmpty(request.DeviceUserId))
 		{
-			await _storage.CreateRedemptionAsync(code, request.DeviceUserId, request.DisplayName, accessLevel);
+			await _storage.CreateRedemptionAsync(petId, code, request.DeviceUserId, request.DisplayName, accessLevel);
 		}
 
-		// Get pet data by petId (partitioned by petId)
-		var petId = shareCode.PetId;
+		// Get pet data by petId
 		var pet = await _storage.GetPetAsync(petId);
 		if (pet is null || pet.IsDeleted)
 		{
@@ -171,16 +171,10 @@ public class ShareFunctions
 
 	[Function("GetSharedUsers")]
 	public async Task<HttpResponseData> GetSharedUsers(
-		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/{code}/users")] HttpRequestData req,
-		string code)
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/pet/{petId}/users")] HttpRequestData req,
+		string petId)
 	{
-		var shareCode = await _storage.GetShareCodeAsync(code);
-		if (shareCode is null)
-		{
-			return req.CreateResponse(HttpStatusCode.NotFound);
-		}
-
-		var redemptions = await _storage.GetRedemptionsAsync(code);
+		var redemptions = await _storage.GetRedemptionsByPetAsync(petId);
 		var result = new SharedUsersResponse
 		{
 			Users = redemptions.Select(r => new SharedUserDto
@@ -203,18 +197,18 @@ public class ShareFunctions
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "share/revoke")] HttpRequestData req)
 	{
 		var request = await req.ReadFromJsonAsync<RevokeAccessRequest>();
-		if (request is null || string.IsNullOrEmpty(request.ShareCode) || string.IsNullOrEmpty(request.DeviceUserId))
+		if (request is null || string.IsNullOrEmpty(request.PetId) || string.IsNullOrEmpty(request.DeviceUserId))
 		{
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
-		var revoked = await _storage.RevokeRedemptionAsync(request.ShareCode, request.DeviceUserId);
+		var revoked = await _storage.RevokeRedemptionAsync(request.PetId, request.DeviceUserId);
 		if (!revoked)
 		{
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
 
-		_logger.LogInformation("Revoked access for {DeviceUserId} on share code {Code}", request.DeviceUserId, request.ShareCode);
+		_logger.LogInformation("Revoked access for {DeviceUserId} on pet {PetId}", request.DeviceUserId, request.PetId);
 		return req.CreateResponse(HttpStatusCode.OK);
 	}
 

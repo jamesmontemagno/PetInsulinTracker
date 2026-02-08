@@ -6,6 +6,7 @@ namespace PetInsulinTracker.Api.Services;
 public class TableStorageService
 {
 	private readonly TableServiceClient _serviceClient;
+	private readonly HashSet<string> _createdTables = [];
 
 	public TableStorageService()
 	{
@@ -17,32 +18,42 @@ public class TableStorageService
 	private async Task<TableClient> GetTableClientAsync(string tableName)
 	{
 		var client = _serviceClient.GetTableClient(tableName);
-		await client.CreateIfNotExistsAsync();
+		if (_createdTables.Add(tableName))
+		{
+			await client.CreateIfNotExistsAsync();
+		}
 		return client;
 	}
 
-	// Pets — partitioned by petId
+	// Pets — partitioned by OwnerId, RowKey = PetId
 	public async Task UpsertPetAsync(PetEntity entity)
 	{
 		var client = await GetTableClientAsync("Pets");
-		var petId = entity.RowKey.Length > 0 ? entity.RowKey : Guid.NewGuid().ToString();
-		entity.PartitionKey = petId;
-		entity.RowKey = petId;
+		entity.RowKey = entity.RowKey.Length > 0 ? entity.RowKey : Guid.NewGuid().ToString();
+		entity.PartitionKey = entity.OwnerId ?? entity.RowKey;
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}
 
 	public async Task<PetEntity?> GetPetAsync(string petId)
 	{
 		var client = await GetTableClientAsync("Pets");
-		try
+		// Query by RowKey since we may not know the OwnerId
+		await foreach (var entity in client.QueryAsync<PetEntity>(e => e.RowKey == petId))
 		{
-			var response = await client.GetEntityAsync<PetEntity>(petId, petId);
-			return response.Value;
+			return entity;
 		}
-		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
+		return null;
+	}
+
+	public async Task<List<PetEntity>> GetPetsByOwnerAsync(string ownerId)
+	{
+		var client = await GetTableClientAsync("Pets");
+		var results = new List<PetEntity>();
+		await foreach (var entity in client.QueryAsync<PetEntity>(e => e.PartitionKey == ownerId))
 		{
-			return null;
+			results.Add(entity);
 		}
+		return results;
 	}
 
 	// Generic log operations
@@ -80,34 +91,34 @@ public class TableStorageService
 		var client = await GetTableClientAsync("Pets");
 		var results = new List<PetEntity>();
 		await foreach (var entity in client.QueryAsync<PetEntity>(
-			e => e.PartitionKey == petId && e.Timestamp >= since))
+			e => e.RowKey == petId && e.Timestamp >= since))
 		{
 			results.Add(entity);
 		}
 		return results;
 	}
 
-	// Share codes
+	// Share codes — PK = PetId, RK = Code
 	public async Task<ShareCodeEntity?> GetShareCodeAsync(string code)
 	{
 		var client = await GetTableClientAsync("ShareCodes");
-		try
+		// Code is globally unique; cross-partition scan by RK (infrequent: redemption only)
+		await foreach (var entity in client.QueryAsync<ShareCodeEntity>(e => e.RowKey == code))
 		{
-			var response = await client.GetEntityAsync<ShareCodeEntity>("ShareCodes", code);
-			return response.Value;
+			return entity;
 		}
-		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
-		{
-			return null;
-		}
+		return null;
 	}
 
 	public async Task<bool> DeleteShareCodeAsync(string code)
 	{
+		var entity = await GetShareCodeAsync(code);
+		if (entity is null) return false;
+
 		var client = await GetTableClientAsync("ShareCodes");
 		try
 		{
-			await client.DeleteEntityAsync("ShareCodes", code);
+			await client.DeleteEntityAsync(entity.PartitionKey, entity.RowKey);
 			return true;
 		}
 		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
@@ -120,8 +131,7 @@ public class TableStorageService
 	{
 		var client = await GetTableClientAsync("ShareCodes");
 		var results = new List<ShareCodeEntity>();
-		await foreach (var entity in client.QueryAsync<ShareCodeEntity>(
-			e => e.PartitionKey == "ShareCodes" && e.PetId == petId))
+		await foreach (var entity in client.QueryAsync<ShareCodeEntity>(e => e.PartitionKey == petId))
 		{
 			results.Add(entity);
 		}
@@ -133,7 +143,7 @@ public class TableStorageService
 		var client = await GetTableClientAsync("ShareCodes");
 		var entity = new ShareCodeEntity
 		{
-			PartitionKey = "ShareCodes",
+			PartitionKey = petId,
 			RowKey = code,
 			PetId = petId,
 			AccessLevel = accessLevel,
@@ -142,37 +152,38 @@ public class TableStorageService
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}
 
-	// Share redemptions
-	public async Task CreateRedemptionAsync(string shareCode, string deviceUserId, string displayName, string accessLevel)
+	// Share redemptions — PK = PetId, RK = DeviceUserId
+	public async Task CreateRedemptionAsync(string petId, string shareCode, string deviceUserId, string displayName, string accessLevel)
 	{
 		var client = await GetTableClientAsync("ShareRedemptions");
 		var entity = new ShareRedemptionEntity
 		{
-			PartitionKey = shareCode,
+			PartitionKey = petId,
 			RowKey = deviceUserId,
+			ShareCode = shareCode,
 			DisplayName = displayName,
 			AccessLevel = accessLevel
 		};
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}
 
-	public async Task<List<ShareRedemptionEntity>> GetRedemptionsAsync(string shareCode)
+	public async Task<List<ShareRedemptionEntity>> GetRedemptionsByPetAsync(string petId)
 	{
 		var client = await GetTableClientAsync("ShareRedemptions");
 		var results = new List<ShareRedemptionEntity>();
-		await foreach (var entity in client.QueryAsync<ShareRedemptionEntity>(e => e.PartitionKey == shareCode))
+		await foreach (var entity in client.QueryAsync<ShareRedemptionEntity>(e => e.PartitionKey == petId))
 		{
 			results.Add(entity);
 		}
 		return results;
 	}
 
-	public async Task<ShareRedemptionEntity?> GetRedemptionAsync(string shareCode, string deviceUserId)
+	public async Task<ShareRedemptionEntity?> GetRedemptionAsync(string petId, string deviceUserId)
 	{
 		var client = await GetTableClientAsync("ShareRedemptions");
 		try
 		{
-			var response = await client.GetEntityAsync<ShareRedemptionEntity>(shareCode, deviceUserId);
+			var response = await client.GetEntityAsync<ShareRedemptionEntity>(petId, deviceUserId);
 			return response.Value;
 		}
 		catch (Azure.RequestFailedException ex) when (ex.Status == 404)
@@ -181,9 +192,9 @@ public class TableStorageService
 		}
 	}
 
-	public async Task<bool> RevokeRedemptionAsync(string shareCode, string deviceUserId)
+	public async Task<bool> RevokeRedemptionAsync(string petId, string deviceUserId)
 	{
-		var entity = await GetRedemptionAsync(shareCode, deviceUserId);
+		var entity = await GetRedemptionAsync(petId, deviceUserId);
 		if (entity is null) return false;
 
 		entity.IsRevoked = true;

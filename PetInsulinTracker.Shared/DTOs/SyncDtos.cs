@@ -70,7 +70,7 @@ public class SharedUsersResponse
 
 public class RevokeAccessRequest
 {
-	public string ShareCode { get; set; } = string.Empty;
+	public string PetId { get; set; } = string.Empty;
 	public string DeviceUserId { get; set; } = string.Empty;
 }
 

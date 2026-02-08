@@ -51,6 +51,23 @@
 
                     <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12" Padding="0,8">
                         <Border Grid.Column="0"
+                                BackgroundColor="{AppThemeBinding Light=#F3E5F5, Dark=#2D1A33}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                HeightRequest="36" WidthRequest="36">
+                            <mi:MauiIcon Icon="{mi:Fluent CloudOff24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                            <Label Text="Offline Mode" FontFamily="OpenSansSemibold" />
+                            <Label Text="Keep all data on this device only"
+                                   Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="2" IsToggled="{Binding OfflineMode}" />
+                    </Grid>
+
+                    <BoxView Style="{StaticResource DividerStyle}" Margin="52,0,0,0" />
+
+                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12" Padding="0,8">
+                        <Border Grid.Column="0"
                                 BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 HeightRequest="36" WidthRequest="36">
@@ -82,10 +99,12 @@
                 </Grid>
             </Border>
 
-            <!-- Sync -->
-            <Label Text="SYNC" Style="{StaticResource OverlineStyle}" />
+            <!-- Sync (hidden in offline mode) -->
+            <Label Text="SYNC" Style="{StaticResource OverlineStyle}"
+                   IsVisible="{Binding IsSyncVisible}" />
 
-            <Border Style="{StaticResource CardStyle}">
+            <Border Style="{StaticResource CardStyle}"
+                    IsVisible="{Binding IsSyncVisible}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
                         <Border Grid.Column="0"
