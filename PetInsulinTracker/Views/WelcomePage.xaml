@@ -41,6 +41,7 @@
                 <!-- Theme Carousel -->
                 <CarouselView x:Name="ThemeCarousel"
                               HeightRequest="180"
+                              Margin="-32,0"
                               PeekAreaInsets="40"
                               Loop="False"
                               CurrentItemChanged="OnThemeCarouselChanged"
