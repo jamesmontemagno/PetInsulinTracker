@@ -60,8 +60,13 @@ jobs:
       - name: NuGet Restore
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
+      - name: Build Android (PR/Quick Build)
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: >-
+          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-android
+
       - name: Set API Base URL
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
@@ -101,11 +106,6 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > ${{ runner.temp }}/petinsulintracker.keystore
           echo "KEYSTORE_PATH=${{ runner.temp }}/petinsulintracker.keystore" >> $GITHUB_ENV
-
-      - name: Build Android
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: >-
-          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-android
 
       - name: Publish Android
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release == 'true' }}

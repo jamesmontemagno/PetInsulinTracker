@@ -83,6 +83,11 @@ jobs:
       - name: NuGet Restore
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
+      - name: Build iOS (PR/Quick Build)
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: >-
+          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-ios
+
       - name: Set API Base URL
         if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
@@ -118,11 +123,6 @@ jobs:
           sed -i '' -E "s#<ApplicationVersion>[^<]+</ApplicationVersion>#<ApplicationVersion>${{ steps.ver.outputs.app_version }}</ApplicationVersion>#" "$FILE"
           echo 'Resulting version lines:'
           grep -E 'ApplicationDisplayVersion|ApplicationVersion' "$FILE"
-
-      - name: Build iOS
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: >-
-          dotnet build ${{ env.PROJECT_PATH }} -c Debug -f ${{ env.DOTNET_VERSION }}-ios
 
       - name: Publish iOS
         if: ${{ github.event_name == 'workflow_dispatch' }}
