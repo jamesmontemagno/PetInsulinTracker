@@ -57,4 +57,6 @@ public class Pet
 	public DateTimeOffset LastModified { get; set; } = DateTimeOffset.UtcNow;
 
 	public bool IsSynced { get; set; }
+
+	public bool IsDeleted { get; set; }
 }

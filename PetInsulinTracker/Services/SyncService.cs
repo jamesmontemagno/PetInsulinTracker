@@ -136,15 +136,18 @@ public class SyncService : ISyncService
 
 	public async Task SyncAsync(string shareCode)
 	{
+		var pet = await _db.GetPetByShareCodeAsync(shareCode);
+		if (pet is null) return;
+
 		var lastSync = Preferences.Get($"lastSync_{shareCode}", DateTimeOffset.MinValue);
 
-		// Gather unsynced local data
-		var unsyncedPets = await _db.GetUnsyncedAsync<Pet>();
-		var unsyncedInsulin = await _db.GetUnsyncedAsync<InsulinLog>();
-		var unsyncedFeeding = await _db.GetUnsyncedAsync<FeedingLog>();
-		var unsyncedWeight = await _db.GetUnsyncedAsync<WeightLog>();
-		var unsyncedVetInfo = await _db.GetUnsyncedAsync<VetInfo>();
-		var unsyncedSchedules = await _db.GetUnsyncedAsync<Schedule>();
+		// Gather unsynced local data scoped to this pet
+		var unsyncedPets = await _db.GetUnsyncedAsync<Pet>(pet.Id);
+		var unsyncedInsulin = await _db.GetUnsyncedAsync<InsulinLog>(pet.Id);
+		var unsyncedFeeding = await _db.GetUnsyncedAsync<FeedingLog>(pet.Id);
+		var unsyncedWeight = await _db.GetUnsyncedAsync<WeightLog>(pet.Id);
+		var unsyncedVetInfo = await _db.GetUnsyncedAsync<VetInfo>(pet.Id);
+		var unsyncedSchedules = await _db.GetUnsyncedAsync<Schedule>(pet.Id);
 
 		var request = new SyncRequest
 		{
@@ -158,31 +161,36 @@ public class SyncService : ISyncService
 				DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 				InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 				WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
-				ShareCode = p.ShareCode, LastModified = p.LastModified
+				ShareCode = p.ShareCode, LastModified = p.LastModified,
+				IsDeleted = p.IsDeleted
 			}).ToList(),
 			InsulinLogs = unsyncedInsulin.Select(l => new InsulinLogDto
 			{
 				Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
-				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
+				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			FeedingLogs = unsyncedFeeding.Select(l => new FeedingLogDto
 			{
 				Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
-				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
+				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			WeightLogs = unsyncedWeight.Select(l => new WeightLogDto
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight, Unit = l.Unit,
-				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
+				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			VetInfos = unsyncedVetInfo.Select(v => new VetInfoDto
 			{
 				Id = v.Id, PetId = v.PetId, VetName = v.VetName,
 				ClinicName = v.ClinicName, Phone = v.Phone,
 				EmergencyPhone = v.EmergencyPhone, Address = v.Address,
-				Email = v.Email, Notes = v.Notes, LastModified = v.LastModified
+				Email = v.Email, Notes = v.Notes, LastModified = v.LastModified,
+				IsDeleted = v.IsDeleted
 			}).ToList(),
 			Schedules = unsyncedSchedules.Select(s => new ScheduleDto
 			{
@@ -190,7 +198,8 @@ public class SyncService : ISyncService
 				Label = s.Label, TimeTicks = s.TimeTicks,
 				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
-				LastModified = s.LastModified
+				LastModified = s.LastModified,
+				IsDeleted = s.IsDeleted
 			}).ToList()
 		};
 
@@ -210,14 +219,97 @@ public class SyncService : ISyncService
 			var local = await _db.GetPetAsync(p.Id);
 			if (local is null || p.LastModified > local.LastModified)
 			{
-				await _db.SavePetAsync(new Pet
+				await _db.SaveSyncedAsync(new Pet
 				{
 					Id = p.Id, OwnerId = p.OwnerId, AccessLevel = p.AccessLevel,
 					Name = p.Name, Species = p.Species, Breed = p.Breed,
 					DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
-					ShareCode = p.ShareCode, LastModified = p.LastModified, IsSynced = true
+					ShareCode = p.ShareCode, LastModified = p.LastModified, IsSynced = true,
+					IsDeleted = p.IsDeleted
+				});
+			}
+		}
+
+		foreach (var l in syncResponse.InsulinLogs)
+		{
+			var local = await _db.GetInsulinLogAsync(l.Id);
+			if (local is null || l.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new InsulinLog
+				{
+					Id = l.Id, PetId = l.PetId, DoseIU = l.DoseIU,
+					AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
+					Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById,
+					LastModified = l.LastModified, IsSynced = true,
+					IsDeleted = l.IsDeleted
+				});
+			}
+		}
+
+		foreach (var l in syncResponse.FeedingLogs)
+		{
+			var local = await _db.GetFeedingLogAsync(l.Id);
+			if (local is null || l.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new FeedingLog
+				{
+					Id = l.Id, PetId = l.PetId, FoodName = l.FoodName,
+					Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
+					FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById,
+					LastModified = l.LastModified, IsSynced = true,
+					IsDeleted = l.IsDeleted
+				});
+			}
+		}
+
+		foreach (var l in syncResponse.WeightLogs)
+		{
+			var local = await _db.GetWeightLogAsync(l.Id);
+			if (local is null || l.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new WeightLog
+				{
+					Id = l.Id, PetId = l.PetId, Weight = l.Weight,
+					Unit = l.Unit, RecordedAt = l.RecordedAt,
+					Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById,
+					LastModified = l.LastModified, IsSynced = true,
+					IsDeleted = l.IsDeleted
+				});
+			}
+		}
+
+		foreach (var v in syncResponse.VetInfos)
+		{
+			var local = await _db.GetVetInfoByIdAsync(v.Id);
+			if (local is null || v.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new VetInfo
+				{
+					Id = v.Id, PetId = v.PetId, VetName = v.VetName,
+					ClinicName = v.ClinicName, Phone = v.Phone,
+					EmergencyPhone = v.EmergencyPhone, Address = v.Address,
+					Email = v.Email, Notes = v.Notes,
+					LastModified = v.LastModified, IsSynced = true,
+					IsDeleted = v.IsDeleted
+				});
+			}
+		}
+
+		foreach (var s in syncResponse.Schedules)
+		{
+			var local = await _db.GetScheduleAsync(s.Id);
+			if (local is null || s.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new Schedule
+				{
+					Id = s.Id, PetId = s.PetId, ScheduleType = s.ScheduleType,
+					Label = s.Label, TimeTicks = s.TimeTicks,
+					IsEnabled = s.IsEnabled,
+					ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
+					LastModified = s.LastModified, IsSynced = true,
+					IsDeleted = s.IsDeleted
 				});
 			}
 		}
@@ -236,16 +328,19 @@ public class SyncService : ISyncService
 	public async Task SyncAllAsync()
 	{
 		var pets = await _db.GetPetsAsync();
-		foreach (var pet in pets.Where(p => !string.IsNullOrEmpty(p.ShareCode)))
-		{
-			try
+		var syncTasks = pets
+			.Where(p => !string.IsNullOrEmpty(p.ShareCode))
+			.Select(async pet =>
 			{
-				await SyncAsync(pet.ShareCode!);
-			}
-			catch
-			{
-				// Silently fail for offline scenarios
-			}
-		}
+				try
+				{
+					await SyncAsync(pet.ShareCode!);
+				}
+				catch
+				{
+					// Silently fail for offline scenarios
+				}
+			});
+		await Task.WhenAll(syncTasks);
 	}
 }

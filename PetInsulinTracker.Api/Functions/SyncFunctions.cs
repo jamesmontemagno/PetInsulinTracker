@@ -62,7 +62,8 @@ public class SyncFunctions
 				WeightUnit = pet.WeightUnit,
 				CurrentWeight = pet.CurrentWeight,
 				ShareCode = shareCode,
-				LastModified = pet.LastModified
+				LastModified = pet.LastModified,
+				IsDeleted = pet.IsDeleted
 			});
 		}
 
@@ -79,7 +80,8 @@ public class SyncFunctions
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
 				LoggedById = log.LoggedById,
-				LastModified = log.LastModified
+				LastModified = log.LastModified,
+				IsDeleted = log.IsDeleted
 			});
 		}
 
@@ -98,7 +100,8 @@ public class SyncFunctions
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
 				LoggedById = log.LoggedById,
-				LastModified = log.LastModified
+				LastModified = log.LastModified,
+				IsDeleted = log.IsDeleted
 			});
 		}
 
@@ -115,7 +118,8 @@ public class SyncFunctions
 				Notes = log.Notes,
 				LoggedBy = log.LoggedBy,
 				LoggedById = log.LoggedById,
-				LastModified = log.LastModified
+				LastModified = log.LastModified,
+				IsDeleted = log.IsDeleted
 			});
 		}
 
@@ -133,7 +137,8 @@ public class SyncFunctions
 				Address = info.Address,
 				Email = info.Email,
 				Notes = info.Notes,
-				LastModified = info.LastModified
+				LastModified = info.LastModified,
+				IsDeleted = info.IsDeleted
 			});
 		}
 
@@ -149,7 +154,8 @@ public class SyncFunctions
 				TimeTicks = s.TimeTicks,
 				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
-				LastModified = s.LastModified
+				LastModified = s.LastModified,
+				IsDeleted = s.IsDeleted
 			});
 		}
 
@@ -157,12 +163,12 @@ public class SyncFunctions
 		var since = syncRequest.LastSyncTimestamp;
 		var now = DateTimeOffset.UtcNow;
 
-		var serverPets = await _storage.GetPetsByShareCodeAsync(shareCode);
-		var serverInsulinLogs = await _storage.GetEntitiesByPartitionAsync<InsulinLogEntity>("InsulinLogs", shareCode);
-		var serverFeedingLogs = await _storage.GetEntitiesByPartitionAsync<FeedingLogEntity>("FeedingLogs", shareCode);
-		var serverWeightLogs = await _storage.GetEntitiesByPartitionAsync<WeightLogEntity>("WeightLogs", shareCode);
-		var serverVetInfos = await _storage.GetEntitiesByPartitionAsync<VetInfoEntity>("VetInfos", shareCode);
-		var serverSchedules = await _storage.GetEntitiesByPartitionAsync<ScheduleEntity>("Schedules", shareCode);
+		var serverPets = await _storage.GetPetsModifiedSinceAsync(shareCode, since);
+		var serverInsulinLogs = await _storage.GetEntitiesModifiedSinceAsync<InsulinLogEntity>("InsulinLogs", shareCode, since);
+		var serverFeedingLogs = await _storage.GetEntitiesModifiedSinceAsync<FeedingLogEntity>("FeedingLogs", shareCode, since);
+		var serverWeightLogs = await _storage.GetEntitiesModifiedSinceAsync<WeightLogEntity>("WeightLogs", shareCode, since);
+		var serverVetInfos = await _storage.GetEntitiesModifiedSinceAsync<VetInfoEntity>("VetInfos", shareCode, since);
+		var serverSchedules = await _storage.GetEntitiesModifiedSinceAsync<ScheduleEntity>("Schedules", shareCode, since);
 
 		var syncResponse = new SyncResponse
 		{
@@ -182,7 +188,8 @@ public class SyncFunctions
 				WeightUnit = p.WeightUnit,
 				CurrentWeight = p.CurrentWeight,
 				ShareCode = p.ShareCode,
-				LastModified = p.LastModified
+				LastModified = p.LastModified,
+				IsDeleted = p.IsDeleted
 			}).ToList(),
 			InsulinLogs = serverInsulinLogs.Select(l => new InsulinLogDto
 			{
@@ -194,7 +201,8 @@ public class SyncFunctions
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
 				LoggedById = l.LoggedById,
-				LastModified = l.LastModified
+				LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			FeedingLogs = serverFeedingLogs.Select(l => new FeedingLogDto
 			{
@@ -208,7 +216,8 @@ public class SyncFunctions
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
 				LoggedById = l.LoggedById,
-				LastModified = l.LastModified
+				LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			WeightLogs = serverWeightLogs.Select(l => new WeightLogDto
 			{
@@ -220,7 +229,8 @@ public class SyncFunctions
 				Notes = l.Notes,
 				LoggedBy = l.LoggedBy,
 				LoggedById = l.LoggedById,
-				LastModified = l.LastModified
+				LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
 			}).ToList(),
 			VetInfos = serverVetInfos.Select(v => new VetInfoDto
 			{
@@ -233,7 +243,8 @@ public class SyncFunctions
 				Address = v.Address,
 				Email = v.Email,
 				Notes = v.Notes,
-				LastModified = v.LastModified
+				LastModified = v.LastModified,
+				IsDeleted = v.IsDeleted
 			}).ToList(),
 			Schedules = serverSchedules.Select(s => new ScheduleDto
 			{
@@ -244,7 +255,8 @@ public class SyncFunctions
 				TimeTicks = s.TimeTicks,
 				IsEnabled = s.IsEnabled,
 				ReminderLeadTimeMinutes = s.ReminderLeadTimeMinutes,
-				LastModified = s.LastModified
+				LastModified = s.LastModified,
+				IsDeleted = s.IsDeleted
 			}).ToList()
 		};
 

@@ -16,6 +16,7 @@ public class PetDto
 	public string? ShareCode { get; set; }
 	public string AccessLevel { get; set; } = "owner";
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class InsulinLogDto
@@ -29,6 +30,7 @@ public class InsulinLogDto
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class FeedingLogDto
@@ -44,6 +46,7 @@ public class FeedingLogDto
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class WeightLogDto
@@ -57,6 +60,7 @@ public class WeightLogDto
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class VetInfoDto
@@ -71,6 +75,7 @@ public class VetInfoDto
 	public string? Email { get; set; }
 	public string? Notes { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class ScheduleDto
@@ -83,4 +88,5 @@ public class ScheduleDto
 	public bool IsEnabled { get; set; } = true;
 	public int ReminderLeadTimeMinutes { get; set; } = 15;
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }

@@ -85,6 +85,18 @@ public class TableStorageService
 		return results;
 	}
 
+	public async Task<List<PetEntity>> GetPetsModifiedSinceAsync(string shareCode, DateTimeOffset since)
+	{
+		var client = await GetTableClientAsync("Pets");
+		var results = new List<PetEntity>();
+		await foreach (var entity in client.QueryAsync<PetEntity>(
+			e => e.PartitionKey == shareCode && e.Timestamp >= since))
+		{
+			results.Add(entity);
+		}
+		return results;
+	}
+
 	// Share codes
 	public async Task<ShareCodeEntity?> GetShareCodeAsync(string code)
 	{

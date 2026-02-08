@@ -23,6 +23,7 @@ public class PetEntity : ITableEntity
 	public double? CurrentWeight { get; set; }
 	public string? ShareCode { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class InsulinLogEntity : ITableEntity
@@ -40,6 +41,7 @@ public class InsulinLogEntity : ITableEntity
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class FeedingLogEntity : ITableEntity
@@ -59,6 +61,7 @@ public class FeedingLogEntity : ITableEntity
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class WeightLogEntity : ITableEntity
@@ -76,6 +79,7 @@ public class WeightLogEntity : ITableEntity
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class VetInfoEntity : ITableEntity
@@ -94,6 +98,7 @@ public class VetInfoEntity : ITableEntity
 	public string? Email { get; set; }
 	public string? Notes { get; set; }
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class ScheduleEntity : ITableEntity
@@ -110,6 +115,7 @@ public class ScheduleEntity : ITableEntity
 	public bool IsEnabled { get; set; } = true;
 	public int ReminderLeadTimeMinutes { get; set; } = 15;
 	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
 }
 
 public class ShareCodeEntity : ITableEntity

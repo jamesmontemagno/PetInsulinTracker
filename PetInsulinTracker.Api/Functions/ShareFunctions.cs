@@ -72,7 +72,7 @@ public class ShareFunctions
 
 		// Get all data for this share code
 		var pets = await _storage.GetPetsByShareCodeAsync(code);
-		var pet = pets.FirstOrDefault();
+		var pet = pets.FirstOrDefault(p => !p.IsDeleted);
 		if (pet is null)
 		{
 			return req.CreateResponse(HttpStatusCode.NotFound);
@@ -103,32 +103,32 @@ public class ShareFunctions
 				ShareCode = code,
 				LastModified = pet.LastModified
 			},
-			InsulinLogs = accessLevel == "guest" ? [] : insulinLogs.Select(l => new InsulinLogDto
+			InsulinLogs = accessLevel == "guest" ? [] : insulinLogs.Where(l => !l.IsDeleted).Select(l => new InsulinLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, DoseIU = l.DoseIU,
 				AdministeredAt = l.AdministeredAt, InjectionSite = l.InjectionSite,
 				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
-			FeedingLogs = accessLevel == "guest" ? [] : feedingLogs.Select(l => new FeedingLogDto
+			FeedingLogs = accessLevel == "guest" ? [] : feedingLogs.Where(l => !l.IsDeleted).Select(l => new FeedingLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, FoodName = l.FoodName,
 				Amount = l.Amount, Unit = l.Unit, FoodType = l.FoodType,
 				FedAt = l.FedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
-			WeightLogs = accessLevel == "guest" ? [] : weightLogs.Select(l => new WeightLogDto
+			WeightLogs = accessLevel == "guest" ? [] : weightLogs.Where(l => !l.IsDeleted).Select(l => new WeightLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, Weight = l.Weight,
 				Unit = l.WeightUnit, RecordedAt = l.RecordedAt,
 				Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified
 			}).ToList(),
-			VetInfo = vetInfos.Select(v => new VetInfoDto
+			VetInfo = vetInfos.Where(v => !v.IsDeleted).Select(v => new VetInfoDto
 			{
 				Id = v.RowKey, PetId = v.PetId, VetName = v.VetName,
 				ClinicName = v.ClinicName, Phone = v.Phone,
 				EmergencyPhone = v.EmergencyPhone, Address = v.Address,
 				Email = v.Email, Notes = v.Notes, LastModified = v.LastModified
 			}).FirstOrDefault(),
-			Schedules = schedules.Select(s => new ScheduleDto
+			Schedules = schedules.Where(s => !s.IsDeleted).Select(s => new ScheduleDto
 			{
 				Id = s.RowKey, PetId = s.PetId, ScheduleType = s.ScheduleType,
 				Label = s.Label, TimeTicks = s.TimeTicks,

@@ -30,7 +30,7 @@ public class DatabaseService : IDatabaseService
 	public async Task<List<Pet>> GetPetsAsync()
 	{
 		var db = await GetConnectionAsync();
-		return await db.Table<Pet>().OrderBy(p => p.Name).ToListAsync();
+		return await db.Table<Pet>().Where(p => !p.IsDeleted).OrderBy(p => p.Name).ToListAsync();
 	}
 
 	public async Task<Pet?> GetPetAsync(string id)
@@ -52,8 +52,11 @@ public class DatabaseService : IDatabaseService
 
 	public async Task<int> DeletePetAsync(Pet pet)
 	{
+		pet.IsDeleted = true;
+		pet.IsSynced = false;
+		pet.LastModified = DateTimeOffset.UtcNow;
 		var db = await GetConnectionAsync();
-		return await db.DeleteAsync(pet);
+		return await db.UpdateAsync(pet);
 	}
 
 	// Insulin Logs
@@ -62,16 +65,22 @@ public class DatabaseService : IDatabaseService
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<InsulinLog>()
-			.Where(l => l.PetId == petId)
+			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.AdministeredAt)
 			.ToListAsync();
+	}
+
+	public async Task<InsulinLog?> GetInsulinLogAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<InsulinLog>().FirstOrDefaultAsync(l => l.Id == id);
 	}
 
 	public async Task<InsulinLog?> GetLatestInsulinLogAsync(string petId)
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<InsulinLog>()
-			.Where(l => l.PetId == petId)
+			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.AdministeredAt)
 			.FirstOrDefaultAsync();
 	}
@@ -89,8 +98,11 @@ public class DatabaseService : IDatabaseService
 
 	public async Task<int> DeleteInsulinLogAsync(InsulinLog log)
 	{
+		log.IsDeleted = true;
+		log.IsSynced = false;
+		log.LastModified = DateTimeOffset.UtcNow;
 		var db = await GetConnectionAsync();
-		return await db.DeleteAsync(log);
+		return await db.UpdateAsync(log);
 	}
 
 	// Feeding Logs
@@ -99,9 +111,15 @@ public class DatabaseService : IDatabaseService
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<FeedingLog>()
-			.Where(l => l.PetId == petId)
+			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.FedAt)
 			.ToListAsync();
+	}
+
+	public async Task<FeedingLog?> GetFeedingLogAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<FeedingLog>().FirstOrDefaultAsync(l => l.Id == id);
 	}
 
 	public async Task<int> SaveFeedingLogAsync(FeedingLog log)
@@ -117,8 +135,11 @@ public class DatabaseService : IDatabaseService
 
 	public async Task<int> DeleteFeedingLogAsync(FeedingLog log)
 	{
+		log.IsDeleted = true;
+		log.IsSynced = false;
+		log.LastModified = DateTimeOffset.UtcNow;
 		var db = await GetConnectionAsync();
-		return await db.DeleteAsync(log);
+		return await db.UpdateAsync(log);
 	}
 
 	// Weight Logs
@@ -127,16 +148,22 @@ public class DatabaseService : IDatabaseService
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<WeightLog>()
-			.Where(l => l.PetId == petId)
+			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.RecordedAt)
 			.ToListAsync();
+	}
+
+	public async Task<WeightLog?> GetWeightLogAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<WeightLog>().FirstOrDefaultAsync(l => l.Id == id);
 	}
 
 	public async Task<WeightLog?> GetLatestWeightLogAsync(string petId)
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<WeightLog>()
-			.Where(l => l.PetId == petId)
+			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.RecordedAt)
 			.FirstOrDefaultAsync();
 	}
@@ -154,8 +181,11 @@ public class DatabaseService : IDatabaseService
 
 	public async Task<int> DeleteWeightLogAsync(WeightLog log)
 	{
+		log.IsDeleted = true;
+		log.IsSynced = false;
+		log.LastModified = DateTimeOffset.UtcNow;
 		var db = await GetConnectionAsync();
-		return await db.DeleteAsync(log);
+		return await db.UpdateAsync(log);
 	}
 
 	// Vet Info
@@ -163,7 +193,13 @@ public class DatabaseService : IDatabaseService
 	public async Task<VetInfo?> GetVetInfoAsync(string petId)
 	{
 		var db = await GetConnectionAsync();
-		return await db.Table<VetInfo>().FirstOrDefaultAsync(v => v.PetId == petId);
+		return await db.Table<VetInfo>().FirstOrDefaultAsync(v => v.PetId == petId && !v.IsDeleted);
+	}
+
+	public async Task<VetInfo?> GetVetInfoByIdAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<VetInfo>().FirstOrDefaultAsync(v => v.Id == id);
 	}
 
 	public async Task<int> SaveVetInfoAsync(VetInfo info)
@@ -183,16 +219,22 @@ public class DatabaseService : IDatabaseService
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<Schedule>()
-			.Where(s => s.PetId == petId)
+			.Where(s => s.PetId == petId && !s.IsDeleted)
 			.OrderBy(s => s.TimeTicks)
 			.ToListAsync();
+	}
+
+	public async Task<Schedule?> GetScheduleAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<Schedule>().FirstOrDefaultAsync(s => s.Id == id);
 	}
 
 	public async Task<List<Schedule>> GetAllEnabledSchedulesAsync()
 	{
 		var db = await GetConnectionAsync();
 		return await db.Table<Schedule>()
-			.Where(s => s.IsEnabled)
+			.Where(s => s.IsEnabled && !s.IsDeleted)
 			.ToListAsync();
 	}
 
@@ -209,11 +251,20 @@ public class DatabaseService : IDatabaseService
 
 	public async Task<int> DeleteScheduleAsync(Schedule schedule)
 	{
+		schedule.IsDeleted = true;
+		schedule.IsSynced = false;
+		schedule.LastModified = DateTimeOffset.UtcNow;
 		var db = await GetConnectionAsync();
-		return await db.DeleteAsync(schedule);
+		return await db.UpdateAsync(schedule);
 	}
 
 	// Sync support
+
+	public async Task<Pet?> GetPetByShareCodeAsync(string shareCode)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<Pet>().FirstOrDefaultAsync(p => p.ShareCode == shareCode && !p.IsDeleted);
+	}
 
 	public async Task<List<T>> GetUnsyncedAsync<T>() where T : new()
 	{
@@ -222,10 +273,30 @@ public class DatabaseService : IDatabaseService
 			$"SELECT * FROM [{typeof(T).Name}] WHERE [IsSynced] = 0");
 	}
 
+	public async Task<List<T>> GetUnsyncedAsync<T>(string petId) where T : new()
+	{
+		var db = await GetConnectionAsync();
+		var tableName = typeof(T).Name;
+		if (typeof(T) == typeof(Pet))
+			return await db.QueryAsync<T>($"SELECT * FROM [{tableName}] WHERE [IsSynced] = 0 AND [Id] = ?", petId);
+		return await db.QueryAsync<T>($"SELECT * FROM [{tableName}] WHERE [IsSynced] = 0 AND [PetId] = ?", petId);
+	}
+
 	public async Task MarkSyncedAsync<T>(string id) where T : new()
 	{
 		var db = await GetConnectionAsync();
 		await db.ExecuteAsync(
 			$"UPDATE [{typeof(T).Name}] SET [IsSynced] = 1 WHERE [Id] = ?", id);
+	}
+
+	public async Task<int> SaveSyncedAsync<T>(T entity) where T : new()
+	{
+		var db = await GetConnectionAsync();
+		var tableName = typeof(T).Name;
+		var existing = await db.QueryAsync<T>($"SELECT * FROM [{tableName}] WHERE [Id] = ?",
+			typeof(T).GetProperty("Id")!.GetValue(entity));
+		return existing.Count > 0
+			? await db.UpdateAsync(entity)
+			: await db.InsertAsync(entity);
 	}
 }
