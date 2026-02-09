@@ -33,9 +33,15 @@
 - One-tap call buttons for vet and emergency
 - Built-in diabetic pet care tips: hypoglycemia signs, injection technique, feeding timing, insulin storage
 
-### 🔗 Sharing
-- Generate a 6-character share code to share your pet's profile
-- Family members or pet sitters can import the pet and log entries
+### 🔗 Sharing & Access Control
+- Generate 6-character share codes (Full Access or Guest Access) to share a pet's profile
+- **Full Access** — family members can view all logs, pet info, and log new entries
+- **Guest Access** — pet sitters can view pet info and log entries but not see other people's logs
+- Owner and full-access users can create and manage share codes
+- Each share code tracks who created it and when
+- View and delete active share codes from the Share page
+- Deleting a code prevents future redemptions — existing access is not revoked
+- Owner can see all people with access and revoke any individual's access
 - Cloud sync via Azure Functions + Table Storage
 
 ### 🎨 Themes & Personalization
@@ -129,7 +135,53 @@ dotnet build PetInsulinTracker.Api/PetInsulinTracker.Api.csproj
 
 ### Offline-First Sync
 - SQLite for local persistence with full CRUD
-- Azure Table Storage as cloud store (partitioned by share code)
+- Azure Table Storage as cloud store (partitioned by OwnerId / PetId)
+- Last-write-wins conflict resolution
+- Sync triggered manually from Settings
+
+### Share System
+
+Share codes let pet owners grant access to family members or pet sitters without an account or sign-in.
+
+#### Access Levels
+| Level | Can view pet info | Can log entries | Sees all logs | Create/manage share codes | Manage people |
+|-------|:-:|:-:|:-:|:-:|:-:|
+| **Owner** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Full** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Guest** | ✅ | ✅ | ❌ | ❌ | ❌ |
+
+#### Code Lifecycle
+1. **Create** — Owner or full-access user taps "+" on the Share page and picks Full Access or Guest Access. A unique 6-character alphanumeric code is generated server-side (charset excludes ambiguous chars: `O`, `0`, `1`, `I`, `L`).
+2. **Share** — The code is displayed and can be copied to the clipboard. Creator name and creation date are recorded.
+3. **Redeem** — A recipient enters the code on the Welcome or Import Pet page. The pet and all relevant data are downloaded and saved locally.
+4. **Delete** — Owner or full-access users can delete a code to prevent future redemptions. Anyone who already redeemed it keeps their access.
+5. **Revoke** — The pet owner can revoke a specific user's access from the "People with Access" list. Revoked users will receive a `403 Forbidden` on their next sync.
+
+#### Azure Table Storage Layout
+| Table | PartitionKey | RowKey | Purpose |
+|-------|-------------|--------|--------|
+| `Pets` | OwnerId | PetId | Pet profiles |
+| `ShareCodes` | PetId | Code | Active share codes with creator metadata |
+| `ShareRedemptions` | PetId | DeviceUserId | Who redeemed which code; tracks revocation |
+| `InsulinLogs` | PetId | LogId | Insulin administration records |
+| `FeedingLogs` | PetId | LogId | Feeding records |
+| `WeightLogs` | PetId | LogId | Weight records |
+| `VetInfos` | PetId | VetInfoId | Veterinarian contact info |
+| `Schedules` | PetId | ScheduleId | Insulin/feeding/vet schedules |
+
+#### API Endpoints (Azure Functions)
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| POST | `/share/generate` | Owner/Full | Generate a new share code |
+| POST | `/share/redeem` | Any | Redeem a code and download pet data |
+| GET | `/share/pet/{petId}/codes` | Owner/Full | List all active codes for a pet |
+| DELETE | `/share/{code}` | Owner/Full | Delete a share code |
+| GET | `/share/pet/{petId}/users` | Owner/Full | List all users with access |
+| POST | `/share/revoke` | Owner | Revoke a specific user's access |
+| POST | `/share/leave` | Self | Remove your own access to a shared pet |
+| POST | `/sync` | Any member | Bi-directional sync for a single pet |
+| POST | `/pets` | Owner | Create a new pet |
+| POST | `/pets/delete` | Owner | Delete a pet and all associated data |
 
 ## 🔐 CI/CD Secrets
 
@@ -138,14 +190,6 @@ GitHub Actions workflows rely on these repository secrets:
 - Android release build & signing ([.github/workflows/maui-android.yml](.github/workflows/maui-android.yml)): optional `API_BASE_URL` override; release signing requires `ANDROID_KEYSTORE` (base64), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`.
 - iOS TestFlight build & signing ([.github/workflows/maui-ios.yml](.github/workflows/maui-ios.yml)): optional `API_BASE_URL`; signing requires `APPSTORE_CERTIFICATE_P12` (base64), `APPSTORE_CERTIFICATE_P12_PASSWORD`, `APPSTORE_CODESIGN_KEY` (App Store signing identity), and App Store Connect API keys `APPSTORE_ISSUER_ID`, `APPSTORE_KEY_ID`, `APPSTORE_PRIVATE_KEY`.
 - GitHub Pages deploy ([.github/workflows/pages.yml](.github/workflows/pages.yml)): no secrets required.
-
-- Last-write-wins conflict resolution
-- Sync triggered manually from Settings
-
-### Share System
-- 6-character alphanumeric codes (charset excludes ambiguous chars: O, 0, 1, I, L)
-- Pet data uploaded to Azure Table Storage with share code as partition key
-- Recipients import by entering the code
 
 ---
 
