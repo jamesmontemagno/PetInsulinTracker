@@ -77,6 +77,12 @@ public partial class AddEditPetViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isEditing;
 
+	[ObservableProperty]
+	private bool isSaving;
+
+	[ObservableProperty]
+	private string? savingStatus;
+
 	public string PageTitle => IsEditing ? "Edit Pet" : "Add Pet";
 
 	public List<string> SpeciesOptions { get; } = ["Dog", "Cat"];
@@ -139,79 +145,92 @@ public partial class AddEditPetViewModel : ObservableObject
 	[RelayCommand(CanExecute = nameof(CanSave))]
 	private async Task SaveAsync()
 	{
-		var pet = _existingPet ?? new Pet();
-		var isNew = _existingPet is null;
-		var photoChanged = _existingPet?.PhotoPath != PhotoPath;
-		if (isNew)
-		{
-			pet.OwnerId = Constants.DeviceUserId;
-			pet.OwnerName = Constants.OwnerName;
-		}
-		pet.Name = Name;
-		pet.Species = Species;
-		pet.Breed = Breed;
-		pet.DateOfBirth = DateOfBirth;
-		pet.InsulinType = InsulinType;
-		pet.InsulinConcentration = InsulinConcentration;
-		pet.CurrentDoseIU = CurrentDoseIU;
-		pet.WeightUnit = WeightUnit;
-		pet.CurrentWeight = CurrentWeight;
-		pet.DefaultFoodName = DefaultFoodName;
-		pet.DefaultFoodAmount = DefaultFoodAmount;
-		pet.DefaultFoodUnit = DefaultFoodUnit;
-		pet.DefaultFoodType = DefaultFoodType;
-		pet.PhotoPath = PhotoPath;
+		IsSaving = true;
+		SavingStatus = "Saving pet info…";
 
-		await _db.SavePetAsync(pet);
-
-		// Create the pet in the backend
-		if (isNew)
+		try
 		{
-			try
+			var pet = _existingPet ?? new Pet();
+			var isNew = _existingPet is null;
+			var photoChanged = _existingPet?.PhotoPath != PhotoPath;
+			if (isNew)
 			{
-				await _syncService.CreatePetAsync(pet);
-				pet.IsSynced = true;
-				await _db.SavePetAsync(pet);
+				pet.OwnerId = Constants.DeviceUserId;
+				pet.OwnerName = Constants.OwnerName;
 			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine($"CreatePet sync failed (will retry): {ex}");
-			}
-		}
-		else
-		{
-			_ = _syncService.SyncAsync(pet.Id);
-		}
+			pet.Name = Name;
+			pet.Species = Species;
+			pet.Breed = Breed;
+			pet.DateOfBirth = DateOfBirth;
+			pet.InsulinType = InsulinType;
+			pet.InsulinConcentration = InsulinConcentration;
+			pet.CurrentDoseIU = CurrentDoseIU;
+			pet.WeightUnit = WeightUnit;
+			pet.CurrentWeight = CurrentWeight;
+			pet.DefaultFoodName = DefaultFoodName;
+			pet.DefaultFoodAmount = DefaultFoodAmount;
+			pet.DefaultFoodUnit = DefaultFoodUnit;
+			pet.DefaultFoodType = DefaultFoodType;
+			pet.PhotoPath = PhotoPath;
 
-		string? photoUploadError = null;
-		if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
-		{
-			try
+			await _db.SavePetAsync(pet);
+
+			// Create the pet in the backend
+			if (isNew)
 			{
-				var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
-				if (!string.IsNullOrEmpty(url))
+				SavingStatus = "Syncing with server…";
+				try
 				{
-					pet.PhotoUrl = url;
-					await _db.SaveSyncedAsync(pet);
+					await _syncService.CreatePetAsync(pet);
+					pet.IsSynced = true;
+					await _db.SavePetAsync(pet);
 				}
-				else
+				catch (Exception ex)
 				{
-					photoUploadError = "Photo could not be uploaded. The image may be in an unsupported format.";
+					Debug.WriteLine($"CreatePet sync failed (will retry): {ex}");
 				}
 			}
-			catch (Exception ex)
+			else
 			{
-				Debug.WriteLine($"Photo upload failed: {ex}");
-				photoUploadError = $"Photo upload failed: {ex.Message}";
+				_ = _syncService.SyncAsync(pet.Id);
+			}
+
+			string? photoUploadError = null;
+			if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
+			{
+				SavingStatus = "Uploading photo…";
+				try
+				{
+					var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
+					if (!string.IsNullOrEmpty(url))
+					{
+						pet.PhotoUrl = url;
+						await _db.SaveSyncedAsync(pet);
+					}
+					else
+					{
+						photoUploadError = "Photo could not be uploaded. The image may be in an unsupported format.";
+					}
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine($"Photo upload failed: {ex}");
+					photoUploadError = $"Photo upload failed: {ex.Message}";
+				}
+			}
+
+			WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
+			await Shell.Current.GoToAsync("..");
+
+			if (!string.IsNullOrEmpty(photoUploadError))
+			{
+				await Shell.Current.DisplayAlertAsync("Photo Upload", photoUploadError, "OK");
 			}
 		}
-
-		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
-		await Shell.Current.GoToAsync("..");
-
-		if (!string.IsNullOrEmpty(photoUploadError))
+		finally
 		{
-			await Shell.Current.DisplayAlertAsync("Photo Upload", photoUploadError, "OK");
+			IsSaving = false;
+			SavingStatus = null;
 		}
 	}
 

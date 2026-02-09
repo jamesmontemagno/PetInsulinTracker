@@ -9,6 +9,7 @@
              Title="{Binding PageTitle}"
              BackgroundColor="{DynamicResource PageBackground}">
 
+    <Grid>
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 

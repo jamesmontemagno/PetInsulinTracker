@@ -32,6 +32,9 @@
                     StartColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#2A1820}"
                     EndColor="{AppThemeBinding Light={StaticResource Secondary}, Dark=#1A1015}"
                     IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="80" IconColor="White" Opacity="0.6"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
             </Grid>
 
             <!-- Pet Info Overlay (overlaps hero) -->

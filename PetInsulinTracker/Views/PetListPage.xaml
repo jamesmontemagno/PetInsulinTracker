@@ -60,9 +60,8 @@
                                     WidthRequest="96"
                                     StrokeShape="RoundRectangle 20">
                                 <Grid>
-                                    <Label Style="{StaticResource AvatarTextStyle}"
-                                           Text="{Binding Pet.Name, Converter={StaticResource FirstLetterConverter}}"
-                                           FontSize="32"
+                                    <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="40" IconColor="White"
+                                           HorizontalOptions="Center" VerticalOptions="Center"
                                            IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                                     <Image Source="{Binding Pet.PhotoSource}" Aspect="AspectFill"
                                            IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
