@@ -108,6 +108,9 @@ public class SyncFunctions
 				DefaultFoodAmount = petData.DefaultFoodAmount,
 				DefaultFoodUnit = petData.DefaultFoodUnit,
 				DefaultFoodType = petData.DefaultFoodType,
+				ShareCode = petData.ShareCode,
+				FullAccessCode = petData.FullAccessCode,
+				GuestAccessCode = petData.GuestAccessCode,
 				LastModified = ClampLastModified(petData.LastModified),
 				IsDeleted = petData.IsDeleted
 			});
@@ -172,6 +175,9 @@ public class SyncFunctions
 					DefaultFoodAmount = p.DefaultFoodAmount,
 					DefaultFoodUnit = p.DefaultFoodUnit,
 					DefaultFoodType = p.DefaultFoodType,
+					ShareCode = p.ShareCode,
+					FullAccessCode = p.FullAccessCode,
+					GuestAccessCode = p.GuestAccessCode,
 					LastModified = ClampLastModified(p.LastModified),
 					IsDeleted = p.IsDeleted
 				});
@@ -292,6 +298,9 @@ public class SyncFunctions
 				DefaultFoodAmount = p.DefaultFoodAmount,
 				DefaultFoodUnit = p.DefaultFoodUnit,
 				DefaultFoodType = p.DefaultFoodType,
+				ShareCode = p.ShareCode,
+				FullAccessCode = p.FullAccessCode,
+				GuestAccessCode = p.GuestAccessCode,
 				LastModified = p.LastModified, IsDeleted = p.IsDeleted
 			}).ToList(),
 			InsulinLogs = serverInsulinLogs.Select(l => new InsulinLogDto
