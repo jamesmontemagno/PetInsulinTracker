@@ -110,3 +110,15 @@ public class CreatePetResponse
 {
 	public PetDto Pet { get; set; } = new();
 }
+
+public class PetPhotoUploadRequest
+{
+	public string PetId { get; set; } = string.Empty;
+	public string DeviceUserId { get; set; } = string.Empty;
+	public string Base64Image { get; set; } = string.Empty;
+}
+
+public class PetPhotoUploadResponse
+{
+	public string PhotoUrl { get; set; } = string.Empty;
+}

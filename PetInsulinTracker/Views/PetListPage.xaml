@@ -57,9 +57,9 @@
                                 <Grid>
                                     <Label Style="{StaticResource AvatarTextStyle}"
                                            Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}"
-                                           IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
-                                    <Image Source="{Binding PhotoPath}" Aspect="AspectFill"
-                                           IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                           IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                                    <Image Source="{Binding PhotoSource}" Aspect="AspectFill"
+                                           IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                 </Grid>
                             </Border>
                             <!-- Pet Info -->

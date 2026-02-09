@@ -18,8 +18,8 @@
                 <controls:GradientCard
                     StartColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#2A1820}"
                     EndColor="{AppThemeBinding Light={StaticResource Secondary}, Dark=#1A1015}" />
-                <Image Source="{Binding Pet.PhotoPath}" Aspect="AspectFill" Opacity="0.3"
-                       IsVisible="{Binding Pet.PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                <Image Source="{Binding Pet.PhotoSource}" Aspect="AspectFill" Opacity="0.3"
+                       IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
             </Grid>
 
             <!-- Pet Info Overlay (overlaps hero) -->

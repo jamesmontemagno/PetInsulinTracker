@@ -124,6 +124,7 @@ public class ShareFunctions
 				Species = pet.Species,
 				Breed = pet.Breed,
 				DateOfBirth = pet.DateOfBirth,
+				PhotoUrl = pet.PhotoUrl,
 				InsulinType = pet.InsulinType,
 				InsulinConcentration = pet.InsulinConcentration,
 				CurrentDoseIU = pet.CurrentDoseIU,

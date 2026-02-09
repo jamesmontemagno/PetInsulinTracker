@@ -26,6 +26,10 @@ public class Pet
 	public DateTime? DateOfBirth { get; set; }
 
 	public string? PhotoPath { get; set; }
+	public string? PhotoUrl { get; set; }
+
+	[Ignore]
+	public string? PhotoSource => !string.IsNullOrEmpty(PhotoPath) ? PhotoPath : PhotoUrl;
 
 	/// <summary>e.g., Vetsulin, ProZinc, NPH, Glargine</summary>
 	public string? InsulinType { get; set; }

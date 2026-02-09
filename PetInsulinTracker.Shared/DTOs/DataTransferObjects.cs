@@ -9,6 +9,7 @@ public class PetDto
 	public string Species { get; set; } = string.Empty;
 	public string Breed { get; set; } = string.Empty;
 	public DateTime? DateOfBirth { get; set; }
+	public string? PhotoUrl { get; set; }
 	public string? InsulinType { get; set; }
 	public string? InsulinConcentration { get; set; }
 	public double? CurrentDoseIU { get; set; }

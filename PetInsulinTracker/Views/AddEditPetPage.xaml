@@ -26,10 +26,10 @@
                         <Grid>
                             <mi:MauiIcon Icon="{mi:Fluent CameraAdd20}" IconSize="40" IconColor="{DynamicResource PageTextSecondary}"
                                    HorizontalOptions="Center" VerticalOptions="Center"
-                                   IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
-                            <Image Source="{Binding PhotoPath}"
+                                   IsVisible="{Binding PhotoPreviewSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                            <Image Source="{Binding PhotoPreviewSource}"
                                    Aspect="AspectFill"
-                                   IsVisible="{Binding PhotoPath, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                   IsVisible="{Binding PhotoPreviewSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                         </Grid>
                     </Border>
                     <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">

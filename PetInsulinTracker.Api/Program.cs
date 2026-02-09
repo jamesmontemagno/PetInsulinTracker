@@ -8,6 +8,7 @@ var host = new HostBuilder()
 	.ConfigureServices(services =>
 	{
 		services.AddSingleton<TableStorageService>();
+		services.AddSingleton<BlobStorageService>();
 	})
 	.Build();
 

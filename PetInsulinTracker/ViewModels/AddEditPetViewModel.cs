@@ -70,6 +70,9 @@ public partial class AddEditPetViewModel : ObservableObject
 	private string? photoPath;
 
 	[ObservableProperty]
+	private string? photoPreviewSource;
+
+	[ObservableProperty]
 	private bool isEditing;
 
 	public string PageTitle => IsEditing ? "Edit Pet" : "Add Pet";
@@ -86,6 +89,22 @@ public partial class AddEditPetViewModel : ObservableObject
 		if (!string.IsNullOrEmpty(value))
 		{
 			_ = LoadPetAsync(value);
+		}
+	}
+
+	partial void OnPhotoPathChanged(string? value)
+	{
+		if (!string.IsNullOrEmpty(value))
+		{
+			PhotoPreviewSource = value;
+		}
+		else if (_existingPet is not null)
+		{
+			PhotoPreviewSource = _existingPet.PhotoUrl;
+		}
+		else
+		{
+			PhotoPreviewSource = null;
 		}
 	}
 
@@ -109,6 +128,9 @@ public partial class AddEditPetViewModel : ObservableObject
 		DefaultFoodUnit = _existingPet.DefaultFoodUnit;
 		DefaultFoodType = _existingPet.DefaultFoodType;
 		PhotoPath = _existingPet.PhotoPath;
+		PhotoPreviewSource = !string.IsNullOrEmpty(_existingPet.PhotoPath)
+			? _existingPet.PhotoPath
+			: _existingPet.PhotoUrl;
 		OnPropertyChanged(nameof(PageTitle));
 	}
 
@@ -117,6 +139,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	{
 		var pet = _existingPet ?? new Pet();
 		var isNew = _existingPet is null;
+		var photoChanged = _existingPet?.PhotoPath != PhotoPath;
 		if (isNew)
 		{
 			pet.OwnerId = Constants.DeviceUserId;
@@ -156,6 +179,23 @@ public partial class AddEditPetViewModel : ObservableObject
 		else
 		{
 			_ = _syncService.SyncAsync(pet.Id);
+		}
+
+		if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
+		{
+			try
+			{
+				var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
+				if (!string.IsNullOrEmpty(url))
+				{
+					pet.PhotoUrl = url;
+					await _db.SaveSyncedAsync(pet);
+				}
+			}
+			catch
+			{
+				// Upload can retry later
+			}
 		}
 
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));

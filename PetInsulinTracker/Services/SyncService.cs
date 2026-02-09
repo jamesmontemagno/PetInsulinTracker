@@ -3,6 +3,7 @@ using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Shared;
 using PetInsulinTracker.Shared.DTOs;
+using SkiaSharp;
 
 namespace PetInsulinTracker.Services;
 
@@ -89,6 +90,7 @@ public class SyncService : ISyncService
 			Species = data.Pet.Species,
 			Breed = data.Pet.Breed,
 			DateOfBirth = data.Pet.DateOfBirth,
+			PhotoUrl = data.Pet.PhotoUrl,
 			InsulinType = data.Pet.InsulinType,
 			InsulinConcentration = data.Pet.InsulinConcentration,
 			CurrentDoseIU = data.Pet.CurrentDoseIU,
@@ -205,6 +207,30 @@ public class SyncService : ISyncService
 		response.EnsureSuccessStatusCode();
 	}
 
+	public async Task<string?> UploadPetPhotoThumbnailAsync(string petId, string photoPath)
+	{
+		if (Constants.IsOfflineMode || string.IsNullOrWhiteSpace(photoPath)) return null;
+
+		var bytes = CreateThumbnailJpeg(photoPath, 256, 80);
+		if (bytes.Length == 0) return null;
+
+		var request = new PetPhotoUploadRequest
+		{
+			PetId = petId,
+			DeviceUserId = Constants.DeviceUserId,
+			Base64Image = Convert.ToBase64String(bytes)
+		};
+
+		var response = await _http.PostAsJsonAsync(
+			$"{Constants.ApiBaseUrl}/pets/{petId}/photo-thumbnail",
+			request,
+			AppJsonSerializerContext.Default.PetPhotoUploadRequest);
+
+		response.EnsureSuccessStatusCode();
+		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.PetPhotoUploadResponse);
+		return result?.PhotoUrl;
+	}
+
 	public async Task SyncAsync(string petId)
 	{
 		if (Constants.IsOfflineMode) return;
@@ -232,6 +258,7 @@ public class SyncService : ISyncService
 			AccessLevel = p.AccessLevel,
 			Name = p.Name, Species = p.Species, Breed = p.Breed,
 			DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
+			PhotoUrl = p.PhotoUrl,
 			InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 			WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
 			DefaultFoodName = p.DefaultFoodName,
@@ -250,6 +277,7 @@ public class SyncService : ISyncService
 				AccessLevel = pet.AccessLevel,
 				Name = pet.Name, Species = pet.Species, Breed = pet.Breed,
 				DateOfBirth = pet.DateOfBirth, InsulinType = pet.InsulinType,
+				PhotoUrl = pet.PhotoUrl,
 				InsulinConcentration = pet.InsulinConcentration, CurrentDoseIU = pet.CurrentDoseIU,
 				WeightUnit = pet.WeightUnit, CurrentWeight = pet.CurrentWeight,
 				DefaultFoodName = pet.DefaultFoodName,
@@ -328,6 +356,7 @@ public class SyncService : ISyncService
 					AccessLevel = p.AccessLevel,
 					Name = p.Name, Species = p.Species, Breed = p.Breed,
 					DateOfBirth = p.DateOfBirth, InsulinType = p.InsulinType,
+					PhotoUrl = p.PhotoUrl,
 					InsulinConcentration = p.InsulinConcentration, CurrentDoseIU = p.CurrentDoseIU,
 					WeightUnit = p.WeightUnit, CurrentWeight = p.CurrentWeight,
 					DefaultFoodName = p.DefaultFoodName,
@@ -431,6 +460,38 @@ public class SyncService : ISyncService
 		foreach (var s in unsyncedSchedules) await _db.MarkSyncedAsync<Schedule>(s.Id);
 
 		Preferences.Set($"lastSync_{petId}", syncResponse.SyncTimestamp.ToString("O"));
+	}
+
+	private static byte[] CreateThumbnailJpeg(string photoPath, int maxSize, int quality)
+	{
+		try
+		{
+			using var input = File.OpenRead(photoPath);
+			using var original = SKBitmap.Decode(input);
+			if (original is null) return [];
+
+			var maxDimension = Math.Max(original.Width, original.Height);
+			var scale = maxDimension > maxSize ? (float)maxSize / maxDimension : 1f;
+			var targetWidth = Math.Max(1, (int)Math.Round(original.Width * scale));
+			var targetHeight = Math.Max(1, (int)Math.Round(original.Height * scale));
+
+			var imageInfo = new SKImageInfo(targetWidth, targetHeight, original.ColorType, original.AlphaType);
+			using var resized = new SKBitmap(imageInfo);
+			using (var canvas = new SKCanvas(resized))
+			{
+				canvas.Clear(SKColors.Transparent);
+				var destRect = new SKRect(0, 0, targetWidth, targetHeight);
+				canvas.DrawBitmap(original, destRect);
+			}
+
+			using var image = SKImage.FromBitmap(resized);
+			using var data = image.Encode(SKEncodedImageFormat.Jpeg, quality);
+			return data.ToArray();
+		}
+		catch
+		{
+			return [];
+		}
 	}
 
 	public async Task DeleteShareCodeAsync(string shareCode)

@@ -12,11 +12,13 @@ public class PetFunctions
 {
 	private readonly ILogger<PetFunctions> _logger;
 	private readonly TableStorageService _storage;
+	private readonly BlobStorageService _blob;
 
-	public PetFunctions(ILogger<PetFunctions> logger, TableStorageService storage)
+	public PetFunctions(ILogger<PetFunctions> logger, TableStorageService storage, BlobStorageService blob)
 	{
 		_logger = logger;
 		_storage = storage;
+		_blob = blob;
 	}
 
 	private static DateTime? EnsureUtc(DateTime? dt) =>
@@ -85,6 +87,7 @@ public class PetFunctions
 				Species = request.Species,
 				Breed = request.Breed,
 				DateOfBirth = request.DateOfBirth,
+				PhotoUrl = petEntity.PhotoUrl,
 				InsulinType = request.InsulinType,
 				InsulinConcentration = request.InsulinConcentration,
 				CurrentDoseIU = request.CurrentDoseIU,
@@ -123,6 +126,16 @@ public class PetFunctions
 		var deleted = await _storage.DeletePetAsync(request.PetId);
 		if (!deleted)
 			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		// Clean up blob storage thumbnail
+		try
+		{
+			await _blob.DeletePetThumbnailAsync(request.PetId);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to delete thumbnail for pet {PetId}", request.PetId);
+		}
 
 		_logger.LogInformation("Deleted pet {PetId} by owner {OwnerId}", request.PetId, request.OwnerId);
 		return req.CreateResponse(HttpStatusCode.OK);
