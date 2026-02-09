@@ -228,7 +228,12 @@ public class SyncService : ISyncService
 		if (Constants.IsOfflineMode || string.IsNullOrWhiteSpace(photoPath)) return null;
 
 		var bytes = CreateThumbnailJpeg(photoPath, 256, 80);
-		if (bytes.Length == 0) return null;
+		if (bytes.Length == 0)
+		{
+			var ext = Path.GetExtension(photoPath);
+			throw new InvalidOperationException(
+				$"Unable to create thumbnail from the selected photo (format: {ext}). Try choosing a JPEG or PNG image.");
+		}
 
 		var request = new PetPhotoUploadRequest
 		{
@@ -484,7 +489,11 @@ public class SyncService : ISyncService
 		{
 			using var input = File.OpenRead(photoPath);
 			using var original = SKBitmap.Decode(input);
-			if (original is null) return [];
+			if (original is null)
+			{
+				System.Diagnostics.Debug.WriteLine($"SKBitmap.Decode returned null for {Path.GetExtension(photoPath)}");
+				return [];
+			}
 
 			var maxDimension = Math.Max(original.Width, original.Height);
 			var scale = maxDimension > maxSize ? (float)maxSize / maxDimension : 1f;

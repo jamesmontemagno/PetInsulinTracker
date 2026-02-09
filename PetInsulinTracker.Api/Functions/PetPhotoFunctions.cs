@@ -48,20 +48,29 @@ public class PetPhotoFunctions
 
 		var pet = await _storage.GetPetAsync(petId);
 		if (pet is null || pet.IsDeleted)
+		{
+			_logger.LogWarning("Photo upload rejected: pet {PetId} not found or deleted", petId);
 			return req.CreateResponse(HttpStatusCode.NotFound);
+		}
 
 		var isOwner = string.Equals(pet.OwnerId, request.DeviceUserId, StringComparison.Ordinal);
 		if (!isOwner)
 		{
 			var redemption = await _storage.GetRedemptionAsync(petId, request.DeviceUserId);
 			if (redemption is null || redemption.IsRevoked || redemption.AccessLevel == "guest")
+			{
+				_logger.LogWarning("Photo upload rejected: user {UserId} lacks access to pet {PetId}", request.DeviceUserId, petId);
 				return req.CreateResponse(HttpStatusCode.Forbidden);
+			}
 		}
 
 		// Reject oversized payloads before decoding base64 (base64 expands ~33%)
 		const int maxBytes = 512 * 1024;
 		if (request.Base64Image.Length > maxBytes * 4 / 3 + 4)
+		{
+			_logger.LogWarning("Photo upload rejected: payload too large ({Length} chars) for pet {PetId}", request.Base64Image.Length, petId);
 			return req.CreateResponse(HttpStatusCode.RequestEntityTooLarge);
+		}
 
 		byte[] bytes;
 		try
@@ -74,9 +83,22 @@ public class PetPhotoFunctions
 		}
 
 		if (bytes.Length > maxBytes)
+		{
+			_logger.LogWarning("Photo upload rejected: decoded size {Size} bytes exceeds limit for pet {PetId}", bytes.Length, petId);
 			return req.CreateResponse(HttpStatusCode.RequestEntityTooLarge);
+		}
 
-		var url = await _blob.UploadPetThumbnailAsync(petId, bytes);
+		string url;
+		try
+		{
+			url = await _blob.UploadPetThumbnailAsync(petId, bytes);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Blob upload failed for pet {PetId}", petId);
+			return req.CreateResponse(HttpStatusCode.InternalServerError);
+		}
+
 		pet.PhotoUrl = url;
 		pet.LastModified = DateTimeOffset.UtcNow;
 		await _storage.UpsertPetAsync(pet);

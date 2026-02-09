@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
+using SkiaSharp;
 
 namespace PetInsulinTracker.ViewModels;
 
@@ -171,9 +173,9 @@ public partial class AddEditPetViewModel : ObservableObject
 				pet.IsSynced = true;
 				await _db.SavePetAsync(pet);
 			}
-			catch
+			catch (Exception ex)
 			{
-				// Will retry on next sync
+				Debug.WriteLine($"CreatePet sync failed (will retry): {ex}");
 			}
 		}
 		else
@@ -181,6 +183,7 @@ public partial class AddEditPetViewModel : ObservableObject
 			_ = _syncService.SyncAsync(pet.Id);
 		}
 
+		string? photoUploadError = null;
 		if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
 		{
 			try
@@ -191,18 +194,76 @@ public partial class AddEditPetViewModel : ObservableObject
 					pet.PhotoUrl = url;
 					await _db.SaveSyncedAsync(pet);
 				}
+				else
+				{
+					photoUploadError = "Photo could not be uploaded. The image may be in an unsupported format.";
+				}
 			}
-			catch
+			catch (Exception ex)
 			{
-				// Upload can retry later
+				Debug.WriteLine($"Photo upload failed: {ex}");
+				photoUploadError = $"Photo upload failed: {ex.Message}";
 			}
 		}
 
 		WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
 		await Shell.Current.GoToAsync("..");
+
+		if (!string.IsNullOrEmpty(photoUploadError))
+		{
+			await Shell.Current.DisplayAlertAsync("Photo Upload", photoUploadError, "OK");
+		}
 	}
 
 	private bool CanSave() => !string.IsNullOrWhiteSpace(Name);
+
+	/// <summary>
+	/// Copies a photo to the app data directory, converting HEIC/HEIF to JPEG
+	/// since SkiaSharp may not decode HEIC on all platforms.
+	/// </summary>
+	private async Task<string?> CopyAndConvertPhotoAsync(FileResult result)
+	{
+		var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
+		Directory.CreateDirectory(destDir);
+
+		var ext = Path.GetExtension(result.FileName)?.ToLowerInvariant();
+		var isHeic = ext is ".heic" or ".heif";
+		var destExt = isHeic ? ".jpg" : ext;
+		var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{destExt}");
+
+		using var sourceStream = await result.OpenReadAsync();
+
+		if (isHeic)
+		{
+			// Decode via SkiaSharp and re-encode as JPEG for reliable thumbnail creation
+			using var memStream = new MemoryStream();
+			await sourceStream.CopyToAsync(memStream);
+			memStream.Position = 0;
+
+			using var bitmap = SKBitmap.Decode(memStream);
+			if (bitmap is null)
+			{
+				// Fallback: copy raw bytes and let the thumbnail encoder try later
+				Debug.WriteLine($"HEIC decode failed for {result.FileName}, copying raw file");
+				memStream.Position = 0;
+				using var fallbackDest = File.Create(destPath);
+				await memStream.CopyToAsync(fallbackDest);
+				return destPath;
+			}
+
+			using var image = SKImage.FromBitmap(bitmap);
+			using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 90);
+			using var destStream = File.Create(destPath);
+			jpegData.SaveTo(destStream);
+		}
+		else
+		{
+			using var destStream = File.Create(destPath);
+			await sourceStream.CopyToAsync(destStream);
+		}
+
+		return destPath;
+	}
 
 	[RelayCommand]
 	private async Task PickPhotoAsync()
@@ -217,20 +278,11 @@ public partial class AddEditPetViewModel : ObservableObject
 			var result = results?.FirstOrDefault();
 			if (result is null) return;
 
-			// Copy to app data directory so it persists
-			var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
-			Directory.CreateDirectory(destDir);
-			var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{Path.GetExtension(result.FileName)}");
-
-			using var sourceStream = await result.OpenReadAsync();
-			using var destStream = File.Create(destPath);
-			await sourceStream.CopyToAsync(destStream);
-
-			PhotoPath = destPath;
+			PhotoPath = await CopyAndConvertPhotoAsync(result);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			// User cancelled or permission denied
+			Debug.WriteLine($"PickPhoto failed: {ex}");
 		}
 	}
 
@@ -246,19 +298,11 @@ public partial class AddEditPetViewModel : ObservableObject
 
 			if (result is null) return;
 
-			var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
-			Directory.CreateDirectory(destDir);
-			var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{Path.GetExtension(result.FileName)}");
-
-			using var sourceStream = await result.OpenReadAsync();
-			using var destStream = File.Create(destPath);
-			await sourceStream.CopyToAsync(destStream);
-
-			PhotoPath = destPath;
+			PhotoPath = await CopyAndConvertPhotoAsync(result);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			// User cancelled or permission denied
+			Debug.WriteLine($"TakePhoto failed: {ex}");
 		}
 	}
 }
