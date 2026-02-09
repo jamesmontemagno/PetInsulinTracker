@@ -27,9 +27,6 @@ public class PetEntity : ITableEntity
 	public double? DefaultFoodAmount { get; set; }
 	public string DefaultFoodUnit { get; set; } = "cups";
 	public string DefaultFoodType { get; set; } = "Dry";
-	public string? ShareCode { get; set; }
-	public string? FullAccessCode { get; set; }
-	public string? GuestAccessCode { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 	public bool IsDeleted { get; set; }
 }
@@ -135,7 +132,14 @@ public class ShareCodeEntity : ITableEntity
 
 	public string PetId { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
+	/// <summary>
+	/// Legacy field: the pet owner's ID at code creation time.
+	/// Retained for backward compatibility with existing table data.
+	/// Prefer <see cref="CreatedById"/> for identifying who created the code.
+	/// </summary>
 	public string? OwnerId { get; set; }
+	public string CreatedById { get; set; } = string.Empty;
+	public string CreatedByName { get; set; } = string.Empty;
 	public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 

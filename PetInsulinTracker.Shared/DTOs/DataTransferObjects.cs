@@ -19,9 +19,6 @@ public class PetDto
 	public double? DefaultFoodAmount { get; set; }
 	public string DefaultFoodUnit { get; set; } = "cups";
 	public string DefaultFoodType { get; set; } = "Dry";
-	public string? ShareCode { get; set; }
-	public string? FullAccessCode { get; set; }
-	public string? GuestAccessCode { get; set; }
 	public string AccessLevel { get; set; } = "owner";
 	public DateTimeOffset LastModified { get; set; }
 	public bool IsDeleted { get; set; }

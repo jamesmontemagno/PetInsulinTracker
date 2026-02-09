@@ -43,9 +43,6 @@ public interface IDatabaseService
 	Task<int> SaveScheduleAsync(Schedule schedule);
 	Task<int> DeleteScheduleAsync(Schedule schedule);
 
-	// Pets (lookup by share code)
-	Task<Pet?> GetPetByShareCodeAsync(string shareCode);
-
 	// Sync support
 	Task<List<T>> GetUnsyncedAsync<T>() where T : new();
 	Task<List<T>> GetUnsyncedAsync<T>(string petId) where T : new();

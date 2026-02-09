@@ -23,6 +23,8 @@ namespace PetInsulinTracker.Shared;
 [JsonSerializable(typeof(SyncResponse))]
 [JsonSerializable(typeof(ShareCodeRequest))]
 [JsonSerializable(typeof(ShareCodeResponse))]
+[JsonSerializable(typeof(ShareCodeDto))]
+[JsonSerializable(typeof(ShareCodesResponse))]
 [JsonSerializable(typeof(RedeemShareCodeRequest))]
 [JsonSerializable(typeof(RedeemShareCodeResponse))]
 [JsonSerializable(typeof(SharedUserDto))]
@@ -41,6 +43,7 @@ namespace PetInsulinTracker.Shared;
 [JsonSerializable(typeof(List<WeightLogDto>))]
 [JsonSerializable(typeof(List<VetInfoDto>))]
 [JsonSerializable(typeof(List<ScheduleDto>))]
+[JsonSerializable(typeof(List<ShareCodeDto>))]
 [JsonSerializable(typeof(List<SharedUserDto>))]
 public partial class AppJsonSerializerContext : JsonSerializerContext
 {
