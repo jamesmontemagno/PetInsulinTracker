@@ -10,6 +10,11 @@ public static class Constants
 	public const string OfflineModeKey = "offline_mode";
 	public const string NotificationsEnabledKey = "notifications_enabled";
 
+	// Schedule type constants
+	public const string ScheduleTypeInsulin = "Insulin";
+	public const string ScheduleTypeFeeding = "Feeding";
+	public const string ScheduleTypeCombined = "Insulin & Feeding";
+
 	/// <summary>Whether the app is in fully offline mode (no cloud sync).</summary>
 	public static bool IsOfflineMode => Preferences.Get(OfflineModeKey, false);
 

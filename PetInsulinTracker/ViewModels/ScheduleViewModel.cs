@@ -38,7 +38,7 @@ public partial class ScheduleViewModel : ObservableObject
 	private string label = string.Empty;
 
 	[ObservableProperty]
-	private string scheduleType = "Insulin";
+	private string scheduleType = Constants.ScheduleTypeInsulin;
 
 	[ObservableProperty]
 	private TimeSpan timeOfDay = new(8, 0, 0);
@@ -53,7 +53,7 @@ public partial class ScheduleViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isSyncing;
 
-	public List<string> ScheduleTypeOptions { get; } = ["Insulin", "Feeding", "Insulin & Feeding"];
+	public List<string> ScheduleTypeOptions { get; } = [Constants.ScheduleTypeInsulin, Constants.ScheduleTypeFeeding, Constants.ScheduleTypeCombined];
 
 	public string SaveButtonText => IsEditing ? "Save Changes" : "Add Schedule";
 
@@ -145,7 +145,7 @@ public partial class ScheduleViewModel : ObservableObject
 	{
 		_editingScheduleId = null;
 		Label = string.Empty;
-		ScheduleType = "Insulin";
+		ScheduleType = Constants.ScheduleTypeInsulin;
 		TimeOfDay = new TimeSpan(8, 0, 0);
 		ReminderLeadTimeMinutes = 15;
 		IsEditing = false;

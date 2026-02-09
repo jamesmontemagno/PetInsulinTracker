@@ -266,32 +266,32 @@ public partial class WelcomePage : ContentPage
 		if (_savedPetId is null) return;
 
 		if (MorningCombinedEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Morning Insulin & Feeding", "Insulin & Feeding",
+			await SaveScheduleAsync(db, "Morning Insulin & Feeding", Constants.ScheduleTypeCombined,
 				MorningCombinedTime.Time ?? new TimeSpan(8, 0, 0),
 				int.TryParse(MorningCombinedReminder.Text, out var rc1) ? rc1 : 15);
 
 		if (EveningCombinedEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Evening Insulin & Feeding", "Insulin & Feeding",
+			await SaveScheduleAsync(db, "Evening Insulin & Feeding", Constants.ScheduleTypeCombined,
 				EveningCombinedTime.Time ?? new TimeSpan(20, 0, 0),
 				int.TryParse(EveningCombinedReminder.Text, out var rc2) ? rc2 : 15);
 
 		if (MorningInsulinEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Morning Insulin", "Insulin",
+			await SaveScheduleAsync(db, "Morning Insulin", Constants.ScheduleTypeInsulin,
 				MorningInsulinTime.Time ?? new TimeSpan(7, 0, 0),
 				int.TryParse(MorningInsulinReminder.Text, out var r1) ? r1 : 15);
 
 		if (EveningInsulinEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Evening Insulin", "Insulin",
+			await SaveScheduleAsync(db, "Evening Insulin", Constants.ScheduleTypeInsulin,
 				EveningInsulinTime.Time ?? new TimeSpan(19, 0, 0),
 				int.TryParse(EveningInsulinReminder.Text, out var r2) ? r2 : 15);
 
 		if (MorningFeedingEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Morning Feeding", "Feeding",
+			await SaveScheduleAsync(db, "Morning Feeding", Constants.ScheduleTypeFeeding,
 				MorningFeedingTime.Time ?? new TimeSpan(7, 0, 0),
 				int.TryParse(MorningFeedingReminder.Text, out var r3) ? r3 : 15);
 
 		if (EveningFeedingEnabled.IsToggled)
-			await SaveScheduleAsync(db, "Evening Feeding", "Feeding",
+			await SaveScheduleAsync(db, "Evening Feeding", Constants.ScheduleTypeFeeding,
 				EveningFeedingTime.Time ?? new TimeSpan(19, 0, 0),
 				int.TryParse(EveningFeedingReminder.Text, out var r4) ? r4 : 15);
 	}

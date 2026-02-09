@@ -162,7 +162,7 @@ public partial class PetDetailViewModel : ObservableObject
 	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType)
 	{
 		var matching = schedules
-			.Where(s => s.ScheduleType == scheduleType)
+			.Where(s => s.ScheduleType == scheduleType || s.ScheduleType == Constants.ScheduleTypeCombined)
 			.OrderBy(s => s.TimeOfDay)
 			.ToList();
 		if (matching.Count == 0) return null;

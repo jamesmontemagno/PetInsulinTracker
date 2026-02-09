@@ -1,3 +1,4 @@
+using PetInsulinTracker.Helpers;
 using SQLite;
 
 namespace PetInsulinTracker.Models;
@@ -10,8 +11,8 @@ public class Schedule
 	[Indexed]
 	public string PetId { get; set; } = string.Empty;
 
-	/// <summary>Insulin or Feeding</summary>
-	public string ScheduleType { get; set; } = "Insulin";
+	/// <summary>Insulin, Feeding, or Insulin & Feeding</summary>
+	public string ScheduleType { get; set; } = Constants.ScheduleTypeInsulin;
 
 	/// <summary>Display label, e.g., "Morning Insulin"</summary>
 	public string Label { get; set; } = string.Empty;
