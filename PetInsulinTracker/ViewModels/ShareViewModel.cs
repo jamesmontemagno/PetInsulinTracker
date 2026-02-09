@@ -105,11 +105,13 @@ public partial class ShareViewModel : ObservableObject
 			{
 				GuestAccessCode = code;
 				Pet.GuestAccessCode = code;
+				OnPropertyChanged(nameof(GuestAccessCode));
 			}
 			else
 			{
 				FullAccessCode = code;
 				Pet.FullAccessCode = code;
+				OnPropertyChanged(nameof(FullAccessCode));
 			}
 
 			// Set the primary ShareCode to the most recently generated one
