@@ -100,6 +100,9 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = data.Pet.DefaultFoodAmount,
 			DefaultFoodUnit = data.Pet.DefaultFoodUnit,
 			DefaultFoodType = data.Pet.DefaultFoodType,
+			ShareCode = data.Pet.ShareCode,
+			FullAccessCode = data.Pet.FullAccessCode,
+			GuestAccessCode = data.Pet.GuestAccessCode,
 			LastModified = data.Pet.LastModified,
 			IsSynced = true
 		};
@@ -265,6 +268,9 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = p.DefaultFoodAmount,
 			DefaultFoodUnit = p.DefaultFoodUnit,
 			DefaultFoodType = p.DefaultFoodType,
+			ShareCode = p.ShareCode,
+			FullAccessCode = p.FullAccessCode,
+			GuestAccessCode = p.GuestAccessCode,
 			LastModified = p.LastModified,
 			IsDeleted = p.IsDeleted
 		}).ToList();
@@ -284,6 +290,9 @@ public class SyncService : ISyncService
 				DefaultFoodAmount = pet.DefaultFoodAmount,
 				DefaultFoodUnit = pet.DefaultFoodUnit,
 				DefaultFoodType = pet.DefaultFoodType,
+				ShareCode = pet.ShareCode,
+				FullAccessCode = pet.FullAccessCode,
+				GuestAccessCode = pet.GuestAccessCode,
 				LastModified = pet.LastModified,
 				IsDeleted = pet.IsDeleted
 			});
@@ -363,6 +372,9 @@ public class SyncService : ISyncService
 					DefaultFoodAmount = p.DefaultFoodAmount,
 					DefaultFoodUnit = p.DefaultFoodUnit,
 					DefaultFoodType = p.DefaultFoodType,
+					ShareCode = p.ShareCode,
+					FullAccessCode = p.FullAccessCode,
+					GuestAccessCode = p.GuestAccessCode,
 					LastModified = p.LastModified, IsSynced = true,
 					IsDeleted = p.IsDeleted
 				});
