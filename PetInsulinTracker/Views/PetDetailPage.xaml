@@ -52,6 +52,7 @@
                             <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
                                    Style="{StaticResource SubtleTextStyle}" />
                             <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" />
+                            <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1" Text="Edit"
                                 Style="{StaticResource GhostButtonStyle}"
@@ -82,16 +83,55 @@
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding DoseProgress}"
                                             CenterText="{Binding DoseCountdownText}"
-                                            SubText="{Binding DoseCountdownSubText}"
+                                            SubText=""
                                             RingColor="{DynamicResource CurrentPrimary}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             CenterTextColor="{DynamicResource PageText}" />
-                    <Button Grid.Column="1"
-                            Text="Quick Log Insulin"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Command="{Binding QuickLogInsulinCommand}"
-                            VerticalOptions="Center"
-                            SemanticProperties.Hint="Log insulin at current dose and time" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="8">
+                        <Button Text="Quick Log Food + Insulin"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding QuickLogCombinedCommand}"
+                                IsVisible="{Binding HasCombinedSchedule}"
+                                SemanticProperties.Hint="Log feeding and insulin at the current time" />
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasCombinedSchedule}">
+                            <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="Next dose: {0} · {1}">
+                                        <Binding Path="DoseCountdownText" />
+                                        <Binding Path="DoseCountdownSubText" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="Next feeding: {0} · {1}">
+                                        <Binding Path="FeedingCountdownText" />
+                                        <Binding Path="FeedingCountdownSubText" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </VerticalStackLayout>
+
+                        <Button Text="Quick Log Insulin"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding QuickLogInsulinCommand}"
+                                IsVisible="{Binding HasCombinedSchedule, Converter={StaticResource InvertedBoolConverter}}"
+                                SemanticProperties.Hint="Log insulin at current dose and time" />
+                        <VerticalStackLayout Spacing="2"
+                                             IsVisible="{Binding HasCombinedSchedule, Converter={StaticResource InvertedBoolConverter}}">
+                            <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="Next dose: {0} · {1}">
+                                        <Binding Path="DoseCountdownText" />
+                                        <Binding Path="DoseCountdownSubText" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
                 </Grid>
 
                 <!-- Feeding Indicator + Quick Log -->
@@ -100,7 +140,7 @@
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding FeedingProgress}"
                                             CenterText="{Binding FeedingCountdownText}"
-                                            SubText="{Binding FeedingCountdownSubText}"
+                                            SubText=""
                                             RingColor="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             CenterTextColor="{DynamicResource PageText}" />
@@ -109,7 +149,17 @@
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Command="{Binding QuickLogFeedingCommand}"
                                 SemanticProperties.Hint="Log feeding with default food" />
-                        <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="Next feeding: {0} · {1}">
+                                        <Binding Path="FeedingCountdownText" />
+                                        <Binding Path="FeedingCountdownSubText" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Grid>
 

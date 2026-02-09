@@ -80,6 +80,9 @@ public partial class PetDetailViewModel : ObservableObject
 	private string quickFeedInfoText = "";
 
 	[ObservableProperty]
+	private bool hasCombinedSchedule;
+
+	[ObservableProperty]
 	private bool isGuest;
 
 	[ObservableProperty]
@@ -154,6 +157,7 @@ public partial class PetDetailViewModel : ObservableObject
 
 		_schedules = await _db.GetSchedulesAsync(id);
 		ActiveSchedules = new ObservableCollection<Schedule>(_schedules);
+		HasCombinedSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
 
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
@@ -355,6 +359,40 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveFeedingLogAsync(log);
+		_ = SyncInBackgroundAsync(Pet.Id);
+		await LoadDataAsync(Pet.Id);
+	}
+
+	[RelayCommand]
+	private async Task QuickLogCombinedAsync()
+	{
+		if (Pet is null) return;
+
+		var adjustedTime = GetAdjustedLogTime(Constants.ScheduleTypeCombined);
+
+		var insulinLog = new InsulinLog
+		{
+			PetId = Pet.Id,
+			DoseIU = Pet.CurrentDoseIU ?? 0,
+			AdministeredAt = adjustedTime,
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
+		};
+
+		var feedingLog = new FeedingLog
+		{
+			PetId = Pet.Id,
+			FoodName = Pet.DefaultFoodName ?? "Meal",
+			Amount = Pet.DefaultFoodAmount ?? 0,
+			Unit = Pet.DefaultFoodUnit,
+			FoodType = Pet.DefaultFoodType,
+			FedAt = adjustedTime,
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
+		};
+
+		await _db.SaveInsulinLogAsync(insulinLog);
+		await _db.SaveFeedingLogAsync(feedingLog);
 		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
