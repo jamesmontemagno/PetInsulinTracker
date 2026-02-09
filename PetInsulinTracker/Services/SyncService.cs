@@ -53,7 +53,13 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
-			new ShareCodeRequest { PetId = petId, AccessLevel = accessLevel, OwnerId = Constants.DeviceUserId },
+			new ShareCodeRequest
+			{
+				PetId = petId,
+				AccessLevel = accessLevel,
+				DeviceUserId = Constants.DeviceUserId,
+				DisplayName = Constants.OwnerName
+			},
 			AppJsonSerializerContext.Default.ShareCodeRequest);
 
 		response.EnsureSuccessStatusCode();
@@ -100,9 +106,6 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = data.Pet.DefaultFoodAmount,
 			DefaultFoodUnit = data.Pet.DefaultFoodUnit,
 			DefaultFoodType = data.Pet.DefaultFoodType,
-			ShareCode = data.Pet.ShareCode,
-			FullAccessCode = data.Pet.FullAccessCode,
-			GuestAccessCode = data.Pet.GuestAccessCode,
 			LastModified = data.Pet.LastModified,
 			IsSynced = true
 		};
@@ -167,10 +170,20 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode) return [];
 
-		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/users");
+		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/users?deviceUserId={Constants.DeviceUserId}");
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.SharedUsersResponse);
 		return result?.Users ?? [];
+	}
+
+	public async Task<List<ShareCodeDto>> GetShareCodesAsync(string petId)
+	{
+		if (Constants.IsOfflineMode) return [];
+
+		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/codes?deviceUserId={Constants.DeviceUserId}");
+		response.EnsureSuccessStatusCode();
+		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.ShareCodesResponse);
+		return result?.Codes ?? [];
 	}
 
 	public async Task RevokeAccessAsync(string petId, string deviceUserId)
@@ -179,7 +192,7 @@ public class SyncService : ISyncService
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/revoke",
-			new RevokeAccessRequest { PetId = petId, DeviceUserId = deviceUserId },
+			new RevokeAccessRequest { PetId = petId, DeviceUserId = deviceUserId, RequesterId = Constants.DeviceUserId },
 			AppJsonSerializerContext.Default.RevokeAccessRequest);
 		response.EnsureSuccessStatusCode();
 	}
@@ -268,9 +281,6 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = p.DefaultFoodAmount,
 			DefaultFoodUnit = p.DefaultFoodUnit,
 			DefaultFoodType = p.DefaultFoodType,
-			ShareCode = p.ShareCode,
-			FullAccessCode = p.FullAccessCode,
-			GuestAccessCode = p.GuestAccessCode,
 			LastModified = p.LastModified,
 			IsDeleted = p.IsDeleted
 		}).ToList();
@@ -290,9 +300,6 @@ public class SyncService : ISyncService
 				DefaultFoodAmount = pet.DefaultFoodAmount,
 				DefaultFoodUnit = pet.DefaultFoodUnit,
 				DefaultFoodType = pet.DefaultFoodType,
-				ShareCode = pet.ShareCode,
-				FullAccessCode = pet.FullAccessCode,
-				GuestAccessCode = pet.GuestAccessCode,
 				LastModified = pet.LastModified,
 				IsDeleted = pet.IsDeleted
 			});
@@ -372,9 +379,6 @@ public class SyncService : ISyncService
 					DefaultFoodAmount = p.DefaultFoodAmount,
 					DefaultFoodUnit = p.DefaultFoodUnit,
 					DefaultFoodType = p.DefaultFoodType,
-					ShareCode = p.ShareCode,
-					FullAccessCode = p.FullAccessCode,
-					GuestAccessCode = p.GuestAccessCode,
 					LastModified = p.LastModified, IsSynced = true,
 					IsDeleted = p.IsDeleted
 				});
@@ -510,7 +514,8 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode) return;
 
-		var response = await _http.DeleteAsync($"{Constants.ApiBaseUrl}/share/{shareCode}");
+		var response = await _http.DeleteAsync(
+			$"{Constants.ApiBaseUrl}/share/{shareCode}?deviceUserId={Constants.DeviceUserId}");
 		response.EnsureSuccessStatusCode();
 	}
 

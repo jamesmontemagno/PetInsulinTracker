@@ -12,11 +12,39 @@ public class ShareFunctions
 	private readonly ILogger<ShareFunctions> _logger;
 	private readonly TableStorageService _storage;
 	private static readonly char[] ShareCodeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".ToCharArray();
+	private const string FullAccessLevel = "full";
 
 	public ShareFunctions(ILogger<ShareFunctions> logger, TableStorageService storage)
 	{
 		_logger = logger;
 		_storage = storage;
+	}
+
+	private static string? GetQueryValue(Uri url, string key)
+	{
+		var query = url.Query;
+		if (string.IsNullOrEmpty(query)) return null;
+		foreach (var part in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+		{
+			var kvp = part.Split('=', 2);
+			if (kvp.Length == 2
+				&& string.Equals(Uri.UnescapeDataString(kvp[0]), key, StringComparison.OrdinalIgnoreCase))
+			{
+				return Uri.UnescapeDataString(kvp[1]);
+			}
+		}
+		return null;
+	}
+
+	private async Task<bool> HasOwnerOrFullAccessAsync(string petId, string deviceUserId)
+	{
+		var pet = await _storage.GetPetAsync(petId);
+		if (pet is null) return false;
+		if (pet.OwnerId == deviceUserId) return true;
+		var redemption = await _storage.GetRedemptionAsync(petId, deviceUserId);
+		return redemption is not null
+			&& !redemption.IsRevoked
+			&& redemption.AccessLevel == FullAccessLevel;
 	}
 
 	[Function("GenerateShareCode")]
@@ -30,14 +58,15 @@ public class ShareFunctions
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
-		// Verify the requester is the pet owner
-		if (string.IsNullOrEmpty(request.OwnerId))
+		if (string.IsNullOrEmpty(request.DeviceUserId))
 		{
-			_logger.LogWarning("GenerateShareCode rejected: missing OwnerId for pet {PetId}", request.PetId);
+			_logger.LogWarning("GenerateShareCode rejected: missing DeviceUserId for pet {PetId}", request.PetId);
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
-		_logger.LogInformation("GenerateShareCode for pet {PetId} by owner {OwnerId}, access={AccessLevel}", request.PetId, request.OwnerId, request.AccessLevel);
+		_logger.LogInformation(
+			"GenerateShareCode for pet {PetId} by user {DeviceUserId}, access={AccessLevel}",
+			request.PetId, request.DeviceUserId, request.AccessLevel);
 
 		var pet = await _storage.GetPetAsync(request.PetId);
 		if (pet is null)
@@ -45,10 +74,20 @@ public class ShareFunctions
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
 
-		if (pet.OwnerId != request.OwnerId)
+		// Inline access check to avoid redundant pet lookup via HasOwnerOrFullAccessAsync
+		if (pet.OwnerId != request.DeviceUserId)
 		{
-			_logger.LogWarning("Non-owner {RequesterId} attempted to generate share code for pet {PetId}", request.OwnerId, request.PetId);
-			return req.CreateResponse(HttpStatusCode.Forbidden);
+			var redemption = await _storage.GetRedemptionAsync(request.PetId, request.DeviceUserId);
+			var hasFullAccess = redemption is not null
+				&& !redemption.IsRevoked
+				&& redemption.AccessLevel == FullAccessLevel;
+			if (!hasFullAccess)
+			{
+				_logger.LogWarning(
+					"Unauthorized user {RequesterId} attempted to generate share code for pet {PetId}",
+					request.DeviceUserId, request.PetId);
+				return req.CreateResponse(HttpStatusCode.Forbidden);
+			}
 		}
 
 		// Generate a unique 6-character code (no ambiguous chars)
@@ -59,7 +98,17 @@ public class ShareFunctions
 		}
 		while (await _storage.GetShareCodeAsync(code) is not null);
 
-		await _storage.CreateShareCodeAsync(code, request.PetId, request.AccessLevel, request.OwnerId);
+		var creatorName = string.IsNullOrWhiteSpace(request.DisplayName)
+			? request.DeviceUserId
+			: request.DisplayName;
+
+		await _storage.CreateShareCodeAsync(
+			code,
+			request.PetId,
+			request.AccessLevel,
+			pet.OwnerId,
+			request.DeviceUserId,
+			creatorName);
 		_logger.LogInformation("Generated share code {Code} for pet {PetId}", code, request.PetId);
 
 		var response = req.CreateResponse(HttpStatusCode.OK);
@@ -180,6 +229,42 @@ public class ShareFunctions
 		return response;
 	}
 
+	[Function("GetShareCodes")]
+	public async Task<HttpResponseData> GetShareCodes(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/pet/{petId}/codes")] HttpRequestData req,
+		string petId)
+	{
+		var deviceUserId = GetQueryValue(req.Url, "deviceUserId");
+		if (string.IsNullOrEmpty(deviceUserId))
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+
+		var canManage = await HasOwnerOrFullAccessAsync(petId, deviceUserId);
+		if (!canManage)
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+
+		var codes = await _storage.GetShareCodesByPetIdAsync(petId);
+		var result = new ShareCodesResponse
+		{
+			Codes = codes.Select(c =>
+			{
+				var createdById = string.IsNullOrWhiteSpace(c.CreatedById) ? c.OwnerId ?? string.Empty : c.CreatedById;
+				var createdByName = string.IsNullOrWhiteSpace(c.CreatedByName) ? createdById : c.CreatedByName;
+				return new ShareCodeDto
+				{
+					Code = c.RowKey,
+					AccessLevel = c.AccessLevel,
+					CreatedAt = c.CreatedAt,
+					CreatedById = createdById,
+					CreatedByName = createdByName
+				};
+			}).ToList()
+		};
+
+		var response = req.CreateResponse(HttpStatusCode.OK);
+		await response.WriteAsJsonAsync(result);
+		return response;
+	}
+
 	private static string GenerateCode(int length)
 	{
 		var random = Random.Shared;
@@ -193,6 +278,14 @@ public class ShareFunctions
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "share/pet/{petId}/users")] HttpRequestData req,
 		string petId)
 	{
+		var deviceUserId = GetQueryValue(req.Url, "deviceUserId");
+		if (string.IsNullOrEmpty(deviceUserId))
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+
+		var canManage = await HasOwnerOrFullAccessAsync(petId, deviceUserId);
+		if (!canManage)
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+
 		var redemptions = await _storage.GetRedemptionsByPetAsync(petId);
 		var result = new SharedUsersResponse
 		{
@@ -221,16 +314,38 @@ public class ShareFunctions
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
+		// Validate the requester is the pet owner
+		if (string.IsNullOrEmpty(request.RequesterId))
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+
+		var pet = await _storage.GetPetAsync(request.PetId);
+		if (pet is null)
+			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		if (pet.OwnerId != request.RequesterId)
+		{
+			_logger.LogWarning("Unauthorized revoke attempt by {RequesterId} on pet {PetId}",
+				request.RequesterId, request.PetId);
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+		}
+
 		var revoked = await _storage.RevokeRedemptionAsync(request.PetId, request.DeviceUserId);
 		if (!revoked)
 		{
 			return req.CreateResponse(HttpStatusCode.NotFound);
 		}
 
-		_logger.LogInformation("Revoked access for {DeviceUserId} on pet {PetId}", request.DeviceUserId, request.PetId);
+		_logger.LogInformation("Revoked access for {DeviceUserId} on pet {PetId} by {RequesterId}",
+			request.DeviceUserId, request.PetId, request.RequesterId);
 		return req.CreateResponse(HttpStatusCode.OK);
 	}
 
+	/// <summary>
+	/// Self-service endpoint: the DeviceUserId in the request body identifies the user leaving.
+	/// No separate requester validation is performed since the DeviceUserId serves as both
+	/// the identity claim and the target. This is consistent with the app's trust model
+	/// where DeviceUserId is treated as a trusted client-provided identifier.
+	/// </summary>
 	[Function("LeavePet")]
 	public async Task<HttpResponseData> LeavePet(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "share/leave")] HttpRequestData req)
@@ -254,6 +369,18 @@ public class ShareFunctions
 		[HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "share/{code}")] HttpRequestData req,
 		string code)
 	{
+		var deviceUserId = GetQueryValue(req.Url, "deviceUserId");
+		if (string.IsNullOrEmpty(deviceUserId))
+			return req.CreateResponse(HttpStatusCode.BadRequest);
+
+		var shareCode = await _storage.GetShareCodeAsync(code);
+		if (shareCode is null)
+			return req.CreateResponse(HttpStatusCode.NotFound);
+
+		var canManage = await HasOwnerOrFullAccessAsync(shareCode.PetId, deviceUserId);
+		if (!canManage)
+			return req.CreateResponse(HttpStatusCode.Forbidden);
+
 		var deleted = await _storage.DeleteShareCodeAsync(code);
 		if (!deleted)
 		{

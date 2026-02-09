@@ -13,17 +13,29 @@
     <ScrollView>
         <VerticalStackLayout Spacing="16">
 
-            <!-- Hero Header with Gradient -->
-            <Grid HeightRequest="160">
+            <!-- Hero Header with Pet Photo -->
+            <Grid HeightRequest="280">
                 <controls:GradientCard
                     StartColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#2A1820}"
                     EndColor="{AppThemeBinding Light={StaticResource Secondary}, Dark=#1A1015}" />
-                <Image Source="{Binding Pet.PhotoSource}" Aspect="AspectFill" Opacity="0.3"
-                       IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                <!-- Pet Photo with rounded bottom corners -->
+                <Border StrokeThickness="0" BackgroundColor="Transparent">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="0,0,32,32" />
+                    </Border.StrokeShape>
+                    <Image Source="{Binding Pet.PhotoSource}" 
+                           Aspect="AspectFill"
+                           IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                </Border>
+                <!-- Fallback gradient when no photo -->
+                <controls:GradientCard
+                    StartColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#2A1820}"
+                    EndColor="{AppThemeBinding Light={StaticResource Secondary}, Dark=#1A1015}"
+                    IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
             </Grid>
 
             <!-- Pet Info Overlay (overlaps hero) -->
-            <Border Style="{StaticResource CardStyleElevated}" Margin="20,-60,20,0">
+            <Border Style="{StaticResource CardStyleElevated}" Margin="20,-80,20,0">
                 <VerticalStackLayout Spacing="4">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="4">
@@ -215,7 +227,7 @@
                     <Button Grid.Row="1" Grid.Column="0" Text="Share"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToShareCommand}"
-                            IsVisible="{Binding IsOwner}" />
+                            IsVisible="{Binding IsOwnerOrFull}" />
                     <Button Grid.Row="1" Grid.Column="1" Text="Delete Pet"
                             Style="{StaticResource OutlineButtonStyle}"
                             TextColor="Red"

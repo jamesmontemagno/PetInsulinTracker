@@ -9,86 +9,95 @@
              Title="Share Pet"
              BackgroundColor="{DynamicResource PageBackground}">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Create Share Code"
+                     Command="{Binding CreateShareCodeCommand}"
+                     IsEnabled="{Binding CanCreateShareCode}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="+" FontFamily="OpenSansSemibold" Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Resources>
+        <DataTemplate x:Key="ShareCodeCardTemplate" x:DataType="dto:ShareCodeDto">
+            <Border Style="{StaticResource CardStyleElevated}" Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Style="{StaticResource SubtleTextStyle}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding AccessLevel}" Value="full">
+                                <Setter Property="Text" Value="Full Access Code" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding AccessLevel}" Value="guest">
+                                <Setter Property="Text" Value="Guest Access Code" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Border BackgroundColor="{DynamicResource CurrentSurface}"
+                            StrokeThickness="2"
+                            Stroke="{DynamicResource CurrentPrimary}"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="18,12"
+                            HorizontalOptions="Center">
+                        <Label Text="{Binding Code}" FontSize="28" FontFamily="OpenSansSemibold"
+                               CharacterSpacing="5" HorizontalOptions="Center"
+                               TextColor="{DynamicResource CurrentPrimary}"
+                               SemanticProperties.Description="Share code" />
+                    </Border>
+                    <Label Text="{Binding CreatedByName, StringFormat='Created by {0}'}"
+                           Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    <Label Text="{Binding CreatedAt, StringFormat='Created {0:MMM d, yyyy}'}"
+                           Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Copy"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, Path=CopyShareCodeCommand}"
+                                CommandParameter="{Binding .}"
+                                Style="{StaticResource QuickActionButtonStyle}" />
+                        <Button Text="Delete"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, Path=DeleteShareCodeCommand}"
+                                CommandParameter="{Binding .}"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                TextColor="Red" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
             <!-- Share Codes Section -->
             <Label Text="SHARE CODES" Style="{StaticResource OverlineStyle}" />
 
-            <!-- Full Access Code Card -->
-            <Border Style="{StaticResource CardStyleElevated}"
-                    Padding="24"
-                    IsVisible="{Binding FullAccessCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
-                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="Full Access Code" Style="{StaticResource SubtleTextStyle}"
-                           HorizontalOptions="Center" />
-                    <Border BackgroundColor="{DynamicResource CurrentSurface}"
-                            StrokeThickness="2"
-                            Stroke="{DynamicResource CurrentPrimary}"
-                            StrokeShape="RoundRectangle 12"
-                            Padding="24,16"
-                            HorizontalOptions="Center">
-                        <Label Text="{Binding FullAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
-                               CharacterSpacing="6" HorizontalOptions="Center"
-                               TextColor="{DynamicResource CurrentPrimary}"
-                               SemanticProperties.Description="Full access share code" />
-                    </Border>
-                    <Button Text="Copy Code" Command="{Binding CopyFullAccessCodeCommand}"
-                            Style="{StaticResource QuickActionButtonStyle}"
-                            HorizontalOptions="Center" />
-                    <Label Text="For family members — full access to all logs and pet info."
-                           Style="{StaticResource SubtleTextStyle}" FontSize="13"
-                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
-                    <Button Text="Delete Code" Command="{Binding DeleteFullAccessCodeCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Center"
-                            TextColor="Red" />
-                </VerticalStackLayout>
-            </Border>
+            <ActivityIndicator IsRunning="{Binding IsLoadingCodes}"
+                               IsVisible="{Binding IsLoadingCodes}"
+                               HorizontalOptions="Center" />
 
-            <!-- Guest Access Code Card -->
-            <Border Style="{StaticResource CardStyleElevated}"
-                    Padding="24"
-                    IsVisible="{Binding GuestAccessCode, Converter={StaticResource IsNotNullOrEmptyConverter}}">
-                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="Guest Access Code" Style="{StaticResource SubtleTextStyle}"
-                           HorizontalOptions="Center" />
-                    <Border BackgroundColor="{DynamicResource CurrentSurface}"
-                            StrokeThickness="2"
-                            Stroke="{DynamicResource CurrentPrimary}"
-                            StrokeShape="RoundRectangle 12"
-                            Padding="24,16"
-                            HorizontalOptions="Center">
-                        <Label Text="{Binding GuestAccessCode}" FontSize="36" FontFamily="OpenSansSemibold"
-                               CharacterSpacing="6" HorizontalOptions="Center"
-                               TextColor="{DynamicResource CurrentPrimary}"
-                               SemanticProperties.Description="Guest access share code" />
-                    </Border>
-                    <Button Text="Copy Code" Command="{Binding CopyGuestAccessCodeCommand}"
-                            Style="{StaticResource QuickActionButtonStyle}"
-                            HorizontalOptions="Center" />
-                    <Label Text="For pet sitters — can view pet info and log entries, but not other people's logs."
-                           Style="{StaticResource SubtleTextStyle}" FontSize="13"
-                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
-                    <Button Text="Delete Code" Command="{Binding DeleteGuestAccessCodeCommand}"
-                            Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Center"
-                            TextColor="Red" />
-                </VerticalStackLayout>
-            </Border>
+            <Label Text="No share codes yet. Tap Create Share Code to get started."
+                   Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding HasAnyCodes, Converter={StaticResource InvertedBoolConverter}}" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <Button Grid.Column="0" Text="Full Access"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding GenerateFullAccessCodeCommand}"
-                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}"
-                        HorizontalOptions="Fill" />
-                <Button Grid.Column="1" Text="Guest Access"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        Command="{Binding GenerateGuestAccessCodeCommand}"
-                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}"
-                        HorizontalOptions="Fill" />
-            </Grid>
+            <VerticalStackLayout Spacing="12"
+                                 IsVisible="{Binding HasFullAccessCodes}">
+                <Label Text="FULL ACCESS" Style="{StaticResource OverlineStyle}" />
+                <CollectionView ItemsSource="{Binding FullAccessCodes}" SelectionMode="None"
+                                ItemTemplate="{StaticResource ShareCodeCardTemplate}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="12"
+                                 IsVisible="{Binding HasGuestAccessCodes}">
+                <Label Text="GUEST ACCESS" Style="{StaticResource OverlineStyle}" />
+                <CollectionView ItemsSource="{Binding GuestAccessCodes}" SelectionMode="None"
+                                ItemTemplate="{StaticResource ShareCodeCardTemplate}" />
+            </VerticalStackLayout>
+
+            <Button Text="Refresh Codes"
+                    Command="{Binding RefreshShareCodesCommand}"
+                    Style="{StaticResource OutlineButtonStyle}"
+                    HorizontalOptions="Center"
+                    IsVisible="{Binding IsOwnerOrFull}" />
 
             <Label Text="Full Access: See all logs and pet info (family members)&#x0a;Guest Access: See pet info, log entries, but not other people's logs (pet sitters)"
                    Style="{StaticResource SubtleTextStyle}" FontSize="12"
@@ -96,7 +105,7 @@
 
             <!-- People with Access (owner only) -->
             <VerticalStackLayout Spacing="12"
-                                 IsVisible="{Binding IsOwner}">
+                                 IsVisible="{Binding IsOwnerOrFull}">
                 <BoxView Style="{StaticResource DividerStyle}" Margin="0,8" />
                 <Label Text="PEOPLE WITH ACCESS" Style="{StaticResource OverlineStyle}" />
 
@@ -104,7 +113,7 @@
                                    IsVisible="{Binding IsLoadingUsers}"
                                    HorizontalOptions="Center" />
 
-                <Label Text="No one has redeemed your share code yet."
+                <Label Text="No one has redeemed a share code yet."
                        Style="{StaticResource SubtleTextStyle}" FontSize="14"
                        HorizontalTextAlignment="Center"
                        IsVisible="False">
@@ -113,7 +122,7 @@
                             <MultiTrigger.Conditions>
                                 <BindingCondition Binding="{Binding SharedUsers.Count}" Value="0" />
                                 <BindingCondition Binding="{Binding IsLoadingUsers}" Value="False" />
-                                <BindingCondition Binding="{Binding ShareCode, Converter={StaticResource IsNotNullOrEmptyConverter}}" Value="True" />
+                                <BindingCondition Binding="{Binding HasAnyCodes}" Value="True" />
                             </MultiTrigger.Conditions>
                             <Setter Property="IsVisible" Value="True" />
                         </MultiTrigger>
@@ -146,6 +155,7 @@
                                             CommandParameter="{Binding .}"
                                             Style="{StaticResource QuickActionButtonStyle}"
                                             VerticalOptions="Center"
+                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, x:DataType=vm:ShareViewModel, Path=IsOwner}"
                                             IsEnabled="{Binding IsRevoked, Converter={StaticResource InvertedBoolConverter}}">
                                         <Button.Triggers>
                                             <DataTrigger TargetType="Button" Binding="{Binding IsRevoked}" Value="True">

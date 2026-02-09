@@ -145,7 +145,13 @@ public class TableStorageService
 		return results;
 	}
 
-	public async Task CreateShareCodeAsync(string code, string petId, string accessLevel = "full", string? ownerId = null)
+	public async Task CreateShareCodeAsync(
+		string code,
+		string petId,
+		string accessLevel = "full",
+		string? ownerId = null,
+		string createdById = "",
+		string createdByName = "")
 	{
 		var client = await GetTableClientAsync("ShareCodes");
 		var entity = new ShareCodeEntity
@@ -154,7 +160,9 @@ public class TableStorageService
 			RowKey = code,
 			PetId = petId,
 			AccessLevel = accessLevel,
-			OwnerId = ownerId
+			OwnerId = ownerId,
+			CreatedById = createdById,
+			CreatedByName = createdByName
 		};
 		await client.UpsertEntityAsync(entity, TableUpdateMode.Replace);
 	}

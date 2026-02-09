@@ -28,13 +28,28 @@ public class ShareCodeRequest
 {
 	public string PetId { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
-	public string OwnerId { get; set; } = string.Empty;
+	public string DeviceUserId { get; set; } = string.Empty;
+	public string DisplayName { get; set; } = string.Empty;
 }
 
 public class ShareCodeResponse
 {
 	public string ShareCode { get; set; } = string.Empty;
 	public string AccessLevel { get; set; } = "full";
+}
+
+public class ShareCodeDto
+{
+	public string Code { get; set; } = string.Empty;
+	public string AccessLevel { get; set; } = "full";
+	public DateTimeOffset CreatedAt { get; set; }
+	public string CreatedById { get; set; } = string.Empty;
+	public string CreatedByName { get; set; } = string.Empty;
+}
+
+public class ShareCodesResponse
+{
+	public List<ShareCodeDto> Codes { get; set; } = [];
 }
 
 public class RedeemShareCodeRequest
@@ -71,7 +86,10 @@ public class SharedUsersResponse
 public class RevokeAccessRequest
 {
 	public string PetId { get; set; } = string.Empty;
+	/// <summary>DeviceUserId of the user whose access is being revoked.</summary>
 	public string DeviceUserId { get; set; } = string.Empty;
+	/// <summary>DeviceUserId of the person making the revocation request (must be the pet owner).</summary>
+	public string RequesterId { get; set; } = string.Empty;
 }
 
 public class LeavePetRequest

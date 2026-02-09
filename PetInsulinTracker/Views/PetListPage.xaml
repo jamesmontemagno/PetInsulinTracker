@@ -45,41 +45,55 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Pet">
-                    <Border Style="{StaticResource CardStyle}" Margin="20,0">
+                    <Border Style="{StaticResource CardStyle}" Margin="20,0" Padding="16">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetListViewModel}}, x:DataType=vm:PetListViewModel, Path=GoToPetDetailCommand}"
                                 CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="16">
-                            <!-- Avatar -->
-                            <Border Grid.Column="0" Style="{StaticResource AvatarStyle}">
+                        <Grid ColumnDefinitions="96,*,Auto" ColumnSpacing="16">
+                            <!-- Larger Avatar -->
+                            <Border Grid.Column="0" 
+                                    BackgroundColor="{DynamicResource CurrentPrimary}"
+                                    StrokeThickness="0"
+                                    HeightRequest="96"
+                                    WidthRequest="96"
+                                    StrokeShape="RoundRectangle 20">
                                 <Grid>
                                     <Label Style="{StaticResource AvatarTextStyle}"
                                            Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}"
+                                           FontSize="32"
                                            IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                                     <Image Source="{Binding PhotoSource}" Aspect="AspectFill"
                                            IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                 </Grid>
                             </Border>
                             <!-- Pet Info -->
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="6">
                                 <Label Text="{Binding Name}"
-                                       FontSize="17" FontFamily="OpenSansSemibold"
+                                       FontSize="20" FontFamily="OpenSansSemibold"
                                        SemanticProperties.HeadingLevel="Level3" />
                                 <Label Text="{Binding Species}"
+                                       FontSize="15"
                                        Style="{StaticResource SubtleTextStyle}" />
-                                <Label Style="{StaticResource SubtleTextStyle}">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0:F1} {1}">
-                                            <Binding Path="CurrentWeight" />
-                                            <Binding Path="WeightUnit" />
-                                        </MultiBinding>
-                                    </Label.Text>
-                                </Label>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                            StrokeThickness="0"
+                                            Padding="8,4"
+                                            StrokeShape="RoundRectangle 8">
+                                        <Label Style="{StaticResource SubtleTextStyle}" FontSize="13">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0:F1} {1}">
+                                                    <Binding Path="CurrentWeight" />
+                                                    <Binding Path="WeightUnit" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                    </Border>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                             <!-- Chevron -->
-                            <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}"
+                            <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="20" IconColor="{DynamicResource PageTextSecondary}"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>

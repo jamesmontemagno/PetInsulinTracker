@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PetInsulinTracker.Models;
@@ -12,11 +13,16 @@ public partial class ShareViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private const string FullAccessLevel = "full";
+
+	private CancellationTokenSource? _statusCts;
 
 	public ShareViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
 		_syncService = syncService;
+		FullAccessCodes.CollectionChanged += (_, _) => UpdateCodeFlags();
+		GuestAccessCodes.CollectionChanged += (_, _) => UpdateCodeFlags();
 	}
 
 	[ObservableProperty]
@@ -26,26 +32,29 @@ public partial class ShareViewModel : ObservableObject
 	private Pet? pet;
 
 	[ObservableProperty]
-	private string? shareCode;
-
-	[ObservableProperty]
-	private string? fullAccessCode;
-
-	[ObservableProperty]
-	private string? guestAccessCode;
-
-	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(CanCreateShareCode))]
 	private bool isGenerating;
 
 	[ObservableProperty]
 	private bool isLoadingUsers;
 
 	[ObservableProperty]
+	private bool isLoadingCodes;
+
+	[ObservableProperty]
 	private string statusMessage = string.Empty;
+
+	public ObservableCollection<ShareCodeDto> FullAccessCodes { get; } = [];
+	public ObservableCollection<ShareCodeDto> GuestAccessCodes { get; } = [];
 
 	public ObservableCollection<SharedUserDto> SharedUsers { get; } = [];
 
 	public bool IsOwner => Pet?.AccessLevel == "owner";
+	public bool IsOwnerOrFull => Pet?.AccessLevel != "guest";
+	public bool CanCreateShareCode => IsOwnerOrFull && !IsGenerating;
+	public bool HasFullAccessCodes => FullAccessCodes.Count > 0;
+	public bool HasGuestAccessCodes => GuestAccessCodes.Count > 0;
+	public bool HasAnyCodes => HasFullAccessCodes || HasGuestAccessCodes;
 
 	partial void OnPetIdChanged(string? value)
 	{
@@ -55,90 +64,77 @@ public partial class ShareViewModel : ObservableObject
 
 	private async Task LoadPetAsync(string id)
 	{
-		Pet = await _db.GetPetAsync(id);
-		ShareCode = Pet?.ShareCode;
-		FullAccessCode = Pet?.FullAccessCode;
-		GuestAccessCode = Pet?.GuestAccessCode;
-		OnPropertyChanged(nameof(IsOwner));
+		try
+		{
+			Pet = await _db.GetPetAsync(id);
+			OnPropertyChanged(nameof(IsOwner));
+			OnPropertyChanged(nameof(IsOwnerOrFull));
+			OnPropertyChanged(nameof(CanCreateShareCode));
 
-		if (IsOwner && (!string.IsNullOrEmpty(FullAccessCode) || !string.IsNullOrEmpty(GuestAccessCode)))
+			if (!IsOwnerOrFull)
+			{
+				SetStatus("Share management requires owner or full access.", 0);
+				await Shell.Current.GoToAsync("..");
+				return;
+			}
+
+			await LoadShareCodesAsync();
 			await LoadAllSharedUsersAsync();
+		}
+		catch (Exception ex)
+		{
+			SetStatus($"Error loading pet: {ex.Message}");
+		}
 	}
 
 	[RelayCommand]
-	private async Task GenerateFullAccessCodeAsync()
+	private async Task CreateShareCodeAsync()
 	{
-		await GenerateCodeAsync("full");
-	}
+		if (Pet is null || !IsOwnerOrFull) return;
 
-	[RelayCommand]
-	private async Task GenerateGuestAccessCodeAsync()
-	{
-		await GenerateCodeAsync("guest");
+		var selection = await Shell.Current.DisplayActionSheetAsync(
+			"Create Share Code",
+			"Cancel",
+			null,
+			"Full Access",
+			"Guest Access");
+
+		if (string.IsNullOrEmpty(selection) || selection == "Cancel") return;
+
+		var accessLevel = selection == "Guest Access" ? "guest" : FullAccessLevel;
+		var existingCount = accessLevel == "guest" ? GuestAccessCodes.Count : FullAccessCodes.Count;
+		if (existingCount > 0)
+		{
+			var confirm = await Shell.Current.DisplayAlertAsync(
+				"Create Another Share Code?",
+				$"You already have {existingCount} {selection} code{(existingCount == 1 ? "" : "s")}. Create another?",
+				"Create Another",
+				"Cancel");
+			if (!confirm) return;
+		}
+
+		await GenerateCodeAsync(accessLevel);
 	}
 
 	private async Task GenerateCodeAsync(string accessLevel)
 	{
 		if (Pet is null) return;
 
-		// Check if a code already exists for this access level
-		var existingCode = accessLevel == "guest" ? GuestAccessCode : FullAccessCode;
-		if (!string.IsNullOrEmpty(existingCode))
-		{
-			var label = accessLevel == "guest" ? "Guest Access" : "Full Access";
-			var confirm = await Shell.Current.DisplayAlertAsync(
-				"Replace Share Code?",
-				$"You already have a {label} code ({existingCode}). Generating a new one will replace it. Anyone using the old code will need the new one. Continue?",
-				"Generate New", "Keep Existing");
-
-			if (!confirm) return;
-		}
-
 		try
 		{
 			IsGenerating = true;
-			StatusMessage = "Generating share code...";
+			SetStatus("Generating share code...", 0);
 
-			var code = await _syncService.GenerateShareCodeAsync(Pet.Id, accessLevel);
+			await _syncService.GenerateShareCodeAsync(Pet.Id, accessLevel);
+			await LoadShareCodesAsync();
 
-			// Update properties and explicitly notify UI
-			// (Defensive: ensures IsVisible bindings re-evaluate for code card display)
-			if (accessLevel == "guest")
-			{
-				GuestAccessCode = code;
-				Pet.GuestAccessCode = code;
-				OnPropertyChanged(nameof(GuestAccessCode));
-			}
-			else
-			{
-				FullAccessCode = code;
-				Pet.FullAccessCode = code;
-				OnPropertyChanged(nameof(FullAccessCode));
-			}
-
-			// Set the primary ShareCode to the most recently generated one
-			ShareCode = code;
-			Pet.ShareCode = code;
-			OnPropertyChanged(nameof(ShareCode));
-			await _db.SavePetAsync(Pet);
-
-			// Sync pet data to the server so the code is redeemable
-			try
-			{
-				await _syncService.SyncAsync(Pet.Id);
-			}
-			catch
-			{
-				// Sync failure shouldn't block code generation; it will retry on next sync
-			}
-
-			StatusMessage = accessLevel == "guest"
-				? "Guest code generated! They can view pet info and log entries, but won't see your logs."
-				: "Full access code generated! They can see all logs and pet info.";
+			SetStatus(accessLevel == "guest"
+				? "Guest share code created."
+				: "Full access share code created.");
 		}
 		catch (Exception ex)
 		{
-			StatusMessage = $"Error: {ex.Message}";
+			SetStatus($"Error: {ex.Message}");
 		}
 		finally
 		{
@@ -147,27 +143,11 @@ public partial class ShareViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private async Task CopyShareCodeAsync()
+	private async Task CopyShareCodeAsync(ShareCodeDto code)
 	{
-		if (string.IsNullOrEmpty(ShareCode)) return;
-		await Clipboard.Default.SetTextAsync(ShareCode);
-		StatusMessage = "Share code copied to clipboard!";
-	}
-
-	[RelayCommand]
-	private async Task CopyFullAccessCodeAsync()
-	{
-		if (string.IsNullOrEmpty(FullAccessCode)) return;
-		await Clipboard.Default.SetTextAsync(FullAccessCode);
-		StatusMessage = "Full access code copied to clipboard!";
-	}
-
-	[RelayCommand]
-	private async Task CopyGuestAccessCodeAsync()
-	{
-		if (string.IsNullOrEmpty(GuestAccessCode)) return;
-		await Clipboard.Default.SetTextAsync(GuestAccessCode);
-		StatusMessage = "Guest access code copied to clipboard!";
+		if (string.IsNullOrEmpty(code?.Code)) return;
+		await Clipboard.Default.SetTextAsync(code.Code);
+		SetStatus("Share code copied to clipboard!");
 	}
 
 	[RelayCommand]
@@ -192,12 +172,53 @@ public partial class ShareViewModel : ObservableObject
 		}
 		catch (Exception ex)
 		{
-			StatusMessage = $"Error loading shared users: {ex.Message}";
+			SetStatus($"Error loading shared users: {ex.Message}");
 		}
 		finally
 		{
 			IsLoadingUsers = false;
 		}
+	}
+
+	private async Task LoadShareCodesAsync()
+	{
+		if (Pet is null) return;
+		try
+		{
+			IsLoadingCodes = true;
+			var codes = await _syncService.GetShareCodesAsync(Pet.Id);
+			UpdateShareCodes(codes);
+		}
+		catch (Exception ex)
+		{
+			SetStatus($"Error loading share codes: {ex.Message}");
+		}
+		finally
+		{
+			IsLoadingCodes = false;
+		}
+	}
+
+	private void UpdateShareCodes(List<ShareCodeDto> codes)
+	{
+		FullAccessCodes.Clear();
+		GuestAccessCodes.Clear();
+
+		foreach (var code in codes.OrderByDescending(c => c.CreatedAt))
+		{
+			if (code.AccessLevel == "guest")
+				GuestAccessCodes.Add(code);
+			else
+				FullAccessCodes.Add(code);
+		}
+		UpdateCodeFlags();
+	}
+
+	private void UpdateCodeFlags()
+	{
+		OnPropertyChanged(nameof(HasFullAccessCodes));
+		OnPropertyChanged(nameof(HasGuestAccessCodes));
+		OnPropertyChanged(nameof(HasAnyCodes));
 	}
 
 	[RelayCommand]
@@ -215,76 +236,61 @@ public partial class ShareViewModel : ObservableObject
 		try
 		{
 			await _syncService.RevokeAccessAsync(Pet.Id, user.DeviceUserId);
-			StatusMessage = $"Access revoked for {user.DisplayName}.";
+			SetStatus($"Access revoked for {user.DisplayName}.");
 			await LoadAllSharedUsersAsync();
 		}
 		catch (Exception ex)
 		{
-			StatusMessage = $"Error: {ex.Message}";
+			SetStatus($"Error: {ex.Message}");
 		}
 	}
 
 	[RelayCommand]
-	private async Task DeleteFullAccessCodeAsync()
+	private async Task DeleteShareCodeAsync(ShareCodeDto code)
 	{
-		if (Pet is null || string.IsNullOrEmpty(FullAccessCode)) return;
+		if (Pet is null || !IsOwnerOrFull || string.IsNullOrEmpty(code?.Code)) return;
+		var label = code.AccessLevel == "guest" ? "Guest Access" : "Full Access";
 
 		var confirm = await Shell.Current.DisplayAlertAsync(
 			"Delete Share Code?",
-			$"This will permanently deactivate the Full Access code ({FullAccessCode}). Anyone using it will no longer be able to redeem or sync. Continue?",
+			$"This will permanently deactivate the {label} code ({code.Code}). It will only prevent future redemptions — anyone who already redeemed keeps access. Continue?",
 			"Delete", "Cancel");
 
 		if (!confirm) return;
 
 		try
 		{
-			await _syncService.DeleteShareCodeAsync(FullAccessCode);
-			Pet.FullAccessCode = null;
-			if (Pet.ShareCode == FullAccessCode)
-			{
-				Pet.ShareCode = GuestAccessCode;
-				ShareCode = GuestAccessCode;
-			}
-			FullAccessCode = null;
-			await _db.SavePetAsync(Pet);
-			StatusMessage = "Full access code deleted.";
-			await LoadAllSharedUsersAsync();
+			await _syncService.DeleteShareCodeAsync(code.Code);
+			SetStatus("Share code deleted.");
+			await LoadShareCodesAsync();
 		}
 		catch (Exception ex)
 		{
-			StatusMessage = $"Error: {ex.Message}";
+			SetStatus($"Error: {ex.Message}");
 		}
 	}
 
 	[RelayCommand]
-	private async Task DeleteGuestAccessCodeAsync()
+	private Task RefreshShareCodesAsync() => LoadShareCodesAsync();
+
+	private void SetStatus(string message, int autoHideMs = 5000)
 	{
-		if (Pet is null || string.IsNullOrEmpty(GuestAccessCode)) return;
+		_statusCts?.Cancel();
+		StatusMessage = message;
+		if (autoHideMs > 0 && !string.IsNullOrEmpty(message))
+		{
+			var cts = _statusCts = new CancellationTokenSource();
+			_ = ClearStatusAfterDelayAsync(autoHideMs, cts.Token);
+		}
+	}
 
-		var confirm = await Shell.Current.DisplayAlertAsync(
-			"Delete Share Code?",
-			$"This will permanently deactivate the Guest Access code ({GuestAccessCode}). Anyone using it will no longer be able to redeem or sync. Continue?",
-			"Delete", "Cancel");
-
-		if (!confirm) return;
-
+	private async Task ClearStatusAfterDelayAsync(int delayMs, CancellationToken ct)
+	{
 		try
 		{
-			await _syncService.DeleteShareCodeAsync(GuestAccessCode);
-			Pet.GuestAccessCode = null;
-			if (Pet.ShareCode == GuestAccessCode)
-			{
-				Pet.ShareCode = FullAccessCode;
-				ShareCode = FullAccessCode;
-			}
-			GuestAccessCode = null;
-			await _db.SavePetAsync(Pet);
-			StatusMessage = "Guest access code deleted.";
-			await LoadAllSharedUsersAsync();
+			await Task.Delay(delayMs, ct);
+			StatusMessage = string.Empty;
 		}
-		catch (Exception ex)
-		{
-			StatusMessage = $"Error: {ex.Message}";
-		}
+		catch (TaskCanceledException) { }
 	}
 }
