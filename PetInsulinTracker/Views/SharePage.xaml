@@ -142,7 +142,7 @@
                                     </Label>
                                     <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
                                             Text="Revoke"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, Path=RevokeAccessCommand}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShareViewModel}}, x:DataType=vm:ShareViewModel, Path=RevokeAccessCommand}"
                                             CommandParameter="{Binding .}"
                                             Style="{StaticResource QuickActionButtonStyle}"
                                             VerticalOptions="Center"

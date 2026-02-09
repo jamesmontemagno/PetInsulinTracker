@@ -82,7 +82,7 @@
                                 <SwipeItems>
                                     <SwipeItem Text="Delete"
                                                BackgroundColor="{DynamicResource CurrentDanger}"
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WeightLogViewModel}}, Path=DeleteLogCommand}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WeightLogViewModel}}, x:DataType=vm:WeightLogViewModel, Path=DeleteLogCommand}"
                                                CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>

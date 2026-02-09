@@ -48,7 +48,7 @@
                     <Border Style="{StaticResource CardStyle}" Margin="20,0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetListViewModel}}, Path=GoToPetDetailCommand}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetListViewModel}}, x:DataType=vm:PetListViewModel, Path=GoToPetDetailCommand}"
                                 CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
                         <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="16">

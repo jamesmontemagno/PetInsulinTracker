@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:local="clr-namespace:PetInsulinTracker.Views"
              x:Class="PetInsulinTracker.Views.WelcomePage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{DynamicResource PageBackground}">
@@ -47,7 +48,7 @@
                               CurrentItemChanged="OnThemeCarouselChanged"
                               HorizontalOptions="Fill">
                     <CarouselView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="local:ThemePreview">
                             <Border StrokeShape="RoundRectangle 16"
                                     StrokeThickness="3"
                                     Stroke="{Binding BorderColor}"
