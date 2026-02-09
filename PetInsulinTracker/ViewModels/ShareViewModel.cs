@@ -101,20 +101,25 @@ public partial class ShareViewModel : ObservableObject
 
 			var code = await _syncService.GenerateShareCodeAsync(Pet.Id, accessLevel);
 
+			// Update properties and explicitly notify UI
+			// (Defensive: ensures IsVisible bindings re-evaluate for code card display)
 			if (accessLevel == "guest")
 			{
 				GuestAccessCode = code;
 				Pet.GuestAccessCode = code;
+				OnPropertyChanged(nameof(GuestAccessCode));
 			}
 			else
 			{
 				FullAccessCode = code;
 				Pet.FullAccessCode = code;
+				OnPropertyChanged(nameof(FullAccessCode));
 			}
 
 			// Set the primary ShareCode to the most recently generated one
 			ShareCode = code;
 			Pet.ShareCode = code;
+			OnPropertyChanged(nameof(ShareCode));
 			await _db.SavePetAsync(Pet);
 
 			// Sync pet data to the server so the code is redeemable
