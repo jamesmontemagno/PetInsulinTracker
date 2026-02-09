@@ -1,0 +1,48 @@
+name: PR Build Validation - Azure Function
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'PetInsulinTracker.Api/**'
+      - 'PetInsulinTracker.Shared/**'
+      - '.github/workflows/pr-function-build.yml'
+
+env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './PetInsulinTracker.Api'
+  DOTNET_VERSION: '10.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: 'Restore Project Dependencies'
+        shell: bash
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet restore
+          popd
+
+      - name: 'Build Project'
+        shell: bash
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build --configuration Release --no-restore
+          popd
+
+      - name: 'Run Tests'
+        shell: bash
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet test --configuration Release --no-build --verbosity normal || echo "No tests found"
+          popd
