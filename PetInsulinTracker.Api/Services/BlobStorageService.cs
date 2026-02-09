@@ -27,7 +27,8 @@ public class BlobStorageService
 		using var stream = new MemoryStream(bytes);
 		await blob.UploadAsync(stream, new BlobUploadOptions
 		{
-			HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" }
+			HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" },
+			Conditions = null // Allow overwrite of existing blob
 		}, cancellationToken: default);
 		return blob.Uri.ToString();
 	}

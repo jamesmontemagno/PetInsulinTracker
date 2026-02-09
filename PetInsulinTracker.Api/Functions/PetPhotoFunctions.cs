@@ -58,6 +58,11 @@ public class PetPhotoFunctions
 				return req.CreateResponse(HttpStatusCode.Forbidden);
 		}
 
+		// Reject oversized payloads before decoding base64 (base64 expands ~33%)
+		const int maxBytes = 512 * 1024;
+		if (request.Base64Image.Length > maxBytes * 4 / 3 + 4)
+			return req.CreateResponse(HttpStatusCode.RequestEntityTooLarge);
+
 		byte[] bytes;
 		try
 		{
@@ -68,8 +73,8 @@ public class PetPhotoFunctions
 			return req.CreateResponse(HttpStatusCode.BadRequest);
 		}
 
-		if (bytes.Length > 512 * 1024)
-			return req.CreateResponse(HttpStatusCode.BadRequest);
+		if (bytes.Length > maxBytes)
+			return req.CreateResponse(HttpStatusCode.RequestEntityTooLarge);
 
 		var url = await _blob.UploadPetThumbnailAsync(petId, bytes);
 		pet.PhotoUrl = url;

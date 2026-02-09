@@ -152,8 +152,6 @@ public class SyncFunctions
 				syncRequest.Pets.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
 			foreach (var p in syncRequest.Pets)
 			{
-				// Preserve the server's PhotoUrl — it is set exclusively by the photo upload endpoint
-				var serverPet = await _storage.GetPetAsync(p.Id);
 				await _storage.UpsertPetAsync(new PetEntity
 				{
 					RowKey = p.Id,
@@ -164,7 +162,7 @@ public class SyncFunctions
 					Species = p.Species,
 					Breed = p.Breed,
 					DateOfBirth = EnsureUtc(p.DateOfBirth),
-					PhotoUrl = serverPet?.PhotoUrl,
+					PhotoUrl = pet?.PhotoUrl, // Preserve server's PhotoUrl — set exclusively by the photo upload endpoint
 					InsulinType = p.InsulinType,
 					InsulinConcentration = p.InsulinConcentration,
 					CurrentDoseIU = p.CurrentDoseIU,

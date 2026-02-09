@@ -475,9 +475,16 @@ public class SyncService : ISyncService
 			var targetWidth = Math.Max(1, (int)Math.Round(original.Width * scale));
 			var targetHeight = Math.Max(1, (int)Math.Round(original.Height * scale));
 
-			using var resized = original.Resize(new SKImageInfo(targetWidth, targetHeight), SKFilterQuality.Medium);
-			using var bitmap = resized ?? original;
-			using var image = SKImage.FromBitmap(bitmap);
+			var imageInfo = new SKImageInfo(targetWidth, targetHeight, original.ColorType, original.AlphaType);
+			using var resized = new SKBitmap(imageInfo);
+			using (var canvas = new SKCanvas(resized))
+			{
+				canvas.Clear(SKColors.Transparent);
+				var destRect = new SKRect(0, 0, targetWidth, targetHeight);
+				canvas.DrawBitmap(original, destRect);
+			}
+
+			using var image = SKImage.FromBitmap(resized);
 			using var data = image.Encode(SKEncodedImageFormat.Jpeg, quality);
 			return data.ToArray();
 		}
