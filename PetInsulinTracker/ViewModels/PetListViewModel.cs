@@ -7,6 +7,24 @@ using PetInsulinTracker.Services;
 
 namespace PetInsulinTracker.ViewModels;
 
+public partial class PetListItemViewModel : ObservableObject
+{
+	public Pet Pet { get; }
+
+	[ObservableProperty]
+	private string lastInsulinText = "";
+
+	[ObservableProperty]
+	private string lastFeedingText = "";
+
+	public PetListItemViewModel(Pet pet, string lastInsulinText, string lastFeedingText)
+	{
+		Pet = pet;
+		LastInsulinText = lastInsulinText;
+		LastFeedingText = lastFeedingText;
+	}
+}
+
 public partial class PetListViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
@@ -19,7 +37,7 @@ public partial class PetListViewModel : ObservableObject
 	}
 
 	[ObservableProperty]
-	private ObservableCollection<Pet> pets = [];
+	private ObservableCollection<PetListItemViewModel> pets = [];
 
 	[ObservableProperty]
 	private bool isRefreshing;
@@ -30,7 +48,25 @@ public partial class PetListViewModel : ObservableObject
 		try
 		{
 			var petList = await _db.GetPetsAsync();
-			Pets = new ObservableCollection<Pet>(petList);
+			var petViewModels = new List<PetListItemViewModel>();
+
+			foreach (var pet in petList)
+			{
+				var lastInsulin = await _db.GetLatestInsulinLogAsync(pet.Id);
+				var lastInsulinText = lastInsulin is not null
+					? $"{lastInsulin.DoseIU} IU — {lastInsulin.AdministeredAt:g}"
+					: "No insulin logged";
+
+				var feedingLogs = await _db.GetFeedingLogsAsync(pet.Id);
+				var lastFeeding = feedingLogs.FirstOrDefault();
+				var lastFeedingText = lastFeeding is not null
+					? $"{lastFeeding.FoodName} — {lastFeeding.FedAt:g}"
+					: "No feeding logged";
+
+				petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText));
+			}
+
+			Pets = new ObservableCollection<PetListItemViewModel>(petViewModels);
 		}
 		finally
 		{
@@ -56,9 +92,9 @@ public partial class PetListViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private async Task GoToPetDetailAsync(Pet pet)
+	private async Task GoToPetDetailAsync(PetListItemViewModel petItem)
 	{
-		await Shell.Current.GoToAsync($"{nameof(Views.PetDetailPage)}?petId={pet.Id}");
+		await Shell.Current.GoToAsync($"{nameof(Views.PetDetailPage)}?petId={petItem.Pet.Id}");
 	}
 
 	[RelayCommand]

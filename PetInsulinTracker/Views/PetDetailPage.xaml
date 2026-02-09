@@ -95,7 +95,7 @@
                 </Grid>
 
                 <!-- Feeding Indicator + Quick Log -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" IsVisible="{Binding ShowSeparateFeedingCountdown}">
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding FeedingProgress}"

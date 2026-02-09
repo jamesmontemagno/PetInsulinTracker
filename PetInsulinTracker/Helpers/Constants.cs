@@ -15,6 +15,9 @@ public static class Constants
 	public const string ScheduleTypeFeeding = "Feeding";
 	public const string ScheduleTypeCombined = "Insulin & Feeding";
 
+	// Buffer time in minutes around a schedule when logging should advance to next schedule
+	public const int ScheduleBufferMinutes = 30;
+
 	/// <summary>Whether the app is in fully offline mode (no cloud sync).</summary>
 	public static bool IsOfflineMode => Preferences.Get(OfflineModeKey, false);
 

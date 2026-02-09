@@ -44,7 +44,7 @@
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Pet">
+                <DataTemplate x:DataType="vm:PetListItemViewModel">
                     <Border Style="{StaticResource CardStyle}" Margin="20,0" Padding="16">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
@@ -61,19 +61,19 @@
                                     StrokeShape="RoundRectangle 20">
                                 <Grid>
                                     <Label Style="{StaticResource AvatarTextStyle}"
-                                           Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}"
+                                           Text="{Binding Pet.Name, Converter={StaticResource FirstLetterConverter}}"
                                            FontSize="32"
-                                           IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
-                                    <Image Source="{Binding PhotoSource}" Aspect="AspectFill"
-                                           IsVisible="{Binding PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                           IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+                                    <Image Source="{Binding Pet.PhotoSource}" Aspect="AspectFill"
+                                           IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                 </Grid>
                             </Border>
                             <!-- Pet Info -->
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="6">
-                                <Label Text="{Binding Name}"
+                                <Label Text="{Binding Pet.Name}"
                                        FontSize="20" FontFamily="OpenSansSemibold"
                                        SemanticProperties.HeadingLevel="Level3" />
-                                <Label Text="{Binding Species}"
+                                <Label Text="{Binding Pet.Species}"
                                        FontSize="15"
                                        Style="{StaticResource SubtleTextStyle}" />
                                 <HorizontalStackLayout Spacing="6">
@@ -84,13 +84,22 @@
                                         <Label Style="{StaticResource SubtleTextStyle}" FontSize="13">
                                             <Label.Text>
                                                 <MultiBinding StringFormat="{}{0:F1} {1}">
-                                                    <Binding Path="CurrentWeight" />
-                                                    <Binding Path="WeightUnit" />
+                                                    <Binding Path="Pet.CurrentWeight" />
+                                                    <Binding Path="Pet.WeightUnit" />
                                                 </MultiBinding>
                                             </Label.Text>
                                         </Label>
                                     </Border>
                                 </HorizontalStackLayout>
+                                <!-- Last Insulin & Feeding -->
+                                <VerticalStackLayout Spacing="2" Margin="0,4,0,0">
+                                    <Label Text="{Binding LastInsulinText, StringFormat='💉 {0}'}"
+                                           Style="{StaticResource SubtleTextStyle}"
+                                           FontSize="12" />
+                                    <Label Text="{Binding LastFeedingText, StringFormat='🍽️ {0}'}"
+                                           Style="{StaticResource SubtleTextStyle}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
                             <!-- Chevron -->
                             <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="20" IconColor="{DynamicResource PageTextSecondary}"

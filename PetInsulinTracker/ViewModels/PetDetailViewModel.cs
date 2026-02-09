@@ -97,6 +97,9 @@ public partial class PetDetailViewModel : ObservableObject
 	[ObservableProperty]
 	private string syncStatus = "Not synced";
 
+	[ObservableProperty]
+	private bool showSeparateFeedingCountdown = true;
+
 	private List<Schedule> _schedules = [];
 
 	partial void OnPetIdChanged(string? value)
@@ -159,12 +162,16 @@ public partial class PetDetailViewModel : ObservableObject
 		UpdateFeedingCountdown(lastFeeding);
 	}
 
-	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType)
+	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType, out bool hasCombinedSchedule)
 	{
 		var matching = schedules
 			.Where(s => s.ScheduleType == scheduleType || s.ScheduleType == Constants.ScheduleTypeCombined)
 			.OrderBy(s => s.TimeOfDay)
 			.ToList();
+		
+		// Check if any matching schedule is a combined type
+		hasCombinedSchedule = matching.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
+		
 		if (matching.Count == 0) return null;
 
 		var now = DateTime.Now;
@@ -184,7 +191,7 @@ public partial class PetDetailViewModel : ObservableObject
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
 	{
-		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin");
+		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin", out bool hasCombinedScheduleForInsulin);
 
 		if (scheduledNext is not null)
 		{
@@ -212,7 +219,7 @@ public partial class PetDetailViewModel : ObservableObject
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 					: $"{remaining.Minutes}m";
-				DoseCountdownSubText = "Until next dose";
+				DoseCountdownSubText = hasCombinedScheduleForInsulin ? "Until next dose & feeding" : "Until next dose";
 			}
 		}
 		else if (lastDose is not null)
@@ -247,7 +254,10 @@ public partial class PetDetailViewModel : ObservableObject
 
 	private void UpdateFeedingCountdown(FeedingLog? lastFeeding)
 	{
-		var scheduledNext = GetNextScheduledTime(_schedules, "Feeding");
+		var scheduledNext = GetNextScheduledTime(_schedules, "Feeding", out bool hasCombinedScheduleForFeeding);
+		
+		// If there's a combined schedule that handles feeding, don't show separate feeding countdown
+		ShowSeparateFeedingCountdown = !hasCombinedScheduleForFeeding;
 
 		if (scheduledNext is null)
 		{
@@ -286,6 +296,30 @@ public partial class PetDetailViewModel : ObservableObject
 		}
 	}
 
+	/// <summary>
+	/// Checks if the current time is within buffer minutes of the next scheduled time.
+	/// If within buffer, returns a time that will cause the countdown to show the next occurrence.
+	/// </summary>
+	private DateTime GetAdjustedLogTime(string scheduleType)
+	{
+		var now = DateTime.Now;
+		var scheduledNext = GetNextScheduledTime(_schedules, scheduleType, out _);
+		
+		if (scheduledNext is null)
+			return now;
+		
+		var timeDiff = Math.Abs((scheduledNext.Value - now).TotalMinutes);
+		
+		// If we're within the buffer window of the schedule, adjust the logged time
+		// to be just after the scheduled time so it advances to the next schedule
+		if (timeDiff <= Constants.ScheduleBufferMinutes)
+		{
+			return scheduledNext.Value.AddMinutes(1);
+		}
+		
+		return now;
+	}
+
 	[RelayCommand]
 	private async Task QuickLogInsulinAsync()
 	{
@@ -295,7 +329,7 @@ public partial class PetDetailViewModel : ObservableObject
 		{
 			PetId = Pet.Id,
 			DoseIU = Pet.CurrentDoseIU ?? 0,
-			AdministeredAt = DateTime.Now,
+			AdministeredAt = GetAdjustedLogTime(Constants.ScheduleTypeInsulin),
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -316,7 +350,7 @@ public partial class PetDetailViewModel : ObservableObject
 			Amount = Pet.DefaultFoodAmount ?? 0,
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,
-			FedAt = DateTime.Now,
+			FedAt = GetAdjustedLogTime(Constants.ScheduleTypeFeeding),
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
