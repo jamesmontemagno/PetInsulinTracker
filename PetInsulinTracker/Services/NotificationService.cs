@@ -47,12 +47,12 @@ public class NotificationService : INotificationService
 
 			var emoji = schedule.ScheduleType switch
 			{
-				"Insulin" => "💉",
-				"Feeding" => "🍽️",
-				"Insulin & Feeding" => "💉🍽️",
+				Constants.ScheduleTypeInsulin => "💉",
+				Constants.ScheduleTypeFeeding => "🍽️",
+				Constants.ScheduleTypeCombined => "💉🍽️",
 				_ => "⏰"
 			};
-			var scheduleText = schedule.ScheduleType == "Insulin & Feeding" 
+			var scheduleText = schedule.ScheduleType == Constants.ScheduleTypeCombined 
 				? "insulin and feeding" 
 				: schedule.ScheduleType.ToLowerInvariant();
 			var request = new NotificationRequest
