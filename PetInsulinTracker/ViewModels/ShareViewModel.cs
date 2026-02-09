@@ -117,6 +117,7 @@ public partial class ShareViewModel : ObservableObject
 			// Set the primary ShareCode to the most recently generated one
 			ShareCode = code;
 			Pet.ShareCode = code;
+			OnPropertyChanged(nameof(ShareCode));
 			await _db.SavePetAsync(Pet);
 
 			// Sync pet data to the server so the code is redeemable
