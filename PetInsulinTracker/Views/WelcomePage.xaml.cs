@@ -265,6 +265,16 @@ public partial class WelcomePage : ContentPage
 	{
 		if (_savedPetId is null) return;
 
+		if (MorningCombinedEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Morning Insulin & Feeding", "Insulin & Feeding",
+				MorningCombinedTime.Time ?? new TimeSpan(8, 0, 0),
+				int.TryParse(MorningCombinedReminder.Text, out var rc1) ? rc1 : 15);
+
+		if (EveningCombinedEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Evening Insulin & Feeding", "Insulin & Feeding",
+				EveningCombinedTime.Time ?? new TimeSpan(20, 0, 0),
+				int.TryParse(EveningCombinedReminder.Text, out var rc2) ? rc2 : 15);
+
 		if (MorningInsulinEnabled.IsToggled)
 			await SaveScheduleAsync(db, "Morning Insulin", "Insulin",
 				MorningInsulinTime.Time ?? new TimeSpan(7, 0, 0),

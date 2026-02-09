@@ -45,12 +45,21 @@ public class NotificationService : INotificationService
 			if (notifyTime < DateTime.Now)
 				notifyTime = notifyTime.AddDays(1);
 
-			var emoji = schedule.ScheduleType == "Insulin" ? "💉" : "🍽️";
+			var emoji = schedule.ScheduleType switch
+			{
+				"Insulin" => "💉",
+				"Feeding" => "🍽️",
+				"Insulin & Feeding" => "💉🍽️",
+				_ => "⏰"
+			};
+			var scheduleText = schedule.ScheduleType == "Insulin & Feeding" 
+				? "insulin and feeding" 
+				: schedule.ScheduleType.ToLowerInvariant();
 			var request = new NotificationRequest
 			{
 				NotificationId = notificationId,
 				Title = $"{emoji} {schedule.Label}",
-				Description = $"Time for {pet.Name}'s {schedule.ScheduleType.ToLowerInvariant()}!",
+				Description = $"Time for {pet.Name}'s {scheduleText}!",
 				Schedule = new NotificationRequestSchedule
 				{
 					NotifyTime = notifyTime,
