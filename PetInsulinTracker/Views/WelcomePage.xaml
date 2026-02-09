@@ -352,6 +352,50 @@
                        FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
+                <!-- Morning Insulin & Feeding (Combined) -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Morning Insulin &amp; Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="MorningCombinedTime" Time="08:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="MorningCombinedReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="MorningCombinedEnabled" IsToggled="True" />
+                            <Label Text="Add this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Evening Insulin & Feeding (Combined) -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Evening Insulin &amp; Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="EveningCombinedTime" Time="20:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="EveningCombinedReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="EveningCombinedEnabled" IsToggled="True" />
+                            <Label Text="Add this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Morning Insulin -->
                 <Border Style="{StaticResource CardStyle}" Padding="16">
                     <VerticalStackLayout Spacing="12">
@@ -367,7 +411,7 @@
                             </VerticalStackLayout>
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
-                            <Switch x:Name="MorningInsulinEnabled" IsToggled="True" />
+                            <Switch x:Name="MorningInsulinEnabled" IsToggled="False" />
                             <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
@@ -389,7 +433,7 @@
                             </VerticalStackLayout>
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
-                            <Switch x:Name="EveningInsulinEnabled" IsToggled="True" />
+                            <Switch x:Name="EveningInsulinEnabled" IsToggled="False" />
                             <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
@@ -411,7 +455,7 @@
                             </VerticalStackLayout>
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
-                            <Switch x:Name="MorningFeedingEnabled" IsToggled="True" />
+                            <Switch x:Name="MorningFeedingEnabled" IsToggled="False" />
                             <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>
@@ -433,7 +477,7 @@
                             </VerticalStackLayout>
                         </Grid>
                         <HorizontalStackLayout Spacing="8">
-                            <Switch x:Name="EveningFeedingEnabled" IsToggled="True" />
+                            <Switch x:Name="EveningFeedingEnabled" IsToggled="False" />
                             <Label Text="Add this schedule" VerticalOptions="Center"
                                    Style="{StaticResource SubtleTextStyle}" />
                         </HorizontalStackLayout>

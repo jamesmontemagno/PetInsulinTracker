@@ -53,7 +53,7 @@ public partial class ScheduleViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isSyncing;
 
-	public List<string> ScheduleTypeOptions { get; } = ["Insulin", "Feeding"];
+	public List<string> ScheduleTypeOptions { get; } = ["Insulin", "Feeding", "Insulin & Feeding"];
 
 	public string SaveButtonText => IsEditing ? "Save Changes" : "Add Schedule";
 
