@@ -101,6 +101,8 @@ public partial class ShareViewModel : ObservableObject
 
 			var code = await _syncService.GenerateShareCodeAsync(Pet.Id, accessLevel);
 
+			// Update properties and explicitly notify UI
+			// (Defensive: ensures IsVisible bindings re-evaluate for code card display)
 			if (accessLevel == "guest")
 			{
 				GuestAccessCode = code;
