@@ -397,7 +397,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		};
 		await _db.SaveInsulinLogAsync(log);
 		_cachedLastInsulinLog = log;
-		_ = SyncInBackgroundAsync(Pet.Id);
+		await SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 
@@ -419,7 +419,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		};
 		await _db.SaveFeedingLogAsync(log);
 		_cachedLastFeedingLog = log;
-		_ = SyncInBackgroundAsync(Pet.Id);
+		await SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 
@@ -455,7 +455,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		await _db.SaveFeedingLogAsync(feedingLog);
 		_cachedLastInsulinLog = insulinLog;
 		_cachedLastFeedingLog = feedingLog;
-		_ = SyncInBackgroundAsync(Pet.Id);
+		await SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 

@@ -98,7 +98,7 @@ public partial class ScheduleViewModel : ObservableObject
 		await _db.SaveScheduleAsync(schedule);
 
 		if (!string.IsNullOrEmpty(PetId))
-			_ = SyncInBackgroundAsync(PetId);
+			await SyncInBackgroundAsync(PetId);
 
 		await UpdateNotificationsAsync(PetId);
 
@@ -117,7 +117,7 @@ public partial class ScheduleViewModel : ObservableObject
 		Schedules.Remove(schedule);
 
 		if (!string.IsNullOrEmpty(PetId))
-			_ = SyncInBackgroundAsync(PetId);
+			await SyncInBackgroundAsync(PetId);
 
 		if (!string.IsNullOrEmpty(PetId))
 			await UpdateNotificationsAsync(PetId);

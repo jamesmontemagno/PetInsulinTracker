@@ -40,9 +40,17 @@
                                 </VerticalStackLayout>
                             </Grid>
 
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}" HorizontalOptions="Center">
+                                <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
+                                                 Color="{DynamicResource Primary}" />
+                                <Label Text="Syncing…" FontSize="12" VerticalOptions="Center"
+                                       TextColor="{DynamicResource Primary}" />
+                            </HorizontalStackLayout>
+
                             <Button Text="{Binding SaveButtonText}" Command="{Binding SaveScheduleCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
-                                    HorizontalOptions="Fill" />
+                                    HorizontalOptions="Fill"
+                                    IsEnabled="{Binding IsSyncing, Converter={StaticResource InvertedBoolConverter}}" />
 
                             <Button Text="Cancel" Command="{Binding CancelEditCommand}"
                                     Style="{StaticResource OutlineButtonStyle}"

@@ -88,9 +88,7 @@ public partial class InsulinLogViewModel : ObservableObject
 		await _db.SaveInsulinLogAsync(log);
 
 		if (!string.IsNullOrEmpty(PetId))
-		{
-			_ = SyncInBackgroundAsync(PetId);
-		}
+			await SyncInBackgroundAsync(PetId);
 
 		// Reset form
 		InjectionSite = null;
@@ -108,6 +106,9 @@ public partial class InsulinLogViewModel : ObservableObject
 	{
 		await _db.DeleteInsulinLogAsync(log);
 		Logs.Remove(log);
+
+		if (!string.IsNullOrEmpty(PetId))
+			await SyncInBackgroundAsync(PetId);
 	}
 
 	private async Task SyncInBackgroundAsync(string petId)

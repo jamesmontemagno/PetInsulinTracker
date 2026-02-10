@@ -133,7 +133,7 @@ public partial class WeightLogViewModel : ObservableObject
 			await _db.SavePetAsync(pet);
 
 			if (!string.IsNullOrEmpty(pet.Id))
-				_ = SyncInBackgroundAsync(pet.Id);
+				await SyncInBackgroundAsync(pet.Id);
 		}
 
 		// Reset form
@@ -152,6 +152,9 @@ public partial class WeightLogViewModel : ObservableObject
 		await _db.DeleteWeightLogAsync(log);
 		Logs.Remove(log);
 		UpdateTrend();
+
+		if (!string.IsNullOrEmpty(PetId))
+			await SyncInBackgroundAsync(PetId);
 	}
 
 	private async Task SyncInBackgroundAsync(string petId)

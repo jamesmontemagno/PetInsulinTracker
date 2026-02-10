@@ -85,7 +85,7 @@ public partial class VetInfoViewModel : ObservableObject
 		await _db.SaveVetInfoAsync(info);
 
 		if (!string.IsNullOrEmpty(PetId))
-			_ = SyncInBackgroundAsync(PetId);
+			await SyncInBackgroundAsync(PetId);
 
 		await Shell.Current.GoToAsync("..");
 	}

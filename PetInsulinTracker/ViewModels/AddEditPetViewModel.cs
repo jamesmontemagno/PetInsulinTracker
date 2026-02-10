@@ -193,7 +193,15 @@ public partial class AddEditPetViewModel : ObservableObject
 			}
 			else
 			{
-				_ = _syncService.SyncAsync(pet.Id);
+				SavingStatus = "Syncing…";
+				try
+				{
+					await _syncService.SyncAsync(pet.Id);
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine($"Sync failed (will retry): {ex}");
+				}
 			}
 
 			string? photoUploadError = null;

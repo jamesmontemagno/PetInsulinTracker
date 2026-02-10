@@ -115,9 +115,7 @@ public partial class FeedingLogViewModel : ObservableObject
 		await _db.SaveFeedingLogAsync(log);
 
 		if (!string.IsNullOrEmpty(PetId))
-		{
-			_ = SyncInBackgroundAsync(PetId);
-		}
+			await SyncInBackgroundAsync(PetId);
 
 		// Reset form to pet defaults
 		Notes = null;
@@ -134,6 +132,9 @@ public partial class FeedingLogViewModel : ObservableObject
 	{
 		await _db.DeleteFeedingLogAsync(log);
 		Logs.Remove(log);
+
+		if (!string.IsNullOrEmpty(PetId))
+			await SyncInBackgroundAsync(PetId);
 	}
 
 	private async Task SyncInBackgroundAsync(string petId)

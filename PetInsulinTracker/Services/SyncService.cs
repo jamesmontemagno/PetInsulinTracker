@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Microsoft.Maui.Networking;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Shared;
@@ -21,6 +22,9 @@ public class SyncService : ISyncService
 	public async Task CreatePetAsync(Pet pet)
 	{
 		if (Constants.IsOfflineMode) return;
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
 
 		var request = new CreatePetRequest
 		{
@@ -51,6 +55,9 @@ public class SyncService : ISyncService
 		if (Constants.IsOfflineMode)
 			throw new InvalidOperationException("Share codes are not available in offline mode.");
 
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
+
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/generate",
 			new ShareCodeRequest
@@ -71,6 +78,9 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode)
 			throw new InvalidOperationException("Share codes are not available in offline mode.");
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
 
 		var request = new RedeemShareCodeRequest
 		{
@@ -170,6 +180,9 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode) return [];
 
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
+
 		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/users?deviceUserId={Constants.DeviceUserId}");
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.SharedUsersResponse);
@@ -180,6 +193,9 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode) return [];
 
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
+
 		var response = await _http.GetAsync($"{Constants.ApiBaseUrl}/share/pet/{petId}/codes?deviceUserId={Constants.DeviceUserId}");
 		response.EnsureSuccessStatusCode();
 		var result = await response.Content.ReadFromJsonAsync(AppJsonSerializerContext.Default.ShareCodesResponse);
@@ -189,6 +205,9 @@ public class SyncService : ISyncService
 	public async Task RevokeAccessAsync(string petId, string deviceUserId)
 	{
 		if (Constants.IsOfflineMode) return;
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/revoke",
@@ -201,6 +220,9 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode)
 			throw new InvalidOperationException("Leaving a shared pet is not available in offline mode.");
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
 
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/share/leave",
@@ -215,6 +237,9 @@ public class SyncService : ISyncService
 		if (Constants.IsOfflineMode)
 			throw new InvalidOperationException("Deleting a pet is not available in offline mode.");
 
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
+
 		var response = await _http.PostAsJsonAsync(
 			$"{Constants.ApiBaseUrl}/pets/delete",
 			new DeletePetRequest { PetId = petId, OwnerId = Constants.DeviceUserId },
@@ -226,6 +251,9 @@ public class SyncService : ISyncService
 	public async Task<string?> UploadPetPhotoThumbnailAsync(string petId, string photoPath)
 	{
 		if (Constants.IsOfflineMode || string.IsNullOrWhiteSpace(photoPath)) return null;
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
 
 		var bytes = CreateThumbnailJpeg(photoPath, 256, 80);
 		if (bytes.Length == 0)
@@ -255,6 +283,13 @@ public class SyncService : ISyncService
 	public async Task SyncAsync(string petId)
 	{
 		if (Constants.IsOfflineMode) return;
+
+		// Check internet connectivity
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+		{
+			System.Diagnostics.Debug.WriteLine("No internet connection available for sync");
+			return;
+		}
 
 		var pet = await _db.GetPetAsync(petId);
 		if (pet is null) return;
@@ -523,6 +558,9 @@ public class SyncService : ISyncService
 	{
 		if (Constants.IsOfflineMode) return;
 
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+			throw new InvalidOperationException("No internet connection available");
+
 		var response = await _http.DeleteAsync(
 			$"{Constants.ApiBaseUrl}/share/{shareCode}?deviceUserId={Constants.DeviceUserId}");
 		response.EnsureSuccessStatusCode();
@@ -531,6 +569,12 @@ public class SyncService : ISyncService
 	public async Task SyncAllAsync()
 	{
 		if (Constants.IsOfflineMode) return;
+
+		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
+		{
+			System.Diagnostics.Debug.WriteLine("No internet connection available for sync");
+			return;
+		}
 
 		var pets = await _db.GetPetsAsync();
 		var exceptions = new List<Exception>();
