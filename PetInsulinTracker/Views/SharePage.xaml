@@ -82,15 +82,17 @@
             <VerticalStackLayout Spacing="12"
                                  IsVisible="{Binding HasFullAccessCodes}">
                 <Label Text="FULL ACCESS" Style="{StaticResource OverlineStyle}" />
-                <CollectionView ItemsSource="{Binding FullAccessCodes}" SelectionMode="None"
-                                ItemTemplate="{StaticResource ShareCodeCardTemplate}" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding FullAccessCodes}"
+                                     BindableLayout.ItemTemplate="{StaticResource ShareCodeCardTemplate}"
+                                     Spacing="8" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="12"
                                  IsVisible="{Binding HasGuestAccessCodes}">
                 <Label Text="GUEST ACCESS" Style="{StaticResource OverlineStyle}" />
-                <CollectionView ItemsSource="{Binding GuestAccessCodes}" SelectionMode="None"
-                                ItemTemplate="{StaticResource ShareCodeCardTemplate}" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding GuestAccessCodes}"
+                                     BindableLayout.ItemTemplate="{StaticResource ShareCodeCardTemplate}"
+                                     Spacing="8" />
             </VerticalStackLayout>
 
             <Button Text="Refresh Codes"
