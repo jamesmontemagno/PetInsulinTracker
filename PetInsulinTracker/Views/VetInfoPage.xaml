@@ -84,14 +84,14 @@
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="Injection Tips" FontFamily="OpenSansSemibold" FontSize="15" />
-                    <Label FontSize="13" Text="• Rotate injection sites to prevent tissue damage&#10;• Let insulin reach room temperature before injecting&#10;• Gently roll the vial — never shake it&#10;• Use correct syringe (U-40 for Vetsulin/ProZinc, U-100 for Lantus/NPH)" />
+                    <Label FontSize="13" Text="• Rotate injection sites to prevent tissue damage&#10;• Gently roll the vial — never shake it&#10;• Use correct syringe (U-40 for Vetsulin/ProZinc, U-100 for Lantus/NPH)" />
                 </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource InfoBoxStyle}">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="Feeding &amp; Insulin Timing" FontFamily="OpenSansSemibold" FontSize="15" />
-                    <Label FontSize="13" Text="• Dogs: Feed half at injection time, half at peak effect (4-8h later)&#10;• Cats: Can free-feed or time meals with injections&#10;• Never give insulin if your pet hasn't eaten — call your vet" />
+                    <Label FontSize="13" Text="• Dogs: Feed before injection time&#10;• Cats: Can free-feed or time meals with injections&#10;• Never give insulin if your pet hasn't eaten — call your vet&#10;• Always check with your vet!" />
                 </VerticalStackLayout>
             </Border>
 

@@ -87,6 +87,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private bool hasCombinedSchedule;
 
 	[ObservableProperty]
+	private bool isDoseOverdue;
+
+	[ObservableProperty]
+	private bool isFeedingOverdue;
+
+	[ObservableProperty]
+	private Color doseRingColor = Colors.Transparent;
+
+	[ObservableProperty]
+	private Color feedingRingColor = Color.FromArgb("#4CAF50");
+
+	[ObservableProperty]
 	private bool isGuest;
 
 	[ObservableProperty]
@@ -221,12 +233,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			var remaining = scheduledNext.Value - DateTime.Now;
 			if (remaining.TotalMinutes <= 0)
 			{
+				IsDoseOverdue = true;
+				DoseRingColor = Color.FromArgb("#D32F2F");
 				DoseProgress = 1.0;
-				DoseCountdownText = "NOW";
-				DoseCountdownSubText = "Dose due";
+				DoseCountdownText = "OVERDUE";
+				DoseCountdownSubText = "Dose is late";
 			}
 			else
 			{
+				IsDoseOverdue = false;
+				DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
+					? c 
+					: Color.FromArgb("#FF6B9D");
 				if (lastDose is not null)
 				{
 					var total = scheduledNext.Value - lastDose.AdministeredAt;
@@ -257,12 +275,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 			if (remaining.TotalMinutes <= 0)
 			{
+				IsDoseOverdue = true;
+				DoseRingColor = Color.FromArgb("#D32F2F");
 				DoseProgress = 1.0;
-				DoseCountdownText = "NOW";
-				DoseCountdownSubText = "Dose due";
+				DoseCountdownText = "OVERDUE";
+				DoseCountdownSubText = "Dose is late";
 			}
 			else
 			{
+				IsDoseOverdue = false;
+				DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
+					? c 
+					: Color.FromArgb("#FF6B9D");
 				DoseProgress = Math.Clamp(elapsed.TotalHours / intervalHours, 0, 1);
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
@@ -273,6 +297,10 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		}
 		else
 		{
+			IsDoseOverdue = false;
+			DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
+				? c 
+				: Color.FromArgb("#FF6B9D");
 			DoseProgress = 0;
 			DoseCountdownText = "--:--";
 			DoseCountdownSubText = "No schedule set";
@@ -288,6 +316,8 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 		if (scheduledNext is null)
 		{
+			IsFeedingOverdue = false;
+			FeedingRingColor = Color.FromArgb("#4CAF50");
 			FeedingProgress = 0;
 			FeedingCountdownText = "--:--";
 			FeedingCountdownSubText = "No schedule set";
@@ -298,12 +328,16 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 		if (remaining.TotalMinutes <= 0)
 		{
+			IsFeedingOverdue = true;
+			FeedingRingColor = Color.FromArgb("#D32F2F");
 			FeedingProgress = 1.0;
-			FeedingCountdownText = "NOW";
-			FeedingCountdownSubText = "Feeding due";
+			FeedingCountdownText = "OVERDUE";
+			FeedingCountdownSubText = "Feeding is late";
 		}
 		else
 		{
+			IsFeedingOverdue = false;
+			FeedingRingColor = Color.FromArgb("#4CAF50");
 			if (lastFeeding is not null)
 			{
 				var total = scheduledNext.Value - lastFeeding.FedAt;

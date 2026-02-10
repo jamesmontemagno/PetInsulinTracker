@@ -80,12 +80,33 @@
 
                 <!-- Dose Indicator + Quick Log -->
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <!-- Overdue Warning Badge -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="2" 
+                            BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
+                            StrokeThickness="2"
+                            Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            IsVisible="{Binding IsDoseOverdue}"
+                            ZIndex="10">
+                        <HorizontalStackLayout Spacing="8">
+                            <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
+                                         IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
+                                         VerticalOptions="Center" />
+                            <Label Text="Insulin dose is overdue!" 
+                                   FontFamily="OpenSansSemibold"
+                                   TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+                    
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding DoseProgress}"
                                             CenterText="{Binding DoseCountdownText}"
                                             SubText=""
-                                            RingColor="{DynamicResource CurrentPrimary}"
+                                            RingColor="{Binding DoseRingColor}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             CenterTextColor="{DynamicResource PageText}" />
                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="8">
@@ -121,12 +142,33 @@
 
                 <!-- Feeding Indicator + Quick Log -->
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" IsVisible="{Binding ShowSeparateFeedingCountdown}">
+                    <!-- Overdue Warning Badge -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="2" 
+                            BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
+                            StrokeThickness="2"
+                            Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            IsVisible="{Binding IsFeedingOverdue}"
+                            ZIndex="10">
+                        <HorizontalStackLayout Spacing="8">
+                            <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
+                                         IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
+                                         VerticalOptions="Center" />
+                            <Label Text="Feeding is overdue!" 
+                                   FontFamily="OpenSansSemibold"
+                                   TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+                    
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding FeedingProgress}"
                                             CenterText="{Binding FeedingCountdownText}"
                                             SubText=""
-                                            RingColor="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}"
+                                            RingColor="{Binding FeedingRingColor}"
                                             TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             CenterTextColor="{DynamicResource PageText}" />
                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="8">
