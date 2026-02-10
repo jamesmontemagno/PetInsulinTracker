@@ -153,7 +153,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		{
 			var pet = _existingPet ?? new Pet();
 			var isNew = _existingPet is null;
-		var photoChanged = isNew ? !string.IsNullOrEmpty(PhotoPath) : _photoChangedDuringEdit;
+			var photoChanged = isNew ? !string.IsNullOrEmpty(PhotoPath) : _photoChangedDuringEdit;
 			if (isNew)
 			{
 				pet.OwnerId = Constants.DeviceUserId;
