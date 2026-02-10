@@ -30,7 +30,11 @@ public partial class SettingsViewModel : ObservableObject
 		var lastSyncStr = Preferences.Get(Constants.LastSyncTimeKey, string.Empty);
 		if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
 		{
-			syncStatus = $"Last synced: {lastSyncTime:g}";
+			SyncStatus = $"Last synced: {lastSyncTime:g}";
+		}
+		else
+		{
+			SyncStatus = "Not synced";
 		}
 	}
 

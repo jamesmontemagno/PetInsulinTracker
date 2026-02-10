@@ -54,13 +54,13 @@ public partial class PetListViewModel : ObservableObject
 			{
 				var lastInsulin = await _db.GetLatestInsulinLogAsync(pet.Id);
 				var lastInsulinText = lastInsulin is not null
-					? $"{lastInsulin.DoseIU} IU — {lastInsulin.AdministeredAt:g}"
+					? $"{lastInsulin.AdministeredAt:g}"
 					: "No insulin logged";
 
 				var feedingLogs = await _db.GetFeedingLogsAsync(pet.Id);
 				var lastFeeding = feedingLogs.FirstOrDefault();
 				var lastFeedingText = lastFeeding is not null
-					? $"{lastFeeding.FoodName} — {lastFeeding.FedAt:g}"
+					? $"{lastFeeding.FedAt:g}"
 					: "No feeding logged";
 
 				petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText));

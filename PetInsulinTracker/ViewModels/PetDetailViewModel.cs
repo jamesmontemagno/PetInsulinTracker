@@ -133,6 +133,17 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		IsOwnerOrFull = Pet.AccessLevel != "guest";
 		IsOwner = Pet.AccessLevel == "owner";
 
+		// Load last sync time for this pet
+		var lastSyncStr = Preferences.Get($"lastSync_{id}", string.Empty);
+		if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
+		{
+			SyncStatus = $"Last synced: {lastSyncTime:g}";
+		}
+		else
+		{
+			SyncStatus = "Not synced";
+		}
+
 		DoseInfoText = Pet.CurrentDoseIU.HasValue
 			? $"Dose: {Pet.CurrentDoseIU.Value} IU ({Pet.InsulinConcentration ?? "U-40"})"
 			: "No dose set";
@@ -429,7 +440,14 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			IsSyncing = true;
 			SyncStatus = "Syncing…";
 			await _syncService.SyncAsync(petId);
-			SyncStatus = $"Last synced: {DateTime.Now:g}";
+			// Read the timestamp saved by SyncService
+			var lastSyncStr = Preferences.Get($"lastSync_{petId}", string.Empty);
+			if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
+			{
+				SyncStatus = $"Last synced: {lastSyncTime:g}";
+				// Also update global sync time for Settings page
+				Preferences.Set(Constants.LastSyncTimeKey, lastSyncStr);
+			}
 		}
 		catch (Exception ex)
 		{
