@@ -16,7 +16,10 @@ public partial class PetDetailPage : ContentPage
 	{
 		base.OnAppearing();
 		if (BindingContext is PetDetailViewModel vm)
+		{
 			vm.RefreshCommand.Execute(null);
+			vm.StartCountdownTimer();
+		}
 
 		// Page entrance animation
 		Content.Opacity = 0;
@@ -24,5 +27,12 @@ public partial class PetDetailPage : ContentPage
 		await Task.WhenAll(
 			Content.FadeToAsync(1, 300, Easing.CubicOut),
 			Content.TranslateToAsync(0, 0, 300, Easing.CubicOut));
+	}
+
+	protected override void OnDisappearing()
+	{
+		base.OnDisappearing();
+		if (BindingContext is PetDetailViewModel vm)
+			vm.StopCountdownTimer();
 	}
 }

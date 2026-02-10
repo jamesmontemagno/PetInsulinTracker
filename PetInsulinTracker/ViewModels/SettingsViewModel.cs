@@ -26,6 +26,12 @@ public partial class SettingsViewModel : ObservableObject
 			Themes.AppTheme.Midnight => "Midnight Indigo",
 			_ => "Berry Bliss"
 		};
+
+		var lastSyncStr = Preferences.Get(Constants.LastSyncTimeKey, string.Empty);
+		if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
+		{
+			syncStatus = $"Last synced: {lastSyncTime:g}";
+		}
 	}
 
 	[ObservableProperty]
@@ -148,7 +154,9 @@ public partial class SettingsViewModel : ObservableObject
 			IsSyncing = true;
 			SyncStatus = "Syncing...";
 			await _syncService.SyncAllAsync();
-			SyncStatus = $"Last synced: {DateTime.Now:g}";
+			var now = DateTime.Now;
+			Preferences.Set(Constants.LastSyncTimeKey, now.ToString("O"));
+			SyncStatus = $"Last synced: {now:g}";
 		}
 		catch (Exception ex)
 		{

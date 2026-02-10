@@ -18,6 +18,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
 	private Pet? _existingPet;
+	private bool _photoChangedDuringEdit;
 
 	public AddEditPetViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -152,7 +153,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		{
 			var pet = _existingPet ?? new Pet();
 			var isNew = _existingPet is null;
-			var photoChanged = _existingPet?.PhotoPath != PhotoPath;
+		var photoChanged = isNew ? !string.IsNullOrEmpty(PhotoPath) : _photoChangedDuringEdit;
 			if (isNew)
 			{
 				pet.OwnerId = Constants.DeviceUserId;
@@ -289,15 +290,21 @@ public partial class AddEditPetViewModel : ObservableObject
 	{
 		try
 		{
-			var results = await MediaPicker.PickPhotosAsync(new MediaPickerOptions
+			var results = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
 			{
-				Title = "Select pet photo"
+				Title = "Select pet photo",
+				SelectionLimit = 1
 			});
 
 			var result = results?.FirstOrDefault();
 			if (result is null) return;
 
 			PhotoPath = await CopyAndConvertPhotoAsync(result);
+			_photoChangedDuringEdit = true;
+		}
+		catch (PermissionException)
+		{
+			await Shell.Current.DisplayAlertAsync("Permission Required", "Photo library permission is required. Please enable it in Settings.", "OK");
 		}
 		catch (Exception ex)
 		{
@@ -310,7 +317,13 @@ public partial class AddEditPetViewModel : ObservableObject
 	{
 		try
 		{
-			var result = await MediaPicker.CapturePhotoAsync(new MediaPickerOptions
+			if (!MediaPicker.Default.IsCaptureSupported)
+			{
+				await Shell.Current.DisplayAlertAsync("Camera", "Camera is not available on this device.", "OK");
+				return;
+			}
+
+			var result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions
 			{
 				Title = "Take pet photo"
 			});
@@ -318,6 +331,11 @@ public partial class AddEditPetViewModel : ObservableObject
 			if (result is null) return;
 
 			PhotoPath = await CopyAndConvertPhotoAsync(result);
+			_photoChangedDuringEdit = true;
+		}
+		catch (PermissionException)
+		{
+			await Shell.Current.DisplayAlertAsync("Permission Required", "Camera permission is required to take photos. Please enable it in Settings.", "OK");
 		}
 		catch (Exception ex)
 		{

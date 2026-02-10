@@ -9,11 +9,15 @@ using PetInsulinTracker.Services;
 namespace PetInsulinTracker.ViewModels;
 
 [QueryProperty(nameof(PetId), "petId")]
-public partial class PetDetailViewModel : ObservableObject
+public partial class PetDetailViewModel : ObservableObject, IDisposable
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
 	private readonly INotificationService _notifications;
+	private CancellationTokenSource? _timerCts;
+	private Task? _timerTask;
+	private InsulinLog? _cachedLastInsulinLog;
+	private FeedingLog? _cachedLastFeedingLog;
 
 	public PetDetailViewModel(IDatabaseService db, ISyncService syncService, INotificationService notifications)
 	{
@@ -159,6 +163,10 @@ public partial class PetDetailViewModel : ObservableObject
 		ActiveSchedules = new ObservableCollection<Schedule>(_schedules);
 		HasCombinedSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
 
+		// Cache logs for timer updates
+		_cachedLastInsulinLog = insulinLog;
+		_cachedLastFeedingLog = lastFeeding;
+
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
 
@@ -223,7 +231,10 @@ public partial class PetDetailViewModel : ObservableObject
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 					: $"{remaining.Minutes}m";
-				DoseCountdownSubText = hasCombinedScheduleForInsulin ? "Until next dose & feeding" : "Until next dose";
+				var scheduleTimeText = scheduledNext.Value.ToString("t");
+				DoseCountdownSubText = hasCombinedScheduleForInsulin 
+					? $"Next dose & feeding at {scheduleTimeText}" 
+					: $"Next dose at {scheduleTimeText}";
 			}
 		}
 		else if (lastDose is not null)
@@ -245,7 +256,8 @@ public partial class PetDetailViewModel : ObservableObject
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 					: $"{remaining.Minutes}m";
-				DoseCountdownSubText = "Until next dose";
+				var estimatedTime = DateTime.Now.Add(remaining);
+				DoseCountdownSubText = $"Next dose ~{estimatedTime:t}";
 			}
 		}
 		else
@@ -296,7 +308,8 @@ public partial class PetDetailViewModel : ObservableObject
 			FeedingCountdownText = remaining.TotalHours >= 1
 				? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
 				: $"{remaining.Minutes}m";
-			FeedingCountdownSubText = "Until next feeding";
+			var scheduleTimeText = scheduledNext.Value.ToString("t");
+			FeedingCountdownSubText = $"Next feeding at {scheduleTimeText}";
 		}
 	}
 
@@ -338,6 +351,7 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveInsulinLogAsync(log);
+		_cachedLastInsulinLog = log;
 		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
@@ -359,6 +373,7 @@ public partial class PetDetailViewModel : ObservableObject
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveFeedingLogAsync(log);
+		_cachedLastFeedingLog = log;
 		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
@@ -393,6 +408,8 @@ public partial class PetDetailViewModel : ObservableObject
 
 		await _db.SaveInsulinLogAsync(insulinLog);
 		await _db.SaveFeedingLogAsync(feedingLog);
+		_cachedLastInsulinLog = insulinLog;
+		_cachedLastFeedingLog = feedingLog;
 		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
@@ -532,5 +549,49 @@ public partial class PetDetailViewModel : ObservableObject
 		{
 			await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
 		}
+	}
+
+	public void StartCountdownTimer()
+	{
+		// Cancel any existing timer
+		StopCountdownTimer();
+
+		_timerCts = new CancellationTokenSource();
+		_timerTask = Task.Run(async () =>
+		{
+			while (!_timerCts.Token.IsCancellationRequested)
+			{
+				try
+				{
+					await Task.Delay(TimeSpan.FromSeconds(30), _timerCts.Token);
+					
+					// Update countdowns on UI thread
+					MainThread.BeginInvokeOnMainThread(() =>
+					{
+						UpdateDoseCountdown(_cachedLastInsulinLog);
+						UpdateFeedingCountdown(_cachedLastFeedingLog);
+					});
+				}
+				catch (TaskCanceledException)
+				{
+					break;
+				}
+			}
+		}, _timerCts.Token);
+	}
+
+	public void StopCountdownTimer()
+	{
+		_timerCts?.Cancel();
+		_timerCts?.Dispose();
+		_timerCts = null;
+		_timerTask = null;
+	}
+
+	public void Dispose()
+	{
+		StopCountdownTimer();
+		WeakReferenceMessenger.Default.Unregister<WeightUnitChangedMessage>(this);
+		WeakReferenceMessenger.Default.Unregister<PetSavedMessage>(this);
 	}
 }

@@ -99,22 +99,6 @@
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding HasCombinedSchedule}">
                             <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                             <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
-                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="Next dose: {0} · {1}">
-                                        <Binding Path="DoseCountdownText" />
-                                        <Binding Path="DoseCountdownSubText" />
-                                    </MultiBinding>
-                                </Label.Text>
-                            </Label>
-                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="Next feeding: {0} · {1}">
-                                        <Binding Path="FeedingCountdownText" />
-                                        <Binding Path="FeedingCountdownSubText" />
-                                    </MultiBinding>
-                                </Label.Text>
-                            </Label>
                         </VerticalStackLayout>
 
                         <Button Text="Quick Log Insulin"

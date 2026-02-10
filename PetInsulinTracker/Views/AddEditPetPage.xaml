@@ -140,9 +140,26 @@
             <Button Text="Save" Command="{Binding SaveCommand}"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Margin="0,8" HorizontalOptions="Fill"
+                    IsEnabled="{Binding IsSaving, Converter={StaticResource InvertedBoolConverter}}"
                     SemanticProperties.Hint="Save pet information" />
 
         </VerticalStackLayout>
     </ScrollView>
+
+    <!-- Saving overlay -->
+    <Grid IsVisible="{Binding IsSaving}"
+          BackgroundColor="{AppThemeBinding Light=#80FFFFFF, Dark=#80000000}"
+          InputTransparent="False">
+        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="12">
+            <ActivityIndicator IsRunning="{Binding IsSaving}"
+                               Color="{DynamicResource CurrentPrimary}"
+                               HeightRequest="48" WidthRequest="48" />
+            <Label Text="{Binding SavingStatus}"
+                   HorizontalOptions="Center"
+                   FontSize="16"
+                   TextColor="{DynamicResource PageText}" />
+        </VerticalStackLayout>
+    </Grid>
+
     </Grid>
 </ContentPage>

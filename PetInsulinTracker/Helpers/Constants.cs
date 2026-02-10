@@ -9,6 +9,7 @@ public static class Constants
 	public const string DeviceUserIdKey = "device_user_id";
 	public const string OfflineModeKey = "offline_mode";
 	public const string NotificationsEnabledKey = "notifications_enabled";
+	public const string LastSyncTimeKey = "last_sync_time";
 
 	// Schedule type constants
 	public const string ScheduleTypeInsulin = "Insulin";
