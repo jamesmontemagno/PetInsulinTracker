@@ -131,9 +131,10 @@
                     </Label.Triggers>
                 </Label>
 
-                <CollectionView ItemsSource="{Binding SharedUsers}"
-                                IsVisible="{Binding IsLoadingUsers, Converter={StaticResource InvertedBoolConverter}}">
-                    <CollectionView.ItemTemplate>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding SharedUsers}"
+                                     Spacing="8"
+                                     IsVisible="{Binding IsLoadingUsers, Converter={StaticResource InvertedBoolConverter}}">
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="dto:SharedUserDto">
                             <Border Style="{StaticResource CardStyle}" Margin="0,4">
                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Padding="4" ColumnSpacing="12">
@@ -168,8 +169,8 @@
                                 </Grid>
                             </Border>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
                 <Button Text="Refresh"
                         Command="{Binding LoadSharedUsersCommand}"

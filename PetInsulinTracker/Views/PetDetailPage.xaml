@@ -214,12 +214,10 @@
                 <Label Text="ACTIVE SCHEDULES" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
                        IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
 
-                <CollectionView ItemsSource="{Binding ActiveSchedules}" SelectionMode="None"
-                                IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveSchedules}"
+                                     Spacing="8"
+                                     IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:Schedule">
                             <Border Style="{StaticResource CardStyle}">
                                 <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
@@ -247,8 +245,8 @@
                                 </Grid>
                             </Border>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
                 <!-- Manage Section -->
                 <Label Text="MANAGE" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />

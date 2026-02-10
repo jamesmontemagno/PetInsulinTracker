@@ -10,9 +10,10 @@
              Title="Weight Log"
              BackgroundColor="{DynamicResource PageBackground}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="12">
 
+            <!-- Chart and Form Section -->
+            <VerticalStackLayout Grid.Row="0" Spacing="12">
             <!-- Weight Chart -->
             <Border Style="{StaticResource CardStyle}" Padding="8"
                     IsVisible="{Binding ChartData.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
@@ -67,15 +68,16 @@
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
+            </VerticalStackLayout>
 
             <!-- History -->
+            <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="12">
             <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
-            <CollectionView ItemsSource="{Binding Logs}" SelectionMode="None">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Logs}"
+                                 Spacing="8">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:WeightLog">
                         <SwipeView>
                             <SwipeView.RightItems>
@@ -123,10 +125,10 @@
                             </Border>
                         </SwipeView>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-        </VerticalStackLayout>
-    </ScrollView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+            </VerticalStackLayout>
+            </ScrollView>
+    </Grid>
 
 </ContentPage>
