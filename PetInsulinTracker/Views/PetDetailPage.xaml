@@ -54,8 +54,6 @@
                             </Label>
                             <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
                                    Style="{StaticResource SubtleTextStyle}" />
-                            <Label Text="{Binding DoseInfoText}" Style="{StaticResource SubtleTextStyle}" />
-                            <Label Text="{Binding QuickFeedInfoText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1" Text="Edit"
                                 Style="{StaticResource GhostButtonStyle}"
