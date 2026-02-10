@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.AddInsulinLogPage"
+             x:DataType="vm:InsulinLogViewModel"
+             Title="Log Insulin"
+             BackgroundColor="{DynamicResource PageBackground}"
+             Shell.PresentationMode="ModalAnimated">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="LOG INSULIN SHOT" Style="{StaticResource OverlineStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Dose (IU)" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding DoseIU}" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Injection Site" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding InjectionSite}" Placeholder="e.g., scruff" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Date" Style="{StaticResource FormLabelStyle}" />
+                            <DatePicker Date="{Binding LogDate}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                            <TimePicker Time="{Binding LogTime}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Notes" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
+                    </VerticalStackLayout>
+
+                        <Button Text="Save" Command="{Binding SaveAndCloseCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill" />
+                        <Button Text="Cancel" Command="{Binding CloseModalCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill" />
+                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}" HorizontalOptions="Center">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
+                                           Color="{DynamicResource Primary}" />
+                        <Label Text="Syncing..." Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

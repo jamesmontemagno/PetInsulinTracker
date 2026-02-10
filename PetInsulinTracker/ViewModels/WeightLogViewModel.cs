@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
+using PetInsulinTracker.Views;
 
 namespace PetInsulinTracker.ViewModels;
 
@@ -33,6 +34,7 @@ public partial class WeightLogViewModel : ObservableObject
 	// New log entry fields
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveLogCommand))]
+	[NotifyCanExecuteChangedFor(nameof(SaveAndCloseCommand))]
 	private double weight;
 
 	[ObservableProperty]
@@ -145,6 +147,26 @@ public partial class WeightLogViewModel : ObservableObject
 	}
 
 	private bool CanSaveLog() => Weight > 0;
+
+	[RelayCommand(CanExecute = nameof(CanSaveLog))]
+	private async Task SaveAndCloseAsync()
+	{
+		await SaveLogAsync();
+		await Shell.Current.GoToAsync("..");
+	}
+
+	[RelayCommand]
+	private async Task OpenAddLogAsync()
+	{
+		if (string.IsNullOrEmpty(PetId)) return;
+		await Shell.Current.GoToAsync($"{nameof(AddWeightLogPage)}?petId={PetId}");
+	}
+
+	[RelayCommand]
+	private async Task CloseModalAsync()
+	{
+		await Shell.Current.GoToAsync("..");
+	}
 
 	[RelayCommand]
 	private async Task DeleteLogAsync(WeightLog log)

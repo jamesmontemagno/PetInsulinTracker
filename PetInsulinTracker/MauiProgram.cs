@@ -48,8 +48,11 @@ public static class MauiProgram
 		builder.Services.AddTransient<AddEditPetPage>();
 		builder.Services.AddTransient<PetDetailPage>();
 		builder.Services.AddTransient<InsulinLogPage>();
+		builder.Services.AddTransient<AddInsulinLogPage>();
 		builder.Services.AddTransient<FeedingLogPage>();
+		builder.Services.AddTransient<AddFeedingLogPage>();
 		builder.Services.AddTransient<WeightLogPage>();
+		builder.Services.AddTransient<AddWeightLogPage>();
 		builder.Services.AddTransient<VetInfoPage>();
 		builder.Services.AddTransient<SchedulePage>();
 		builder.Services.AddTransient<SharePage>();

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
+using PetInsulinTracker.Views;
 
 namespace PetInsulinTracker.ViewModels;
 
@@ -28,6 +29,7 @@ public partial class FeedingLogViewModel : ObservableObject
 	// New log entry fields
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveLogCommand))]
+	[NotifyCanExecuteChangedFor(nameof(SaveAndCloseCommand))]
 	private string foodName = string.Empty;
 
 	[ObservableProperty]
@@ -126,6 +128,26 @@ public partial class FeedingLogViewModel : ObservableObject
 	}
 
 	private bool CanSaveLog() => !string.IsNullOrWhiteSpace(FoodName);
+
+	[RelayCommand(CanExecute = nameof(CanSaveLog))]
+	private async Task SaveAndCloseAsync()
+	{
+		await SaveLogAsync();
+		await Shell.Current.GoToAsync("..");
+	}
+
+	[RelayCommand]
+	private async Task OpenAddLogAsync()
+	{
+		if (string.IsNullOrEmpty(PetId)) return;
+		await Shell.Current.GoToAsync($"{nameof(AddFeedingLogPage)}?petId={PetId}");
+	}
+
+	[RelayCommand]
+	private async Task CloseModalAsync()
+	{
+		await Shell.Current.GoToAsync("..");
+	}
 
 	[RelayCommand]
 	private async Task DeleteLogAsync(FeedingLog log)

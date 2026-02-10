@@ -14,7 +14,7 @@
                      Command="{Binding CreateShareCodeCommand}"
                      IsEnabled="{Binding CanCreateShareCode}">
             <ToolbarItem.IconImageSource>
-                <FontImageSource Glyph="+" FontFamily="OpenSansSemibold" Color="{DynamicResource PageText}" />
+                <FontImageSource Glyph="{mi:Fluent Add24}" Color="{DynamicResource PageText}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>

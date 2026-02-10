@@ -10,9 +10,18 @@
              Title="Weight Log"
              BackgroundColor="{DynamicResource PageBackground}">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add"
+                     Command="{Binding OpenAddLogCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{mi:Fluent Add24}" Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="12">
 
-            <!-- Chart and Form Section -->
+            <!-- Chart Section -->
             <VerticalStackLayout Grid.Row="0" Spacing="12">
             <!-- Weight Chart -->
             <Border Style="{StaticResource CardStyle}" Padding="8"
@@ -31,49 +40,23 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Log New Entry -->
-            <Label Text="LOG WEIGHT" Style="{StaticResource OverlineStyle}" />
-
-            <Border Style="{StaticResource CardStyle}">
-                <VerticalStackLayout Spacing="12">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Weight" Style="{StaticResource FormLabelStyle}" />
-                            <Entry Text="{Binding Weight}" Keyboard="Numeric"
-                                   Placeholder="Weight" />
-                        </VerticalStackLayout>
-                        <Label Grid.Column="1" Text="{Binding Unit}" FontSize="16"
-                               FontFamily="OpenSansSemibold"
-                               VerticalOptions="End" Margin="0,0,0,8"
-                               TextColor="{DynamicResource PageTextSecondary}" />
-                    </Grid>
-
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Date" Style="{StaticResource FormLabelStyle}" />
-                        <DatePicker Date="{Binding LogDate}" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Notes" Style="{StaticResource FormLabelStyle}" />
-                        <Entry Text="{Binding Notes}" Placeholder="Optional notes" />
-                    </VerticalStackLayout>
-
-                    <Button Text="Save" Command="{Binding SaveLogCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            HorizontalOptions="Fill" />
-                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}" HorizontalOptions="Center">
-                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
-                                           Color="{DynamicResource Primary}" />
-                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
             </VerticalStackLayout>
 
             <!-- History -->
             <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="12">
             <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
+
+                 <Label Text="No history yet"
+                     Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                     HorizontalTextAlignment="Center"
+                     IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
+
+                    <Button Text="Add your first entry"
+                        Command="{Binding OpenAddLogCommand}"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
 
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding Logs}"
                                  Spacing="8">

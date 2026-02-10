@@ -11,12 +11,19 @@
              BackgroundColor="{DynamicResource PageBackground}">
 
     <ContentPage.ToolbarItems>
+
         <ToolbarItem Text="Add"
-                     Command="{Binding GoToAddPetCommand}"
-                     IconImageSource="{mi:Fluent Icon=Add24, IconColor=White}" />
+                     Command="{Binding GoToAddPetCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{mi:Fluent Add24}" Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
         <ToolbarItem Text="Settings"
-                     Command="{Binding GoToSettingsCommand}"
-                     IconImageSource="{mi:Fluent Icon=Settings24, IconColor=White}" />
+                     Command="{Binding GoToSettingsCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{mi:Fluent Settings24}"  Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
     </ContentPage.ToolbarItems>
 
     <RefreshView Command="{Binding LoadPetsCommand}"
