@@ -358,30 +358,6 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		}
 	}
 
-	/// <summary>
-	/// Checks if the current time is within buffer minutes of the next scheduled time.
-	/// If within buffer, returns a time that will cause the countdown to show the next occurrence.
-	/// </summary>
-	private DateTime GetAdjustedLogTime(string scheduleType)
-	{
-		var now = DateTime.Now;
-		var scheduledNext = GetNextScheduledTime(_schedules, scheduleType, out _);
-		
-		if (scheduledNext is null)
-			return now;
-		
-		var timeDiff = Math.Abs((scheduledNext.Value - now).TotalMinutes);
-		
-		// If we're within the buffer window of the schedule, adjust the logged time
-		// to be just after the scheduled time so it advances to the next schedule
-		if (timeDiff <= Constants.ScheduleBufferMinutes)
-		{
-			return scheduledNext.Value.AddMinutes(1);
-		}
-		
-		return now;
-	}
-
 	[RelayCommand]
 	private async Task QuickLogInsulinAsync()
 	{
@@ -391,7 +367,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		{
 			PetId = Pet.Id,
 			DoseIU = Pet.CurrentDoseIU ?? 0,
-			AdministeredAt = GetAdjustedLogTime(Constants.ScheduleTypeInsulin),
+			AdministeredAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -413,7 +389,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			Amount = Pet.DefaultFoodAmount ?? 0,
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,
-			FedAt = GetAdjustedLogTime(Constants.ScheduleTypeFeeding),
+			FedAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -428,13 +404,11 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
-		var adjustedTime = GetAdjustedLogTime(Constants.ScheduleTypeCombined);
-
 		var insulinLog = new InsulinLog
 		{
 			PetId = Pet.Id,
 			DoseIU = Pet.CurrentDoseIU ?? 0,
-			AdministeredAt = adjustedTime,
+			AdministeredAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -446,7 +420,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			Amount = Pet.DefaultFoodAmount ?? 0,
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,
-			FedAt = adjustedTime,
+			FedAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
