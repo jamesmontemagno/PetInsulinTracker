@@ -197,7 +197,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		UpdateFeedingCountdown(lastFeeding);
 	}
 
-	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType, out bool hasCombinedSchedule)
+	private static DateTime? GetNextScheduledTimeAfter(List<Schedule> schedules, string scheduleType, DateTime referenceTime, out bool hasCombinedSchedule)
 	{
 		var matching = schedules
 			.Where(s => s.ScheduleType == scheduleType || s.ScheduleType == Constants.ScheduleTypeCombined)
@@ -209,14 +209,13 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		
 		if (matching.Count == 0) return null;
 
-		var now = DateTime.Now;
-		var today = now.Date;
+		var today = referenceTime.Date;
 
 		// Find the next upcoming time today
 		foreach (var s in matching)
 		{
 			var candidate = today + s.TimeOfDay;
-			if (candidate > now)
+			if (candidate > referenceTime)
 				return candidate;
 		}
 
@@ -226,7 +225,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
 	{
-		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin", out bool hasCombinedScheduleForInsulin);
+		var referenceTime = DateTime.Now;
+		var scheduledNext = GetNextScheduledTimeAfter(_schedules, "Insulin", referenceTime, out bool hasCombinedScheduleForInsulin);
+
+		if (scheduledNext is not null && lastDose is not null)
+		{
+			var minutesFromLast = Math.Abs((scheduledNext.Value - lastDose.AdministeredAt).TotalMinutes);
+			if (minutesFromLast <= Constants.ScheduleBufferMinutes)
+			{
+				referenceTime = scheduledNext.Value.AddMinutes(1);
+				scheduledNext = GetNextScheduledTimeAfter(_schedules, "Insulin", referenceTime, out hasCombinedScheduleForInsulin);
+			}
+		}
 
 		if (scheduledNext is not null)
 		{
@@ -309,7 +319,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 	private void UpdateFeedingCountdown(FeedingLog? lastFeeding)
 	{
-		var scheduledNext = GetNextScheduledTime(_schedules, "Feeding", out bool hasCombinedScheduleForFeeding);
+		var referenceTime = DateTime.Now;
+		var scheduledNext = GetNextScheduledTimeAfter(_schedules, "Feeding", referenceTime, out bool hasCombinedScheduleForFeeding);
+
+		if (scheduledNext is not null && lastFeeding is not null)
+		{
+			var minutesFromLast = Math.Abs((scheduledNext.Value - lastFeeding.FedAt).TotalMinutes);
+			if (minutesFromLast <= Constants.ScheduleBufferMinutes)
+			{
+				referenceTime = scheduledNext.Value.AddMinutes(1);
+				scheduledNext = GetNextScheduledTimeAfter(_schedules, "Feeding", referenceTime, out hasCombinedScheduleForFeeding);
+			}
+		}
 		
 		// If there's a combined schedule that handles feeding, don't show separate feeding countdown
 		ShowSeparateFeedingCountdown = !hasCombinedScheduleForFeeding;
