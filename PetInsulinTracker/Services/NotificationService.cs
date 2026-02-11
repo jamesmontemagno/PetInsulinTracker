@@ -22,7 +22,13 @@ public class NotificationService : INotificationService
 		if (await LocalNotificationCenter.Current.AreNotificationsEnabled())
 			return true;
 
-		return await LocalNotificationCenter.Current.RequestNotificationPermission();
+		var result = await LocalNotificationCenter.Current.RequestNotificationPermission();
+		if (result)
+			return true;
+
+		// RequestNotificationPermission can return false even after the user grants permission
+		// due to a platform timing issue. Re-check the actual status as a fallback.
+		return await LocalNotificationCenter.Current.AreNotificationsEnabled();
 	}
 
 	public async Task ScheduleNotificationsForPetAsync(string petId)

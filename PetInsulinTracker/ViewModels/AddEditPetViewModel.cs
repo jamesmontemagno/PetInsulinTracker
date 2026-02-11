@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using PetInsulinTracker.Services;
-using SkiaSharp;
 
 namespace PetInsulinTracker.ViewModels;
 
@@ -132,7 +131,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	{
 		if (!string.IsNullOrEmpty(value))
 		{
-			PhotoPreviewSource = value;
+			PhotoPreviewSource = ResolvePhotoPath(value);
 		}
 		else if (_existingPet is not null)
 		{
@@ -142,6 +141,16 @@ public partial class AddEditPetViewModel : ObservableObject
 		{
 			PhotoPreviewSource = null;
 		}
+	}
+
+	/// <summary>
+	/// Resolves a stored photo path (relative or absolute) to the full absolute path.
+	/// </summary>
+	private static string ResolvePhotoPath(string photoPath)
+	{
+		if (Path.IsPathRooted(photoPath))
+			return photoPath;
+		return Path.Combine(FileSystem.AppDataDirectory, photoPath);
 	}
 
 	private async Task LoadPetAsync(string id)
@@ -167,9 +176,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		TakesMedication = !string.IsNullOrEmpty(_existingPet.PetMedication);
 		PetMedication = _existingPet.PetMedication;
 		PhotoPath = _existingPet.PhotoPath;
-		PhotoPreviewSource = !string.IsNullOrEmpty(_existingPet.PhotoPath)
-			? _existingPet.PhotoPath
-			: _existingPet.PhotoUrl;
+		PhotoPreviewSource = _existingPet.PhotoSource;
 		OnPropertyChanged(nameof(PageTitle));
 	}
 
@@ -236,7 +243,7 @@ public partial class AddEditPetViewModel : ObservableObject
 			}
 
 			string? photoUploadError = null;
-			if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
+			if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest" && !Constants.IsOfflineMode)
 			{
 				// Ask user if they want to upload the photo
 				var uploadPhoto = await Shell.Current.DisplayAlertAsync(
@@ -323,128 +330,25 @@ public partial class AddEditPetViewModel : ObservableObject
 	}
 
 	/// <summary>
-	/// Copies a photo to the app data directory, converting HEIC/HEIF to JPEG
-	/// since SkiaSharp may not decode HEIC on all platforms.
-	/// Also applies EXIF orientation correction so images display upright.
-	/// Returns a RELATIVE path from AppDataDirectory to ensure portability across app updates.
+	/// Copies a picked photo to the app data directory so it persists.
+	/// Stores and returns the full absolute path.
+	/// SkiaSharp conversion/orientation is only done at upload time via SyncService.
 	/// </summary>
-	private async Task<string?> CopyAndConvertPhotoAsync(FileResult result)
+	private async Task<string?> CopyPhotoToAppDataAsync(FileResult result)
 	{
 		var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
 		Directory.CreateDirectory(destDir);
 
 		var ext = Path.GetExtension(result.FileName)?.ToLowerInvariant();
-		var isHeic = ext is ".heic" or ".heif";
-		// Always output JPEG so EXIF orientation is baked in
-		var fileName = $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}.jpg";
+		if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+		var fileName = $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{ext}";
 		var destPath = Path.Combine(destDir, fileName);
 
 		using var sourceStream = await result.OpenReadAsync();
-		using var memStream = new MemoryStream();
-		await sourceStream.CopyToAsync(memStream);
-		memStream.Position = 0;
-
-		using var bitmap = SKBitmap.Decode(memStream);
-		if (bitmap is null)
-		{
-			// Fallback: copy raw bytes
-			Debug.WriteLine($"SKBitmap.Decode failed for {result.FileName}, copying raw file");
-			memStream.Position = 0;
-			var rawFileName = $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{ext}";
-			var rawDestPath = Path.Combine(destDir, rawFileName);
-			using var fallbackDest = File.Create(rawDestPath);
-			await memStream.CopyToAsync(fallbackDest);
-			// Return relative path from AppDataDirectory for portability
-			return Path.Combine("pet_photos", rawFileName);
-		}
-
-		// Read EXIF orientation and apply correction
-		memStream.Position = 0;
-		var corrected = ApplyExifOrientation(bitmap, memStream);
-		var final = corrected ?? bitmap;
-
-		using var image = SKImage.FromBitmap(final);
-		using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 95);
 		using var destStream = File.Create(destPath);
-		jpegData.SaveTo(destStream);
+		await sourceStream.CopyToAsync(destStream);
 
-		corrected?.Dispose();
-
-		// Return relative path from AppDataDirectory for portability
-		return Path.Combine("pet_photos", Path.GetFileName(destPath));
-	}
-
-	/// <summary>
-	/// Reads EXIF orientation from a stream and returns a corrected bitmap,
-	/// or null if no correction is needed.
-	/// </summary>
-	private static SKBitmap? ApplyExifOrientation(SKBitmap bitmap, Stream stream)
-	{
-		try
-		{
-			using var codec = SKCodec.Create(stream);
-			if (codec is null) return null;
-
-			var origin = codec.EncodedOrigin;
-			if (origin == SKEncodedOrigin.Default || origin == SKEncodedOrigin.TopLeft)
-				return null;
-
-			return ApplyOrientation(bitmap, origin);
-		}
-		catch
-		{
-			return null;
-		}
-	}
-
-	/// <summary>
-	/// Creates a new bitmap with the EXIF orientation transform applied.
-	/// </summary>
-	private static SKBitmap ApplyOrientation(SKBitmap bitmap, SKEncodedOrigin origin)
-	{
-		var needsSwap = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop
-			or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
-
-		var width = needsSwap ? bitmap.Height : bitmap.Width;
-		var height = needsSwap ? bitmap.Width : bitmap.Height;
-
-		var result = new SKBitmap(width, height, bitmap.ColorType, bitmap.AlphaType);
-		using var canvas = new SKCanvas(result);
-
-		switch (origin)
-		{
-			case SKEncodedOrigin.TopRight:
-				canvas.Scale(-1, 1, width / 2f, 0);
-				break;
-			case SKEncodedOrigin.BottomRight:
-				canvas.RotateDegrees(180, width / 2f, height / 2f);
-				break;
-			case SKEncodedOrigin.BottomLeft:
-				canvas.Scale(1, -1, 0, height / 2f);
-				break;
-			case SKEncodedOrigin.LeftTop:
-				canvas.Translate(0, 0);
-				canvas.RotateDegrees(270, 0, 0);
-				canvas.Translate(-height, 0);
-				canvas.Scale(-1, 1, height / 2f, 0);
-				break;
-			case SKEncodedOrigin.RightTop:
-				canvas.Translate(width, 0);
-				canvas.RotateDegrees(90);
-				break;
-			case SKEncodedOrigin.RightBottom:
-				canvas.Translate(width, 0);
-				canvas.RotateDegrees(90);
-				canvas.Scale(-1, 1, bitmap.Height / 2f, 0);
-				break;
-			case SKEncodedOrigin.LeftBottom:
-				canvas.Translate(0, height);
-				canvas.RotateDegrees(270);
-				break;
-		}
-
-		canvas.DrawBitmap(bitmap, 0, 0);
-		return result;
+		return destPath;
 	}
 
 	[RelayCommand]
@@ -461,7 +365,7 @@ public partial class AddEditPetViewModel : ObservableObject
 			var result = results?.FirstOrDefault();
 			if (result is null) return;
 
-			PhotoPath = await CopyAndConvertPhotoAsync(result);
+			PhotoPath = await CopyPhotoToAppDataAsync(result);
 			_photoChangedDuringEdit = true;
 		}
 		catch (PermissionException)
@@ -492,7 +396,7 @@ public partial class AddEditPetViewModel : ObservableObject
 
 			if (result is null) return;
 
-			PhotoPath = await CopyAndConvertPhotoAsync(result);
+			PhotoPath = await CopyPhotoToAppDataAsync(result);
 			_photoChangedDuringEdit = true;
 		}
 		catch (PermissionException)
