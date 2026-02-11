@@ -181,10 +181,10 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- ===== STEP 2.5: Offline Mode ===== -->
+            <!-- ===== STEP 2.5: Online Sync ===== -->
             <VerticalStackLayout x:Name="Step2_5" Spacing="20" IsVisible="False">
 
-                <mi:MauiIcon Icon="{mi:Fluent CloudOff24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+                <mi:MauiIcon Icon="{mi:Fluent CloudSync24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
                 <Label Text="Sync Settings"
                        FontSize="24" FontFamily="OpenSansSemibold"
@@ -198,17 +198,17 @@
                 <Border Style="{StaticResource CardStyle}" Padding="20">
                     <VerticalStackLayout Spacing="16">
                         <HorizontalStackLayout Spacing="12">
-                            <Switch x:Name="OfflineModeSwitch" IsToggled="False" VerticalOptions="Center" />
+                            <Switch x:Name="OnlineSyncSwitch" IsToggled="True" VerticalOptions="Center" />
                             <VerticalStackLayout Spacing="4" HorizontalOptions="Fill">
-                                <Label Text="Offline Mode" FontFamily="OpenSansSemibold" FontSize="16" />
-                                <Label Text="Keep all data local only" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                                <Label Text="Online Sync" FontFamily="OpenSansSemibold" FontSize="16" />
+                                <Label Text="Sync data to the cloud" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
                         <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />
 
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="Cloud Sync (Recommended)" FontFamily="OpenSansSemibold" FontSize="14" />
+                            <Label Text="Online Sync (Recommended)" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="• Access your pet's data from multiple devices" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                             <Label Text="• Share pet care with family or pet sitters" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                             <Label Text="• Automatic backups" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
@@ -218,7 +218,7 @@
                             <Label Text="Offline Mode" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="• All data stays on this device only" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                             <Label Text="• No cloud storage or sharing" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
-                            <Label Text="• You can enable sync later in Settings" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="• You can change this later in Settings" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>

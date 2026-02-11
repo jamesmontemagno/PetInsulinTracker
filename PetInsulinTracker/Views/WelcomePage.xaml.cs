@@ -106,10 +106,11 @@ public partial class WelcomePage : ContentPage
 		GoToStep(2);
 	}
 
-	// Step 2.5: Offline mode choice → go to pet setup (Step 3)
+	// Step 2.5: Online sync choice → go to pet setup (Step 3)
+	// Note: We invert the switch value because the UI shows "Online Sync" but we store "Offline Mode"
 	private void OnStep2_5Next(object? sender, EventArgs e)
 	{
-		Preferences.Set(Constants.OfflineModeKey, OfflineModeSwitch.IsToggled);
+		Preferences.Set(Constants.OfflineModeKey, !OnlineSyncSwitch.IsToggled);
 		GoToStep(3);
 	}
 
