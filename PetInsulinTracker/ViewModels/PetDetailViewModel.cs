@@ -418,8 +418,8 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 		var foodName = Pet.DefaultFoodName ?? "Meal";
 		var amount = Pet.DefaultFoodAmount ?? 0;
-		var unit = Pet.DefaultFoodUnit;
-		var foodType = Pet.DefaultFoodType;
+		var unit = Pet.DefaultFoodUnit ?? "cups";
+		var foodType = Pet.DefaultFoodType ?? "food";
 		
 		var confirm = await Shell.Current.DisplayAlertAsync(
 			"Quick Log Feeding",
@@ -457,8 +457,8 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		var concentrationText = !string.IsNullOrWhiteSpace(concentration) ? $" ({concentration})" : "";
 		var foodName = Pet.DefaultFoodName ?? "Meal";
 		var amount = Pet.DefaultFoodAmount ?? 0;
-		var unit = Pet.DefaultFoodUnit;
-		var foodType = Pet.DefaultFoodType;
+		var unit = Pet.DefaultFoodUnit ?? "cups";
+		var foodType = Pet.DefaultFoodType ?? "food";
 		
 		var confirm = await Shell.Current.DisplayAlertAsync(
 			"Quick Log Food + Insulin",
