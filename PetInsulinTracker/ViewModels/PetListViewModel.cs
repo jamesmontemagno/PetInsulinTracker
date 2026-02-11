@@ -17,11 +17,23 @@ public partial class PetListItemViewModel : ObservableObject
 	[ObservableProperty]
 	private string lastFeedingText = "";
 
-	public PetListItemViewModel(Pet pet, string lastInsulinText, string lastFeedingText)
+	[ObservableProperty]
+	private bool showWeight;
+
+	[ObservableProperty]
+	private bool showLastInsulin;
+
+	[ObservableProperty]
+	private bool showLastFeeding;
+
+	public PetListItemViewModel(Pet pet, string lastInsulinText, string lastFeedingText, bool showWeight, bool showLastInsulin, bool showLastFeeding)
 	{
 		Pet = pet;
 		LastInsulinText = lastInsulinText;
 		LastFeedingText = lastFeedingText;
+		ShowWeight = showWeight;
+		ShowLastInsulin = showLastInsulin;
+		ShowLastFeeding = showLastFeeding;
 	}
 }
 
@@ -63,7 +75,17 @@ public partial class PetListViewModel : ObservableObject
 					? $"{lastFeeding.FedAt:g}"
 					: "No feeding logged";
 
-				petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText));
+				// Get schedules to determine visibility
+				var schedules = await _db.GetSchedulesAsync(pet.Id);
+				var hasInsulinSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeInsulin || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
+				var hasFeedingSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeFeeding || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
+
+				// Determine visibility
+				var showWeight = pet.CurrentWeight.HasValue;
+				var showLastInsulin = !string.IsNullOrEmpty(pet.InsulinType) || pet.CurrentDoseIU.HasValue || hasInsulinSchedule;
+				var showLastFeeding = !string.IsNullOrEmpty(pet.DefaultFoodName) || pet.DefaultFoodAmount.HasValue || hasFeedingSchedule;
+
+				petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText, showWeight, showLastInsulin, showLastFeeding));
 			}
 
 			Pets = new ObservableCollection<PetListItemViewModel>(petViewModels);

@@ -144,6 +144,15 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private bool showSeparateFeedingCountdown = true;
 
 	[ObservableProperty]
+	private bool showInsulinCard;
+
+	[ObservableProperty]
+	private bool showMedicationCard;
+
+	[ObservableProperty]
+	private bool showInsulinType;
+
+	[ObservableProperty]
 	private bool isDoseOverdue;
 
 	[ObservableProperty]
@@ -217,6 +226,11 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		HasCombinedSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
 		HasInsulinSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeInsulin || s.ScheduleType == Constants.ScheduleTypeCombined);
 		HasMedicationSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeMedication);
+
+		// Determine whether to show insulin and medication cards
+		ShowInsulinCard = !string.IsNullOrEmpty(Pet.InsulinType) || Pet.CurrentDoseIU.HasValue || HasInsulinSchedule;
+		ShowMedicationCard = !string.IsNullOrEmpty(Pet.PetMedication) || HasMedicationSchedule;
+		ShowInsulinType = !string.IsNullOrEmpty(Pet.InsulinType);
 
 		// Cache logs for timer updates
 		_cachedLastInsulinLog = insulinLog;
@@ -525,10 +539,19 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var result = await Shell.Current.DisplayPromptAsync(
+			"Quick Log Feeding",
+			"What food was given?",
+			accept: "Log",
+			cancel: "Cancel",
+			initialValue: Pet.DefaultFoodName ?? "Meal");
+
+		if (string.IsNullOrWhiteSpace(result)) return;
+
 		var log = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
+			FoodName = result.Trim(),
 			Amount = Pet.DefaultFoodAmount ?? 0,
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,
@@ -547,6 +570,15 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var result = await Shell.Current.DisplayPromptAsync(
+			"Quick Log Food + Insulin",
+			"What food was given?",
+			accept: "Log",
+			cancel: "Cancel",
+			initialValue: Pet.DefaultFoodName ?? "Meal");
+
+		if (string.IsNullOrWhiteSpace(result)) return;
+
 		var adjustedTime = GetAdjustedLogTime(Constants.ScheduleTypeCombined);
 
 		var insulinLog = new InsulinLog
@@ -561,7 +593,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		var feedingLog = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
+			FoodName = result.Trim(),
 			Amount = Pet.DefaultFoodAmount ?? 0,
 			Unit = Pet.DefaultFoodUnit,
 			FoodType = Pet.DefaultFoodType,

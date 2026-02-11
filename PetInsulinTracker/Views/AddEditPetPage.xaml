@@ -53,6 +53,8 @@
                         <Label Text="Pet Name" Style="{StaticResource FormLabelStyle}" />
                         <Entry Text="{Binding Name}" Placeholder="e.g., Whiskers"
                                SemanticProperties.Description="Pet name" />
+                        <Label Text="Required to save" FontSize="12" TextColor="{DynamicResource Tertiary}"
+                               IsVisible="{Binding Name, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                     </VerticalStackLayout>
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Species" Style="{StaticResource FormLabelStyle}" />
@@ -66,29 +68,6 @@
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Date of Birth" Style="{StaticResource FormLabelStyle}" />
                         <DatePicker Date="{Binding DateOfBirth}" MaximumDate="{x:Static sys:DateTime.Today}" />
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-
-            <!-- Insulin Section -->
-            <Label Text="INSULIN INFORMATION" Style="{StaticResource OverlineStyle}" />
-
-            <Border Style="{StaticResource CardStyle}">
-                <VerticalStackLayout Spacing="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Insulin Type" Style="{StaticResource FormLabelStyle}" />
-                        <Picker ItemsSource="{Binding InsulinTypeOptions}"
-                                SelectedItem="{Binding InsulinType}" />
-                    </VerticalStackLayout>
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Concentration" Style="{StaticResource FormLabelStyle}" />
-                        <Picker ItemsSource="{Binding ConcentrationOptions}"
-                                SelectedItem="{Binding InsulinConcentration}" />
-                    </VerticalStackLayout>
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Current Dose (IU)" Style="{StaticResource FormLabelStyle}" />
-                        <Entry Text="{Binding CurrentDoseIU}" Keyboard="Numeric"
-                               Placeholder="e.g., 2.0" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
@@ -134,6 +113,61 @@
                             <Picker ItemsSource="{Binding FoodTypeOptions}" SelectedItem="{Binding DefaultFoodType}" WidthRequest="80" />
                         </VerticalStackLayout>
                     </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Insulin Section -->
+            <Label Text="INSULIN INFORMATION" Style="{StaticResource OverlineStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Pet takes insulin" Style="{StaticResource FormLabelStyle}"
+                               VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding TakesInsulin}"
+                                SemanticProperties.Description="Toggle insulin tracking" />
+                    </Grid>
+                    <VerticalStackLayout Spacing="12" IsVisible="{Binding TakesInsulin}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Insulin Type" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding InsulinTypeOptions}"
+                                    SelectedItem="{Binding InsulinType}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Concentration" Style="{StaticResource FormLabelStyle}" />
+                            <Picker ItemsSource="{Binding ConcentrationOptions}"
+                                    SelectedItem="{Binding InsulinConcentration}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Current Dose (IU)" Style="{StaticResource FormLabelStyle}" />
+                            <Entry Text="{Binding CurrentDoseIU}" Keyboard="Numeric"
+                                   Placeholder="e.g., 2.0" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Medication Section -->
+            <Label Text="MEDICATION" Style="{StaticResource OverlineStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Pet takes medication" Style="{StaticResource FormLabelStyle}"
+                               VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding TakesMedication}"
+                                SemanticProperties.Description="Toggle medication tracking" />
+                    </Grid>
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding TakesMedication}">
+                        <Label Text="Default Medication" Style="{StaticResource FormLabelStyle}" />
+                        <Entry Text="{Binding PetMedication}" 
+                               Placeholder="e.g., Gabapentin 100mg twice daily"
+                               SemanticProperties.Description="Pet medication information" />
+                        <Label Text="This will be used as the default when logging medications"
+                               FontSize="12"
+                               TextColor="{DynamicResource PageTextSecondary}"
+                               Margin="0,4,0,0" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

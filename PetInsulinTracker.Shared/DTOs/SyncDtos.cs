@@ -125,6 +125,7 @@ public class CreatePetRequest
 	public double? DefaultFoodAmount { get; set; }
 	public string DefaultFoodUnit { get; set; } = "cups";
 	public string DefaultFoodType { get; set; } = "Dry";
+	public string? PetMedication { get; set; }
 }
 
 public class CreatePetResponse

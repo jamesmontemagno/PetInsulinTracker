@@ -43,7 +43,8 @@ public class SyncService : ISyncService
 			DefaultFoodName = pet.DefaultFoodName,
 			DefaultFoodAmount = pet.DefaultFoodAmount,
 			DefaultFoodUnit = pet.DefaultFoodUnit,
-			DefaultFoodType = pet.DefaultFoodType
+			DefaultFoodType = pet.DefaultFoodType,
+			PetMedication = pet.PetMedication
 		};
 
 		var response = await _http.PostAsJsonAsync($"{Constants.ApiBaseUrl}/pets", request, AppJsonSerializerContext.Default.CreatePetRequest);
@@ -116,6 +117,7 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = data.Pet.DefaultFoodAmount,
 			DefaultFoodUnit = data.Pet.DefaultFoodUnit,
 			DefaultFoodType = data.Pet.DefaultFoodType,
+			PetMedication = data.Pet.PetMedication,
 			LastModified = data.Pet.LastModified,
 			IsSynced = true
 		};
@@ -265,10 +267,15 @@ public class SyncService : ISyncService
 		if (Connectivity.Current.NetworkAccess != NetworkAccess.Internet)
 			throw new InvalidOperationException("No internet connection available");
 
-		var bytes = CreateThumbnailJpeg(photoPath, 256, 80);
+		// Convert relative path to absolute if needed
+		var fullPath = Path.IsPathRooted(photoPath) 
+			? photoPath 
+			: Path.Combine(FileSystem.AppDataDirectory, photoPath);
+
+		var bytes = CreateThumbnailJpeg(fullPath, 256, 80);
 		if (bytes.Length == 0)
 		{
-			var ext = Path.GetExtension(photoPath);
+			var ext = Path.GetExtension(fullPath);
 			throw new InvalidOperationException(
 				$"Unable to create thumbnail from the selected photo (format: {ext}). Try choosing a JPEG or PNG image.");
 		}
@@ -332,6 +339,7 @@ public class SyncService : ISyncService
 			DefaultFoodAmount = p.DefaultFoodAmount,
 			DefaultFoodUnit = p.DefaultFoodUnit,
 			DefaultFoodType = p.DefaultFoodType,
+			PetMedication = p.PetMedication,
 			LastModified = p.LastModified,
 			IsDeleted = p.IsDeleted
 		}).ToList();
@@ -351,6 +359,7 @@ public class SyncService : ISyncService
 				DefaultFoodAmount = pet.DefaultFoodAmount,
 				DefaultFoodUnit = pet.DefaultFoodUnit,
 				DefaultFoodType = pet.DefaultFoodType,
+				PetMedication = pet.PetMedication,
 				LastModified = pet.LastModified,
 				IsDeleted = pet.IsDeleted
 			});
@@ -435,8 +444,7 @@ public class SyncService : ISyncService
 					DefaultFoodName = p.DefaultFoodName,
 					DefaultFoodAmount = p.DefaultFoodAmount,
 					DefaultFoodUnit = p.DefaultFoodUnit,
-					DefaultFoodType = p.DefaultFoodType,
-					LastModified = p.LastModified, IsSynced = true,
+					DefaultFoodType = p.DefaultFoodType,				PetMedication = p.PetMedication,					LastModified = p.LastModified, IsSynced = true,
 					IsDeleted = p.IsDeleted
 				});
 			}

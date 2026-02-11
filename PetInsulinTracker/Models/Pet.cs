@@ -35,18 +35,43 @@ public class Pet
 		{
 			var preferLocal = Preferences.Get("prefer_local_image", true);
 
-			if (preferLocal && !string.IsNullOrEmpty(PhotoPath) && File.Exists(PhotoPath))
-				return PhotoPath;
+			if (preferLocal && !string.IsNullOrEmpty(PhotoPath))
+			{
+				var fullPath = GetFullPhotoPath(PhotoPath);
+				if (fullPath is not null && File.Exists(fullPath))
+					return fullPath;
+			}
 
 			if (!string.IsNullOrEmpty(PhotoUrl))
 				return CacheBustedUrl(PhotoUrl);
 
 			// Fallback: use local path even if preference is off (no remote available)
-			if (!string.IsNullOrEmpty(PhotoPath) && File.Exists(PhotoPath))
-				return PhotoPath;
+			if (!string.IsNullOrEmpty(PhotoPath))
+			{
+				var fullPath = GetFullPhotoPath(PhotoPath);
+				if (fullPath is not null && File.Exists(fullPath))
+					return fullPath;
+			}
 
 			return null;
 		}
+	}
+
+	/// <summary>
+	/// Converts a stored photo path (relative or absolute) to a full absolute path.
+	/// Handles legacy absolute paths and new relative paths for cross-update compatibility.
+	/// </summary>
+	private static string? GetFullPhotoPath(string photoPath)
+	{
+		if (string.IsNullOrEmpty(photoPath))
+			return null;
+
+		// If it's already an absolute path and exists, use it (legacy support)
+		if (Path.IsPathRooted(photoPath))
+			return photoPath;
+
+		// Otherwise, treat as relative to AppDataDirectory
+		return Path.Combine(FileSystem.AppDataDirectory, photoPath);
 	}
 
 	/// <summary>
@@ -85,6 +110,9 @@ public class Pet
 
 	/// <summary>Wet, Dry, or Treat</summary>
 	public string DefaultFoodType { get; set; } = "Dry";
+
+	/// <summary>Default medication information, e.g., "Gabapentin 100mg twice daily"</summary>
+	public string? PetMedication { get; set; }
 
 	public DateTimeOffset LastModified { get; set; } = DateTimeOffset.UtcNow;
 

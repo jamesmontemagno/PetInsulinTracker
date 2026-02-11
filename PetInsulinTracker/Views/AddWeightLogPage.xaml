@@ -25,6 +25,8 @@
                                VerticalOptions="End" Margin="0,0,0,8"
                                TextColor="{DynamicResource PageTextSecondary}" />
                     </Grid>
+                    <Label Text="Required (must be greater than 0)" FontSize="12" TextColor="{DynamicResource Tertiary}"
+                           Margin="0,-8,0,0" />
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Date" Style="{StaticResource FormLabelStyle}" />

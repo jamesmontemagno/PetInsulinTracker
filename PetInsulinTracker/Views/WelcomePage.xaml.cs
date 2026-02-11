@@ -49,6 +49,7 @@ public partial class WelcomePage : ContentPage
 	{
 		Step1.IsVisible = step == 1;
 		Step2.IsVisible = step == 2;
+		Step2_5.IsVisible = step == 25; // 2.5 represented as 25
 		Step3.IsVisible = step == 3;
 		Step4.IsVisible = step == 4;
 		Step5.IsVisible = step == 5;
@@ -57,6 +58,7 @@ public partial class WelcomePage : ContentPage
 		Dot3.Color = step >= 3 ? GetPrimaryColor() : GetDividerColor();
 		Dot4.Color = step >= 4 ? GetPrimaryColor() : GetDividerColor();
 		Dot5.Color = step >= 5 ? GetPrimaryColor() : GetDividerColor();
+		Dot6.Color = step >= 6 ? GetPrimaryColor() : GetDividerColor();
 	}
 
 	private static Color GetPrimaryColor() =>
@@ -80,17 +82,27 @@ public partial class WelcomePage : ContentPage
 		GoToStep(2);
 	}
 
-	// Step 2: Owner → go to pet setup (Step 3)
+	// Step 2: Owner → go to offline mode screen (Step 2.5)
 	private void OnRoleOwner(object? sender, EventArgs e)
 	{
+		GoToStep(25); // 2.5 represented as 25
+	}
+
+	// Step 2.5: Offline mode choice → go to pet setup (Step 3)
+	private void OnStep2_5Next(object? sender, EventArgs e)
+	{
+		Preferences.Set(Constants.OfflineModeKey, OfflineModeSwitch.IsToggled);
 		GoToStep(3);
 	}
 
-	// Step 2: Offline only → set preference and go to pet setup (Step 3)
-	private void OnRoleOffline(object? sender, EventArgs e)
+	private void OnTrackInsulinToggled(object? sender, ToggledEventArgs e)
 	{
-		Preferences.Set(Constants.OfflineModeKey, true);
-		GoToStep(3);
+		InsulinInfoCard.IsVisible = e.Value;
+	}
+
+	private void OnTrackMedicationToggled(object? sender, ToggledEventArgs e)
+	{
+		MedicationInfoCard.IsVisible = e.Value;
 	}
 
 	// Step 2: Pet sitter → show redeem section, hide other buttons
@@ -267,6 +279,10 @@ public partial class WelcomePage : ContentPage
 			pet.DefaultFoodAmount = foodAmount;
 		pet.DefaultFoodUnit = FoodUnitPicker.SelectedItem as string ?? "cups";
 		pet.DefaultFoodType = FoodTypePicker.SelectedItem as string ?? "Dry";
+
+		// Save medication if tracking is enabled
+		if (TrackMedicationSwitch.IsToggled && !string.IsNullOrWhiteSpace(MedicationEntry.Text))
+			pet.PetMedication = MedicationEntry.Text?.Trim();
 
 		await db.SavePetAsync(pet);
 		_savedPetId = pet.Id;

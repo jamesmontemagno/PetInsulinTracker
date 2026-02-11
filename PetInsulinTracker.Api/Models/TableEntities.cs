@@ -27,6 +27,7 @@ public class PetEntity : ITableEntity
 	public double? DefaultFoodAmount { get; set; }
 	public string DefaultFoodUnit { get; set; } = "cups";
 	public string DefaultFoodType { get; set; } = "Dry";
+	public string? PetMedication { get; set; }
 	public DateTimeOffset LastModified { get; set; }
 	public bool IsDeleted { get; set; }
 }

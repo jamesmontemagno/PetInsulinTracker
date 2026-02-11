@@ -76,7 +76,8 @@
                                 </Label.Text>
                             </Label>
                             <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
-                                   Style="{StaticResource SubtleTextStyle}" />
+                                   Style="{StaticResource SubtleTextStyle}"
+                                   IsVisible="{Binding ShowInsulinType}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1" Text="Edit"
                                 Style="{StaticResource GhostButtonStyle}"
@@ -262,7 +263,7 @@
                 <Label Text="RECENT ACTIVITY" Style="{StaticResource OverlineStyle}" />
 
                 <!-- Last Insulin Card -->
-                <Border Style="{StaticResource CardStyle}">
+                <Border Style="{StaticResource CardStyle}" IsVisible="{Binding ShowInsulinCard}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToInsulinLogCommand}" />
                     </Border.GestureRecognizers>
@@ -300,7 +301,7 @@
                 </Border>
 
                 <!-- Last Medication Card -->
-                <Border Style="{StaticResource CardStyle}">
+                <Border Style="{StaticResource CardStyle}" IsVisible="{Binding ShowMedicationCard}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToMedicationLogCommand}" />
                     </Border.GestureRecognizers>

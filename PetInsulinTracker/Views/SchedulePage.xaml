@@ -21,6 +21,8 @@
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Label" Style="{StaticResource FormLabelStyle}" />
                                 <Entry Text="{Binding Label}" Placeholder="e.g., Morning Insulin" />
+                                <Label Text="Required to save" FontSize="12" TextColor="{DynamicResource Tertiary}"
+                                       IsVisible="{Binding Label, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Spacing="4">

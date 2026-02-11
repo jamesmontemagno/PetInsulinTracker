@@ -17,6 +17,8 @@
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Medication" Style="{StaticResource FormLabelStyle}" />
                         <Entry Text="{Binding MedicationName}" Placeholder="e.g., Pred 5mg" />
+                        <Label Text="Required to save" FontSize="12" TextColor="{DynamicResource Tertiary}"
+                               IsVisible="{Binding MedicationName, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">

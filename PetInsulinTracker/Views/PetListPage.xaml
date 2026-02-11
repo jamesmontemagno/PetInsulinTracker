@@ -82,7 +82,7 @@
                                 <Label Text="{Binding Pet.Species}"
                                        FontSize="15"
                                        Style="{StaticResource SubtleTextStyle}" />
-                                <HorizontalStackLayout Spacing="6">
+                                <HorizontalStackLayout Spacing="6" IsVisible="{Binding ShowWeight}">
                                     <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                             StrokeThickness="0"
                                             Padding="8,4"
@@ -101,10 +101,12 @@
                                 <VerticalStackLayout Spacing="2" Margin="0,4,0,0">
                                     <Label Text="{Binding LastInsulinText, StringFormat='💉 {0}'}"
                                            Style="{StaticResource SubtleTextStyle}"
-                                           FontSize="12" />
+                                           FontSize="12"
+                                           IsVisible="{Binding ShowLastInsulin}" />
                                     <Label Text="{Binding LastFeedingText, StringFormat='🍽️ {0}'}"
                                            Style="{StaticResource SubtleTextStyle}"
-                                           FontSize="12" />
+                                           FontSize="12"
+                                           IsVisible="{Binding ShowLastFeeding}" />
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
                             <!-- Chevron -->

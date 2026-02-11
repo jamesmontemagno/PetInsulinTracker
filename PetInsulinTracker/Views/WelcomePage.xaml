@@ -23,6 +23,8 @@
                          Color="{DynamicResource CurrentDivider}" />
                 <BoxView x:Name="Dot5" WidthRequest="8" HeightRequest="8" CornerRadius="4"
                          Color="{DynamicResource CurrentDivider}" />
+                <BoxView x:Name="Dot6" WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                         Color="{DynamicResource CurrentDivider}" />
             </HorizontalStackLayout>
 
             <!-- ===== STEP 1: Theme + Name ===== -->
@@ -30,14 +32,28 @@
 
                 <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="56" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-                <Label Text="Welcome to Insulog"
+                <Label Text="Welcome to Pawse"
                        FontSize="26" FontFamily="OpenSansSemibold"
                        TextColor="{DynamicResource PageText}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                <Label Text="Let's set things up. First, pick a color theme for your app."
+                <Label Text="Let's set things up. First, set your name pick a color theme for Pawse."
                        FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Label Text="What's your name?" FontSize="14"
+                       TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                       Margin="0,8,0,0" />
+
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
+                        <Entry x:Name="NameEntry" Placeholder="e.g., James"
+                               FontSize="18" HorizontalTextAlignment="Center"
+                               ReturnType="Next" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- Theme Carousel -->
                 <CarouselView x:Name="ThemeCarousel"
@@ -57,7 +73,7 @@
                                 <Grid RowDefinitions="44,*,Auto" Padding="0">
                                     <BoxView Grid.Row="0" Color="{Binding Shell}"
                                              CornerRadius="16,16,0,0" />
-                                    <Label Grid.Row="0" Text="Insulog" FontSize="13"
+                                    <Label Grid.Row="0" Text="Pawse" FontSize="13"
                                            FontFamily="OpenSansSemibold" TextColor="White"
                                            VerticalOptions="Center" Margin="14,0,0,0" />
                                     <VerticalStackLayout Grid.Row="1" Spacing="8" Padding="14,10">
@@ -94,19 +110,7 @@
                                SelectedIndicatorColor="{DynamicResource CurrentPrimary}"
                                IndicatorSize="8" />
 
-                <Label Text="What's your name?" FontSize="14"
-                       TextColor="{DynamicResource PageTextSecondary}"
-                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                       Margin="0,8,0,0" />
-
-                <Border Style="{StaticResource CardStyle}" Padding="16">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Your Name" Style="{StaticResource FormLabelStyle}" />
-                        <Entry x:Name="NameEntry" Placeholder="e.g., James"
-                               FontSize="18" HorizontalTextAlignment="Center"
-                               ReturnType="Next" />
-                    </VerticalStackLayout>
-                </Border>
+                
 
                 <Button Text="Next"
                         Style="{StaticResource PrimaryButtonStyle}"
@@ -119,7 +123,7 @@
 
                 <mi:MauiIcon Icon="{mi:Fluent People24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
 
-                <Label Text="How will you use Insulog?"
+                <Label Text="How will you use Pawse?"
                        FontSize="24" FontFamily="OpenSansSemibold"
                        TextColor="{DynamicResource PageText}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
@@ -138,11 +142,6 @@
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnRoleSitter" />
-
-                    <Button Text="Use Offline Only"
-                            Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Fill"
-                            Clicked="OnRoleOffline" />
                 </VerticalStackLayout>
 
                 <!-- Pet sitter redeem section (hidden until tapped) -->
@@ -177,6 +176,54 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
+            <!-- ===== STEP 2.5: Offline Mode ===== -->
+            <VerticalStackLayout x:Name="Step2_5" Spacing="20" IsVisible="False">
+
+                <mi:MauiIcon Icon="{mi:Fluent CloudOff24}" IconSize="48" IconColor="{DynamicResource CurrentPrimary}" HorizontalOptions="Center" />
+
+                <Label Text="Sync Settings"
+                       FontSize="24" FontFamily="OpenSansSemibold"
+                       TextColor="{DynamicResource PageText}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Label Text="Choose whether to sync your pet data to the cloud or keep everything local on this device."
+                       FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <Border Style="{StaticResource CardStyle}" Padding="20">
+                    <VerticalStackLayout Spacing="16">
+                        <HorizontalStackLayout Spacing="12">
+                            <Switch x:Name="OfflineModeSwitch" IsToggled="False" VerticalOptions="Center" />
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Fill">
+                                <Label Text="Offline Mode" FontFamily="OpenSansSemibold" FontSize="16" />
+                                <Label Text="Keep all data local only" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />
+
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Cloud Sync (Recommended)" FontFamily="OpenSansSemibold" FontSize="14" />
+                            <Label Text="• Access your pet's data from multiple devices" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="• Share pet care with family or pet sitters" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="• Automatic backups" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Offline Mode" FontFamily="OpenSansSemibold" FontSize="14" />
+                            <Label Text="• All data stays on this device only" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="• No cloud storage or sharing" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            <Label Text="• You can enable sync later in Settings" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Button Text="Continue"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnStep2_5Next" />
+            </VerticalStackLayout>
+
             <!-- ===== STEP 3: Add First Pet (Optional) ===== -->
             <VerticalStackLayout x:Name="Step3" Spacing="16" IsVisible="False">
 
@@ -190,6 +237,31 @@
                 <Label Text="Tell us about your furry friend. You can always add or edit pets later."
                        FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <!-- Care Type Toggles -->
+                <Border Style="{StaticResource CardStyle}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="What care will you track?" FontFamily="OpenSansSemibold" FontSize="15" />
+                        
+                        <HorizontalStackLayout Spacing="12">
+                            <Switch x:Name="TrackInsulinSwitch" IsToggled="True" VerticalOptions="Center" Toggled="OnTrackInsulinToggled" />
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Fill">
+                                <Label Text="Track Insulin" FontFamily="OpenSansSemibold" FontSize="14" />
+                                <Label Text="For diabetic pets requiring insulin" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />
+
+                        <HorizontalStackLayout Spacing="12">
+                            <Switch x:Name="TrackMedicationSwitch" IsToggled="False" VerticalOptions="Center" Toggled="OnTrackMedicationToggled" />
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Fill">
+                                <Label Text="Track Medications" FontFamily="OpenSansSemibold" FontSize="14" />
+                                <Label Text="For pets on regular medications" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
 
                 <Border Style="{StaticResource CardStyle}" Padding="16">
                     <VerticalStackLayout Spacing="12">
@@ -221,7 +293,7 @@
                 </Border>
 
                 <!-- Insulin Info -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="InsulinInfoCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="True">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Insulin (if applicable)" FontFamily="OpenSansSemibold" FontSize="15" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -257,6 +329,18 @@
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Dose (IU)" Style="{StaticResource FormLabelStyle}" />
                             <Entry x:Name="DoseEntry" Placeholder="e.g., 2.0" Keyboard="Numeric" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Medication Info -->
+                <Border x:Name="MedicationInfoCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Medication Details" FontFamily="OpenSansSemibold" FontSize="15" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Medication Information" Style="{StaticResource FormLabelStyle}" />
+                            <Entry x:Name="MedicationEntry" Placeholder="e.g., Gabapentin 100mg twice daily" />
+                            <Label Text="You can add multiple medications later" Style="{StaticResource SubtleTextStyle}" FontSize="11" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
