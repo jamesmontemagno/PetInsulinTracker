@@ -20,6 +20,7 @@ public static class Constants
 	public const string ScheduleTypeInsulin = "Insulin";
 	public const string ScheduleTypeFeeding = "Feeding";
 	public const string ScheduleTypeCombined = "Insulin & Feeding";
+	public const string ScheduleTypeMedication = "Medication";
 
 	// Buffer time in minutes around a schedule when logging should advance to next schedule
 	public const int ScheduleBufferMinutes = 30;

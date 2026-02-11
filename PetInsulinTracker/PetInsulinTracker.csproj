@@ -21,7 +21,7 @@
 		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
 		<!-- Display name -->
-		<ApplicationTitle>Insulog</ApplicationTitle>
+		<ApplicationTitle>Pawse</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.refractored.insulog</ApplicationId>

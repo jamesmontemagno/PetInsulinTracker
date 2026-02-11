@@ -9,6 +9,7 @@ public class SyncRequest
 	public List<InsulinLogDto> InsulinLogs { get; set; } = [];
 	public List<FeedingLogDto> FeedingLogs { get; set; } = [];
 	public List<WeightLogDto> WeightLogs { get; set; } = [];
+	public List<MedicationLogDto> MedicationLogs { get; set; } = [];
 	public List<VetInfoDto> VetInfos { get; set; } = [];
 	public List<ScheduleDto> Schedules { get; set; } = [];
 }
@@ -20,6 +21,7 @@ public class SyncResponse
 	public List<InsulinLogDto> InsulinLogs { get; set; } = [];
 	public List<FeedingLogDto> FeedingLogs { get; set; } = [];
 	public List<WeightLogDto> WeightLogs { get; set; } = [];
+	public List<MedicationLogDto> MedicationLogs { get; set; } = [];
 	public List<VetInfoDto> VetInfos { get; set; } = [];
 	public List<ScheduleDto> Schedules { get; set; } = [];
 }
@@ -65,6 +67,7 @@ public class RedeemShareCodeResponse
 	public List<InsulinLogDto> InsulinLogs { get; set; } = [];
 	public List<FeedingLogDto> FeedingLogs { get; set; } = [];
 	public List<WeightLogDto> WeightLogs { get; set; } = [];
+	public List<MedicationLogDto> MedicationLogs { get; set; } = [];
 	public VetInfoDto? VetInfo { get; set; }
 	public List<ScheduleDto> Schedules { get; set; } = [];
 }

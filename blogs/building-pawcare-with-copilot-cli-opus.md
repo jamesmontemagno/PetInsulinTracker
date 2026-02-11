@@ -1,6 +1,6 @@
-# Building Insulog: How I Built a Full .NET MAUI App with GitHub Copilot CLI and Claude Opus 4.6
+# Building Pawse: How I Built a Full .NET MAUI App with GitHub Copilot CLI and Claude Opus 4.6
 
-Hey friends! I'm super excited to share the story behind Insulog — a .NET MAUI app for managing diabetic pet care that I built almost entirely through conversational AI using the **GitHub Copilot CLI** powered by **Claude Opus 4.6**. This was one of the most fun and eye-opening development experiences I've had in a long time, and I want to walk you through the whole thing.
+Hey friends! I'm super excited to share the story behind Pawse — a .NET MAUI app for managing diabetic pet care that I built almost entirely through conversational AI using the **GitHub Copilot CLI** powered by **Claude Opus 4.6**. This was one of the most fun and eye-opening development experiences I've had in a long time, and I want to walk you through the whole thing.
 
 ## The Problem
 
@@ -99,7 +99,7 @@ I'm planning to flesh out the notification system, add more SkiaSharp visualizat
 
 If you haven't tried the GitHub Copilot CLI yet, I really encourage you to give it a shot. Especially with Opus 4.6 powering it — the code quality, the debugging capability, and the sheer breadth of knowledge (from MAUI XAML quirks to Azure Table Storage partition strategies to SVG icon design) is remarkable.
 
-The code is all up on GitHub if you want to check it out. And if you have a diabetic pet, maybe Insulog will actually be useful for you too. 🐾
+The code is all up on GitHub if you want to check it out. And if you have a diabetic pet, maybe Pawse will actually be useful for you too. 🐾
 
 Cheers,
 James

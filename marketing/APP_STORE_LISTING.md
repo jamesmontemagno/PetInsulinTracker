@@ -1,41 +1,42 @@
-# Insulog — App Store Marketing Assets
+# Pawse — App Store Marketing Assets
 
 ## App Name Options
 
 | Option | Name | Subtitle |
 |--------|------|----------|
-| **1 (Recommended)** | **Insulog** | Pet Insulin & Wellness Tracker |
-| 2 | Insulog | Diabetic Pet Care Companion |
-| 3 | Insulog | Insulin, Feeding & Weight for Pets |
-| 4 | PetDose | Diabetic Pet Care Made Simple |
-| 5 | InsuPaw | Track Insulin for Cats & Dogs |
+| **1 (Recommended)** | **Pawse** | Pet Health & Wellness Tracker |
+| 2 | Pawse | Pet Care Companion |
+| 3 | Pawse | Insulin, Medication, Feeding & More |
 
 ---
 
 ## App Store Description
 
 ### Short Description (80 chars)
-Track your diabetic pet's insulin, feeding, weight & vet info — all in one app.
+Track your pet's insulin, medication, feeding, weight & vet info — all in one app.
 
 ### Full Description
 
-**Insulog** is the all-in-one companion app for pet owners managing feline or canine diabetes. Whether your cat or dog needs insulin twice a day, Insulog helps you stay on top of every dose, every meal, and every weigh-in — so your furry family member stays healthy and happy.
+**Pawse** is the all-in-one companion app for pet owners managing their pet's health and wellness. Whether your furry friend needs insulin, daily medication, or just consistent feeding and weight tracking, Pawse helps you stay on top of every dose, every meal, and every weigh-in.
 
 **🐾 Everything You Need in One Place**
 
-Managing a diabetic pet can feel overwhelming — but it doesn't have to be. Insulog gives you a beautiful, intuitive dashboard for each pet, with at-a-glance status on their last insulin dose, most recent feeding, current weight trend, and a countdown timer to their next injection.
+Managing a pet's health can feel overwhelming — but it doesn't have to be. Pawse gives you a beautiful, intuitive dashboard for each pet, with at-a-glance status on their last insulin dose, most recent feeding, current weight trend, and a countdown timer to their next scheduled care.
 
 **💉 Insulin Tracking**
-Log every shot with dose, injection site, time, and notes. Use Quick Log to record a dose at your prescribed amount with a single tap. Insulog supports all common veterinary insulin types including Vetsulin, ProZinc, NPH (Humulin N), and Glargine (Lantus), in both U-40 and U-100 concentrations.
+Log every shot with dose, injection site, time, and notes. Use Quick Log to record a dose at your prescribed amount with a single tap. Pawse supports all common veterinary insulin types including Vetsulin, ProZinc, NPH (Humulin N), and Glargine (Lantus), in both U-40 and U-100 concentrations.
+
+**💊 Medication Schedules**
+Track any medication your pet takes — add free-form labels like "Pred 5mg" or "Gabapentin 50mg", set specific times, and get daily reminders. Perfect for pets on multiple medications alongside insulin.
 
 **🍽️ Feeding Log**
-Track what your pet eats, how much, and when. Log wet food, dry food, and treats with customizable amounts and units. Consistent feeding is critical for diabetic pets — Insulog helps you stay on schedule.
+Track what your pet eats, how much, and when. Log wet food, dry food, and treats with customizable amounts and units. Consistent feeding is critical for your pet's health — Pawse helps you stay on schedule.
 
 **⚖️ Weight Monitoring**
-Regular weigh-ins help you and your vet assess treatment effectiveness. Insulog charts your pet's weight trend over time with a beautiful interactive graph, making it easy to spot changes.
+Regular weigh-ins help you and your vet assess treatment effectiveness. Pawse charts your pet's weight trend over time with a beautiful interactive graph, making it easy to spot changes.
 
 **⏰ Smart Reminders**
-Set up recurring schedules for insulin injections, meals, and vet visits. Get push notifications so you never miss a dose — even during a busy day.
+Set up recurring schedules for insulin injections, meals, medications, and more. Get push notifications so you never miss a dose — even during a busy day.
 
 **🏥 Vet Info at Your Fingertips**
 Store your veterinarian's contact details, emergency number, and clinic address right in the app. One-tap calling for both regular and emergency lines. Plus, built-in pro tips on injection technique, hypoglycemia signs, feeding timing, and insulin storage.
@@ -47,12 +48,12 @@ Generate a simple 6-character share code and hand it to a family member, partner
 Choose from 5 gorgeous color themes (Warm, Ocean, Forest, Berry, Midnight), with full light and dark mode support. Add your pet's photo for a personal touch.
 
 **📱 Multi-Pet Support**
-Managing diabetes for more than one pet? No problem — Insulog handles multiple pets, each with their own dashboard, logs, schedules, and vet info.
+Managing health for more than one pet? No problem — Pawse handles multiple pets, each with their own dashboard, logs, schedules, and vet info.
 
 ---
 
 ### What's New (v1.0)
-🎉 Initial release of Insulog! Track insulin, feeding, and weight for your diabetic cats and dogs. Includes smart reminders, vet info, share codes, 5 color themes, and more.
+🎉 Initial release of Pawse! Track insulin, medication, feeding, and weight for your pets. Includes smart reminders, vet info, share codes, 5 color themes, and more.
 
 ---
 
@@ -119,7 +120,7 @@ Place screenshots in the `screenshots/` subfolder. Recommended set:
 
 **Dimensions**: 1024 × 500 px
 
-**Concept**: Berry gradient background (#AD1457 → #7B1FA2) with the Insulog paw+cross icon centered, app name "Insulog" in white semibold text below, tagline "Diabetic Pet Care, Simplified" underneath in soft pink (#FCE4EC).
+**Concept**: Berry gradient background (#AD1457 → #7B1FA2) with the Pawse paw+cross icon centered, app name "Pawse" in white semibold text below, tagline "Pet Care, Simplified" underneath in soft pink (#FCE4EC).
 
 ---
 
@@ -148,4 +149,4 @@ Place screenshots in the `screenshots/` subfolder. Recommended set:
 ---
 
 ## Promotional Text (170 chars)
-The smarter way to manage your diabetic pet's insulin, feeding, and health. Beautiful, simple, and built for the whole family. 🐾
+The smarter way to manage your pet's insulin, medication, feeding, and wellness. Beautiful, simple, and built for the whole family. 🐾

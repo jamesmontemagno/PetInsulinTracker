@@ -64,10 +64,10 @@ public class SyncFunctions
 		var petId = syncRequest.PetId;
 		var deviceUserId = syncRequest.DeviceUserId;
 		_logger.LogInformation(
-			"Sync request for pet {PetId} from {DeviceUserId} — LastSync={LastSync}, Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
+			"Sync request for pet {PetId} from {DeviceUserId} — LastSync={LastSync}, Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, MedicationLogs={MedicationCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
 			petId, deviceUserId, syncRequest.LastSyncTimestamp,
 			syncRequest.Pets.Count, syncRequest.InsulinLogs.Count, syncRequest.FeedingLogs.Count,
-			syncRequest.WeightLogs.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
+			syncRequest.WeightLogs.Count, syncRequest.MedicationLogs.Count, syncRequest.VetInfos.Count, syncRequest.Schedules.Count);
 
 		try
 		{
@@ -221,9 +221,9 @@ public class SyncFunctions
 			}
 		}
 
-		// All access levels can upload insulin and feeding logs
-		_logger.LogDebug("Upserting {InsulinCount} insulin logs and {FeedingCount} feeding logs",
-			syncRequest.InsulinLogs.Count, syncRequest.FeedingLogs.Count);
+		// All access levels can upload insulin, feeding, and medication logs
+		_logger.LogDebug("Upserting {InsulinCount} insulin logs, {FeedingCount} feeding logs, and {MedicationCount} medication logs",
+			syncRequest.InsulinLogs.Count, syncRequest.FeedingLogs.Count, syncRequest.MedicationLogs.Count);
 		foreach (var log in syncRequest.InsulinLogs)
 		{
 			await _storage.UpsertEntityAsync("InsulinLogs", new InsulinLogEntity
@@ -248,6 +248,17 @@ public class SyncFunctions
 			});
 		}
 
+		foreach (var log in syncRequest.MedicationLogs)
+		{
+			await _storage.UpsertEntityAsync("MedicationLogs", new MedicationLogEntity
+			{
+				PartitionKey = petId, RowKey = log.Id, PetId = log.PetId,
+				MedicationName = log.MedicationName, AdministeredAt = EnsureUtc(log.AdministeredAt),
+				Notes = log.Notes, LoggedBy = log.LoggedBy, LoggedById = log.LoggedById,
+				LastModified = ClampLastModified(log.LastModified), IsDeleted = log.IsDeleted
+			});
+		}
+
 		// Download server changes since last sync
 		_logger.LogInformation("Upload complete for pet {PetId}, downloading server changes since {Since}", petId, syncRequest.LastSyncTimestamp);
 		var since = syncRequest.LastSyncTimestamp < AzureTableMinDate ? AzureTableMinDate : syncRequest.LastSyncTimestamp;
@@ -256,12 +267,14 @@ public class SyncFunctions
 		var serverPets = await _storage.GetPetsModifiedSinceAsync(petId, since);
 		var serverInsulinLogs = await _storage.GetEntitiesModifiedSinceAsync<InsulinLogEntity>("InsulinLogs", petId, since);
 		var serverFeedingLogs = await _storage.GetEntitiesModifiedSinceAsync<FeedingLogEntity>("FeedingLogs", petId, since);
+		var serverMedicationLogs = await _storage.GetEntitiesModifiedSinceAsync<MedicationLogEntity>("MedicationLogs", petId, since);
 
 		// Guest only sees their own logs
 		if (accessLevel == "guest")
 		{
 			serverInsulinLogs = serverInsulinLogs.Where(l => l.LoggedById == deviceUserId).ToList();
 			serverFeedingLogs = serverFeedingLogs.Where(l => l.LoggedById == deviceUserId).ToList();
+			serverMedicationLogs = serverMedicationLogs.Where(l => l.LoggedById == deviceUserId).ToList();
 		}
 
 		// Weight logs: owner and full only
@@ -309,6 +322,13 @@ public class SyncFunctions
 				LoggedById = l.LoggedById, LastModified = l.LastModified,
 				IsDeleted = l.IsDeleted
 			}).ToList(),
+			MedicationLogs = serverMedicationLogs.Select(l => new MedicationLogDto
+			{
+				Id = l.RowKey, PetId = l.PetId, MedicationName = l.MedicationName,
+				AdministeredAt = l.AdministeredAt, Notes = l.Notes,
+				LoggedBy = l.LoggedBy, LoggedById = l.LoggedById,
+				LastModified = l.LastModified, IsDeleted = l.IsDeleted
+			}).ToList(),
 			WeightLogs = serverWeightLogs.Select(l => new WeightLogDto
 			{
 				Id = l.RowKey, PetId = l.PetId, Weight = l.Weight,
@@ -335,9 +355,9 @@ public class SyncFunctions
 		};
 
 		_logger.LogInformation(
-			"Sync complete for pet {PetId} — returning Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, WeightLogs={WeightCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
+			"Sync complete for pet {PetId} — returning Pets={PetCount}, InsulinLogs={InsulinCount}, FeedingLogs={FeedingCount}, MedicationLogs={MedicationCount}, WeightLogs={WeightCount}, VetInfos={VetCount}, Schedules={ScheduleCount}",
 			petId, syncResponse.Pets.Count, syncResponse.InsulinLogs.Count,
-			syncResponse.FeedingLogs.Count, syncResponse.WeightLogs.Count,
+			syncResponse.FeedingLogs.Count, syncResponse.MedicationLogs.Count, syncResponse.WeightLogs.Count,
 			syncResponse.VetInfos.Count, syncResponse.Schedules.Count);
 
 		var response = req.CreateResponse(HttpStatusCode.OK);

@@ -24,6 +24,13 @@ public interface IDatabaseService
 	Task<int> SaveFeedingLogAsync(FeedingLog log);
 	Task<int> DeleteFeedingLogAsync(FeedingLog log);
 
+	// Medication Logs
+	Task<List<MedicationLog>> GetMedicationLogsAsync(string petId);
+	Task<MedicationLog?> GetMedicationLogAsync(string id);
+	Task<MedicationLog?> GetLatestMedicationLogAsync(string petId);
+	Task<int> SaveMedicationLogAsync(MedicationLog log);
+	Task<int> DeleteMedicationLogAsync(MedicationLog log);
+
 	// Weight Logs
 	Task<List<WeightLog>> GetWeightLogsAsync(string petId);
 	Task<WeightLog?> GetWeightLogAsync(string id);

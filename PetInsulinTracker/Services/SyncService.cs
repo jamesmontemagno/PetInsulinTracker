@@ -151,6 +151,16 @@ public class SyncService : ISyncService
 			});
 		}
 
+		foreach (var l in data.MedicationLogs)
+		{
+			await _db.SaveMedicationLogAsync(new MedicationLog
+			{
+				Id = l.Id, PetId = l.PetId, MedicationName = l.MedicationName,
+				AdministeredAt = l.AdministeredAt, Notes = l.Notes,
+				LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified, IsSynced = true
+			});
+		}
+
 		if (data.VetInfo is not null)
 		{
 			await _db.SaveVetInfoAsync(new VetInfo
@@ -304,6 +314,7 @@ public class SyncService : ISyncService
 		var unsyncedInsulin = await _db.GetUnsyncedAsync<InsulinLog>(pet.Id);
 		var unsyncedFeeding = await _db.GetUnsyncedAsync<FeedingLog>(pet.Id);
 		var unsyncedWeight = await _db.GetUnsyncedAsync<WeightLog>(pet.Id);
+		var unsyncedMedication = await _db.GetUnsyncedAsync<MedicationLog>(pet.Id);
 		var unsyncedVetInfo = await _db.GetUnsyncedAsync<VetInfo>(pet.Id);
 		var unsyncedSchedules = await _db.GetUnsyncedAsync<Schedule>(pet.Id);
 
@@ -369,6 +380,12 @@ public class SyncService : ISyncService
 			{
 				Id = l.Id, PetId = l.PetId, Weight = l.Weight, Unit = l.Unit,
 				RecordedAt = l.RecordedAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified,
+				IsDeleted = l.IsDeleted
+			}).ToList(),
+			MedicationLogs = unsyncedMedication.Select(l => new MedicationLogDto
+			{
+				Id = l.Id, PetId = l.PetId, MedicationName = l.MedicationName,
+				AdministeredAt = l.AdministeredAt, Notes = l.Notes, LoggedBy = l.LoggedBy, LoggedById = l.LoggedById, LastModified = l.LastModified,
 				IsDeleted = l.IsDeleted
 			}).ToList(),
 			VetInfos = unsyncedVetInfo.Select(v => new VetInfoDto
@@ -473,6 +490,22 @@ public class SyncService : ISyncService
 			}
 		}
 
+		foreach (var l in syncResponse.MedicationLogs)
+		{
+			var local = await _db.GetMedicationLogAsync(l.Id);
+			if (local is null || l.LastModified > local.LastModified)
+			{
+				await _db.SaveSyncedAsync(new MedicationLog
+				{
+					Id = l.Id, PetId = l.PetId, MedicationName = l.MedicationName,
+					AdministeredAt = l.AdministeredAt, Notes = l.Notes,
+					LoggedBy = l.LoggedBy, LoggedById = l.LoggedById,
+					LastModified = l.LastModified, IsSynced = true,
+					IsDeleted = l.IsDeleted
+				});
+			}
+		}
+
 		foreach (var v in syncResponse.VetInfos)
 		{
 			var local = await _db.GetVetInfoByIdAsync(v.Id);
@@ -512,6 +545,7 @@ public class SyncService : ISyncService
 		foreach (var l in unsyncedInsulin) await _db.MarkSyncedAsync<InsulinLog>(l.Id);
 		foreach (var l in unsyncedFeeding) await _db.MarkSyncedAsync<FeedingLog>(l.Id);
 		foreach (var l in unsyncedWeight) await _db.MarkSyncedAsync<WeightLog>(l.Id);
+		foreach (var l in unsyncedMedication) await _db.MarkSyncedAsync<MedicationLog>(l.Id);
 		foreach (var v in unsyncedVetInfo) await _db.MarkSyncedAsync<VetInfo>(v.Id);
 		foreach (var s in unsyncedSchedules) await _db.MarkSyncedAsync<Schedule>(s.Id);
 

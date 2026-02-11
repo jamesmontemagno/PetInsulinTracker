@@ -87,6 +87,23 @@ public class WeightLogEntity : ITableEntity
 	public bool IsDeleted { get; set; }
 }
 
+public class MedicationLogEntity : ITableEntity
+{
+	public string PartitionKey { get; set; } = string.Empty;
+	public string RowKey { get; set; } = string.Empty;
+	public DateTimeOffset? Timestamp { get; set; }
+	public ETag ETag { get; set; }
+
+	public string PetId { get; set; } = string.Empty;
+	public string MedicationName { get; set; } = string.Empty;
+	public DateTime AdministeredAt { get; set; }
+	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
+	public string? LoggedById { get; set; }
+	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
+}
+
 public class VetInfoEntity : ITableEntity
 {
 	public string PartitionKey { get; set; } = string.Empty;

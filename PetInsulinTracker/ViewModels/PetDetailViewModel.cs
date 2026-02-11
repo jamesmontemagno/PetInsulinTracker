@@ -18,6 +18,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private Task? _timerTask;
 	private InsulinLog? _cachedLastInsulinLog;
 	private FeedingLog? _cachedLastFeedingLog;
+	private MedicationLog? _cachedLastMedicationLog;
 
 	public PetDetailViewModel(IDatabaseService db, ISyncService syncService, INotificationService notifications)
 	{
@@ -60,6 +61,9 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private string lastFeedingText = "No feeding logged yet";
 
 	[ObservableProperty]
+	private string lastMedicationText = "No medication logged yet";
+
+	[ObservableProperty]
 	private double doseProgress;
 
 	[ObservableProperty]
@@ -69,13 +73,37 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private string doseCountdownSubText = "";
 
 	[ObservableProperty]
+	private string doseRingSubText = "";
+
+	[ObservableProperty]
 	private string feedingCountdownText = "";
 
 	[ObservableProperty]
 	private string feedingCountdownSubText = "";
 
 	[ObservableProperty]
+	private string feedingRingSubText = "";
+
+	[ObservableProperty]
 	private double feedingProgress;
+
+	[ObservableProperty]
+	private string medicationCountdownText = "";
+
+	[ObservableProperty]
+	private string medicationCountdownSubText = "";
+
+	[ObservableProperty]
+	private string medicationRingSubText = "";
+
+	[ObservableProperty]
+	private double medicationProgress;
+
+	[ObservableProperty]
+	private bool isMedicationOverdue;
+
+	[ObservableProperty]
+	private Color medicationRingColor = Color.FromArgb("#5B9A6F");
 
 	[ObservableProperty]
 	private string doseInfoText = "";
@@ -87,16 +115,10 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private bool hasCombinedSchedule;
 
 	[ObservableProperty]
-	private bool isDoseOverdue;
+	private bool hasInsulinSchedule;
 
 	[ObservableProperty]
-	private bool isFeedingOverdue;
-
-	[ObservableProperty]
-	private Color doseRingColor = Colors.Transparent;
-
-	[ObservableProperty]
-	private Color feedingRingColor = Color.FromArgb("#4CAF50");
+	private bool hasMedicationSchedule;
 
 	[ObservableProperty]
 	private bool isGuest;
@@ -110,6 +132,8 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	[ObservableProperty]
 	private ObservableCollection<Schedule> activeSchedules = [];
 
+
+
 	[ObservableProperty]
 	private bool isSyncing;
 
@@ -118,6 +142,18 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 	[ObservableProperty]
 	private bool showSeparateFeedingCountdown = true;
+
+	[ObservableProperty]
+	private bool isDoseOverdue;
+
+	[ObservableProperty]
+	private bool isFeedingOverdue;
+
+	[ObservableProperty]
+	private Color doseRingColor = Color.FromArgb("#5B9A6F");
+
+	[ObservableProperty]
+	private Color feedingRingColor = Color.FromArgb("#5B9A6F");
 
 	private List<Schedule> _schedules = [];
 
@@ -145,17 +181,6 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		IsOwnerOrFull = Pet.AccessLevel != "guest";
 		IsOwner = Pet.AccessLevel == "owner";
 
-		// Load last sync time for this pet
-		var lastSyncStr = Preferences.Get($"lastSync_{id}", string.Empty);
-		if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
-		{
-			SyncStatus = $"Last synced: {lastSyncTime:g}";
-		}
-		else
-		{
-			SyncStatus = "Not synced";
-		}
-
 		DoseInfoText = Pet.CurrentDoseIU.HasValue
 			? $"Dose: {Pet.CurrentDoseIU.Value} IU ({Pet.InsulinConcentration ?? "U-40"})"
 			: "No dose set";
@@ -182,22 +207,33 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			? $"{lastFeeding.FoodName} ({lastFeeding.Amount} {lastFeeding.Unit}) — {lastFeeding.FedAt:g}"
 			: "No feeding logged yet";
 
+		var lastMedication = await _db.GetLatestMedicationLogAsync(id);
+		LastMedicationText = lastMedication is not null
+			? $"{lastMedication.MedicationName} — {lastMedication.AdministeredAt:g}"
+			: "No medication logged yet";
+
 		_schedules = await _db.GetSchedulesAsync(id);
 		ActiveSchedules = new ObservableCollection<Schedule>(_schedules);
 		HasCombinedSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
+		HasInsulinSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeInsulin || s.ScheduleType == Constants.ScheduleTypeCombined);
+		HasMedicationSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeMedication);
 
 		// Cache logs for timer updates
 		_cachedLastInsulinLog = insulinLog;
 		_cachedLastFeedingLog = lastFeeding;
+		_cachedLastMedicationLog = lastMedication;
 
 		// Dose countdown calculation
 		UpdateDoseCountdown(insulinLog);
 
 		// Feeding countdown calculation
 		UpdateFeedingCountdown(lastFeeding);
+
+		// Medication countdown calculation
+		UpdateMedicationCountdown(lastMedication);
 	}
 
-	private static DateTime? GetNextScheduledTimeAfter(List<Schedule> schedules, string scheduleType, DateTime referenceTime, out bool hasCombinedSchedule)
+	private static DateTime? GetNextScheduledTime(List<Schedule> schedules, string scheduleType, out bool hasCombinedSchedule)
 	{
 		var matching = schedules
 			.Where(s => s.ScheduleType == scheduleType || s.ScheduleType == Constants.ScheduleTypeCombined)
@@ -209,13 +245,14 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		
 		if (matching.Count == 0) return null;
 
-		var today = referenceTime.Date;
+		var now = DateTime.Now;
+		var today = now.Date;
 
 		// Find the next upcoming time today
 		foreach (var s in matching)
 		{
 			var candidate = today + s.TimeOfDay;
-			if (candidate > referenceTime)
+			if (candidate > now)
 				return candidate;
 		}
 
@@ -225,36 +262,26 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 	private void UpdateDoseCountdown(InsulinLog? lastDose)
 	{
-		var referenceTime = DateTime.Now;
-		var scheduledNext = GetNextScheduledTimeAfter(_schedules, "Insulin", referenceTime, out bool hasCombinedScheduleForInsulin);
-
-		if (scheduledNext is not null && lastDose is not null)
-		{
-			var minutesFromLast = Math.Abs((scheduledNext.Value - lastDose.AdministeredAt).TotalMinutes);
-			if (minutesFromLast <= Constants.ScheduleBufferMinutes)
-			{
-				referenceTime = scheduledNext.Value.AddMinutes(1);
-				scheduledNext = GetNextScheduledTimeAfter(_schedules, "Insulin", referenceTime, out hasCombinedScheduleForInsulin);
-			}
-		}
+		var scheduledNext = GetNextScheduledTime(_schedules, "Insulin", out bool hasCombinedScheduleForInsulin);
 
 		if (scheduledNext is not null)
 		{
 			var remaining = scheduledNext.Value - DateTime.Now;
+			var doseEmoji = hasCombinedScheduleForInsulin ? "next dose + feed" : "next dose";
+
 			if (remaining.TotalMinutes <= 0)
 			{
-				IsDoseOverdue = true;
-				DoseRingColor = Color.FromArgb("#D32F2F");
 				DoseProgress = 1.0;
-				DoseCountdownText = "OVERDUE";
-				DoseCountdownSubText = "Dose is late";
+				DoseCountdownText = "NOW";
+				DoseCountdownSubText = "Dose due";
+				DoseRingSubText = hasCombinedScheduleForInsulin ? "dose + feed due" : "dose due";
+				IsDoseOverdue = true;
 			}
 			else
 			{
 				IsDoseOverdue = false;
-				DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
-					? c 
-					: Color.FromArgb("#FF6B9D");
+				DoseRingSubText = doseEmoji;
+
 				if (lastDose is not null)
 				{
 					var total = scheduledNext.Value - lastDose.AdministeredAt;
@@ -285,18 +312,16 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 			if (remaining.TotalMinutes <= 0)
 			{
-				IsDoseOverdue = true;
-				DoseRingColor = Color.FromArgb("#D32F2F");
 				DoseProgress = 1.0;
-				DoseCountdownText = "OVERDUE";
-				DoseCountdownSubText = "Dose is late";
+				DoseCountdownText = "NOW";
+				DoseCountdownSubText = "Dose due";
+				DoseRingSubText = "dose due";
+				IsDoseOverdue = true;
 			}
 			else
 			{
 				IsDoseOverdue = false;
-				DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
-					? c 
-					: Color.FromArgb("#FF6B9D");
+				DoseRingSubText = "next dose";
 				DoseProgress = Math.Clamp(elapsed.TotalHours / intervalHours, 0, 1);
 				DoseCountdownText = remaining.TotalHours >= 1
 					? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
@@ -308,40 +333,33 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		else
 		{
 			IsDoseOverdue = false;
-			DoseRingColor = Application.Current?.Resources.TryGetValue("CurrentPrimary", out var primary) == true && primary is Color c 
-				? c 
-				: Color.FromArgb("#FF6B9D");
 			DoseProgress = 0;
 			DoseCountdownText = "--:--";
 			DoseCountdownSubText = "No schedule set";
+			DoseRingSubText = "insulin";
 		}
+
+		// Update ring color based on overdue state
+		DoseRingColor = IsDoseOverdue
+			? Color.FromArgb("#D32F2F")
+			: Color.FromArgb("#5B9A6F");
 	}
 
 	private void UpdateFeedingCountdown(FeedingLog? lastFeeding)
 	{
-		var referenceTime = DateTime.Now;
-		var scheduledNext = GetNextScheduledTimeAfter(_schedules, "Feeding", referenceTime, out bool hasCombinedScheduleForFeeding);
-
-		if (scheduledNext is not null && lastFeeding is not null)
-		{
-			var minutesFromLast = Math.Abs((scheduledNext.Value - lastFeeding.FedAt).TotalMinutes);
-			if (minutesFromLast <= Constants.ScheduleBufferMinutes)
-			{
-				referenceTime = scheduledNext.Value.AddMinutes(1);
-				scheduledNext = GetNextScheduledTimeAfter(_schedules, "Feeding", referenceTime, out hasCombinedScheduleForFeeding);
-			}
-		}
+		var scheduledNext = GetNextScheduledTime(_schedules, "Feeding", out bool hasCombinedScheduleForFeeding);
 		
 		// If there's a combined schedule that handles feeding, don't show separate feeding countdown
 		ShowSeparateFeedingCountdown = !hasCombinedScheduleForFeeding;
 
 		if (scheduledNext is null)
 		{
-			IsFeedingOverdue = false;
-			FeedingRingColor = Color.FromArgb("#4CAF50");
-			FeedingProgress = 0;
-			FeedingCountdownText = "--:--";
-			FeedingCountdownSubText = "No schedule set";
+		IsFeedingOverdue = false;
+		FeedingProgress = 0;
+		FeedingCountdownText = "--:--";
+		FeedingCountdownSubText = "No schedule set";
+		FeedingRingSubText = "feeding";
+		FeedingRingColor = Color.FromArgb("#5B9A6F");
 			return;
 		}
 
@@ -349,16 +367,17 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 
 		if (remaining.TotalMinutes <= 0)
 		{
-			IsFeedingOverdue = true;
-			FeedingRingColor = Color.FromArgb("#D32F2F");
 			FeedingProgress = 1.0;
-			FeedingCountdownText = "OVERDUE";
-			FeedingCountdownSubText = "Feeding is late";
+			FeedingCountdownText = "NOW";
+			FeedingCountdownSubText = "Feeding due";
+			FeedingRingSubText = "feeding due";
+			IsFeedingOverdue = true;
 		}
 		else
 		{
 			IsFeedingOverdue = false;
-			FeedingRingColor = Color.FromArgb("#4CAF50");
+			FeedingRingSubText = "next feeding";
+
 			if (lastFeeding is not null)
 			{
 				var total = scheduledNext.Value - lastFeeding.FedAt;
@@ -377,6 +396,109 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			var scheduleTimeText = scheduledNext.Value.ToString("t");
 			FeedingCountdownSubText = $"Next feeding at {scheduleTimeText}";
 		}
+
+		// Update ring color based on overdue state
+		FeedingRingColor = IsFeedingOverdue
+			? Color.FromArgb("#D32F2F")
+			: Color.FromArgb("#5B9A6F");
+	}
+
+	private void UpdateMedicationCountdown(MedicationLog? lastMed)
+	{
+		// Find next medication schedule (medication-only, not combined)
+		var medSchedules = _schedules
+			.Where(s => s.ScheduleType == Constants.ScheduleTypeMedication)
+			.OrderBy(s => s.TimeOfDay)
+			.ToList();
+
+		if (medSchedules.Count == 0)
+		{
+			IsMedicationOverdue = false;
+			MedicationProgress = 0;
+			MedicationCountdownText = "--:--";
+			MedicationCountdownSubText = "No schedule set";
+			MedicationRingSubText = "medication";
+			MedicationRingColor = Color.FromArgb("#5B9A6F");
+			return;
+		}
+
+		var now = DateTime.Now;
+		var today = now.Date;
+
+		// Find next upcoming medication time
+		DateTime? scheduledNext = null;
+		foreach (var s in medSchedules)
+		{
+			var candidate = today + s.TimeOfDay;
+			if (candidate > now)
+			{
+				scheduledNext = candidate;
+				break;
+			}
+		}
+		scheduledNext ??= today.AddDays(1) + medSchedules[0].TimeOfDay;
+
+		var remaining = scheduledNext.Value - now;
+
+		if (remaining.TotalMinutes <= 0)
+		{
+			MedicationProgress = 1.0;
+			MedicationCountdownText = "NOW";
+			MedicationCountdownSubText = "Medication due";
+			MedicationRingSubText = "med due";
+			IsMedicationOverdue = true;
+		}
+		else
+		{
+			IsMedicationOverdue = false;
+			MedicationRingSubText = "next med";
+
+			if (lastMed is not null)
+			{
+				var total = scheduledNext.Value - lastMed.AdministeredAt;
+				MedicationProgress = total.TotalMinutes > 0
+					? Math.Clamp(1.0 - remaining.TotalMinutes / total.TotalMinutes, 0, 1)
+					: 0;
+			}
+			else
+			{
+				MedicationProgress = 0;
+			}
+
+			MedicationCountdownText = remaining.TotalHours >= 1
+				? $"{(int)remaining.TotalHours}h {remaining.Minutes}m"
+				: $"{remaining.Minutes}m";
+			var scheduleTimeText = scheduledNext.Value.ToString("t");
+			MedicationCountdownSubText = $"Next medication at {scheduleTimeText}";
+		}
+
+		MedicationRingColor = IsMedicationOverdue
+			? Color.FromArgb("#D32F2F")
+			: Color.FromArgb("#7B1FA2");
+	}
+
+	/// <summary>
+	/// Checks if the current time is within buffer minutes of the next scheduled time.
+	/// If within buffer, returns a time that will cause the countdown to show the next occurrence.
+	/// </summary>
+	private DateTime GetAdjustedLogTime(string scheduleType)
+	{
+		var now = DateTime.Now;
+		var scheduledNext = GetNextScheduledTime(_schedules, scheduleType, out _);
+		
+		if (scheduledNext is null)
+			return now;
+		
+		var timeDiff = Math.Abs((scheduledNext.Value - now).TotalMinutes);
+		
+		// If we're within the buffer window of the schedule, adjust the logged time
+		// to be just after the scheduled time so it advances to the next schedule
+		if (timeDiff <= Constants.ScheduleBufferMinutes)
+		{
+			return scheduledNext.Value.AddMinutes(1);
+		}
+		
+		return now;
 	}
 
 	[RelayCommand]
@@ -384,30 +506,17 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
-		var doseIU = Pet.CurrentDoseIU ?? 0;
-		var insulinType = Pet.InsulinType ?? "insulin";
-		var concentration = Pet.InsulinConcentration ?? "";
-		var concentrationText = !string.IsNullOrWhiteSpace(concentration) ? $" ({concentration})" : "";
-		
-		var confirm = await Shell.Current.DisplayAlertAsync(
-			"Quick Log Insulin",
-			$"Log {doseIU} IU of {insulinType}{concentrationText} now?",
-			"Log",
-			"Cancel");
-
-		if (!confirm) return;
-
 		var log = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = doseIU,
-			AdministeredAt = DateTime.Now,
+			DoseIU = Pet.CurrentDoseIU ?? 0,
+			AdministeredAt = GetAdjustedLogTime(Constants.ScheduleTypeInsulin),
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveInsulinLogAsync(log);
 		_cachedLastInsulinLog = log;
-		await SyncInBackgroundAsync(Pet.Id);
+		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 
@@ -416,33 +525,20 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
-		var foodName = Pet.DefaultFoodName ?? "Meal";
-		var amount = Pet.DefaultFoodAmount ?? 0;
-		var unit = Pet.DefaultFoodUnit ?? "cups";
-		var foodType = Pet.DefaultFoodType ?? "food";
-		
-		var confirm = await Shell.Current.DisplayAlertAsync(
-			"Quick Log Feeding",
-			$"Log {amount} {unit} of {foodName} ({foodType}) now?",
-			"Log",
-			"Cancel");
-
-		if (!confirm) return;
-
 		var log = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = foodName,
-			Amount = amount,
-			Unit = unit,
-			FoodType = foodType,
-			FedAt = DateTime.Now,
+			FoodName = Pet.DefaultFoodName ?? "Meal",
+			Amount = Pet.DefaultFoodAmount ?? 0,
+			Unit = Pet.DefaultFoodUnit,
+			FoodType = Pet.DefaultFoodType,
+			FedAt = GetAdjustedLogTime(Constants.ScheduleTypeFeeding),
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
 		await _db.SaveFeedingLogAsync(log);
 		_cachedLastFeedingLog = log;
-		await SyncInBackgroundAsync(Pet.Id);
+		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
 	}
 
@@ -451,28 +547,13 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
-		var doseIU = Pet.CurrentDoseIU ?? 0;
-		var insulinType = Pet.InsulinType ?? "insulin";
-		var concentration = Pet.InsulinConcentration ?? "";
-		var concentrationText = !string.IsNullOrWhiteSpace(concentration) ? $" ({concentration})" : "";
-		var foodName = Pet.DefaultFoodName ?? "Meal";
-		var amount = Pet.DefaultFoodAmount ?? 0;
-		var unit = Pet.DefaultFoodUnit ?? "cups";
-		var foodType = Pet.DefaultFoodType ?? "food";
-		
-		var confirm = await Shell.Current.DisplayAlertAsync(
-			"Quick Log Food + Insulin",
-			$"Log {doseIU} IU of {insulinType}{concentrationText} and {amount} {unit} of {foodName} ({foodType}) now?",
-			"Log",
-			"Cancel");
-
-		if (!confirm) return;
+		var adjustedTime = GetAdjustedLogTime(Constants.ScheduleTypeCombined);
 
 		var insulinLog = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = doseIU,
-			AdministeredAt = DateTime.Now,
+			DoseIU = Pet.CurrentDoseIU ?? 0,
+			AdministeredAt = adjustedTime,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -480,11 +561,11 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		var feedingLog = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = foodName,
-			Amount = amount,
-			Unit = unit,
-			FoodType = foodType,
-			FedAt = DateTime.Now,
+			FoodName = Pet.DefaultFoodName ?? "Meal",
+			Amount = Pet.DefaultFoodAmount ?? 0,
+			Unit = Pet.DefaultFoodUnit,
+			FoodType = Pet.DefaultFoodType,
+			FedAt = adjustedTime,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
 		};
@@ -493,8 +574,58 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		await _db.SaveFeedingLogAsync(feedingLog);
 		_cachedLastInsulinLog = insulinLog;
 		_cachedLastFeedingLog = feedingLog;
-		await SyncInBackgroundAsync(Pet.Id);
+		_ = SyncInBackgroundAsync(Pet.Id);
 		await LoadDataAsync(Pet.Id);
+	}
+
+	[RelayCommand]
+	private async Task QuickLogMedicationAsync()
+	{
+		if (Pet is null) return;
+
+		// Find the next upcoming medication schedule to pre-fill the name
+		var medSchedules = _schedules
+			.Where(s => s.ScheduleType == Constants.ScheduleTypeMedication)
+			.OrderBy(s => s.TimeOfDay)
+			.ToList();
+
+		var medicationName = "Medication";
+		if (medSchedules.Count > 0)
+		{
+			var now = DateTime.Now;
+			var today = now.Date;
+			var next = medSchedules.FirstOrDefault(s => today + s.TimeOfDay > now)
+				?? medSchedules[0];
+			medicationName = next.Label;
+		}
+
+		var result = await Shell.Current.DisplayPromptAsync(
+			"Quick Log Medication",
+			"What medication was given?",
+			accept: "Log",
+			cancel: "Cancel",
+			initialValue: medicationName);
+
+		if (string.IsNullOrWhiteSpace(result)) return;
+
+		var log = new MedicationLog
+		{
+			PetId = Pet.Id,
+			MedicationName = result.Trim(),
+			AdministeredAt = DateTime.Now,
+			LoggedBy = Constants.OwnerName,
+			LoggedById = Constants.DeviceUserId
+		};
+		await _db.SaveMedicationLogAsync(log);
+		_ = SyncInBackgroundAsync(Pet.Id);
+		await LoadDataAsync(Pet.Id);
+	}
+
+	[RelayCommand]
+	private async Task GoToMedicationLogAsync()
+	{
+		if (Pet is null) return;
+		await Shell.Current.GoToAsync($"{nameof(Views.MedicationLogPage)}?petId={Pet.Id}");
 	}
 
 	[RelayCommand]
@@ -512,14 +643,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			IsSyncing = true;
 			SyncStatus = "Syncing…";
 			await _syncService.SyncAsync(petId);
-			// Read the timestamp saved by SyncService
-			var lastSyncStr = Preferences.Get($"lastSync_{petId}", string.Empty);
-			if (!string.IsNullOrEmpty(lastSyncStr) && DateTime.TryParse(lastSyncStr, out var lastSyncTime))
-			{
-				SyncStatus = $"Last synced: {lastSyncTime:g}";
-				// Also update global sync time for Settings page
-				Preferences.Set(Constants.LastSyncTimeKey, lastSyncStr);
-			}
+			SyncStatus = $"Last synced: {DateTime.Now:g}";
 		}
 		catch (Exception ex)
 		{
@@ -606,7 +730,6 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
 			await _db.PurgePetDataAsync(Pet.Id);
 			Preferences.Remove($"lastSync_{Pet.Id}");
-			Preferences.Remove(Constants.GetPetNotificationsKey(Pet.Id));
 			await Shell.Current.GoToAsync("..");
 		}
 		catch (Exception ex)
@@ -634,7 +757,6 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
 			await _db.PurgePetDataAsync(Pet.Id);
 			Preferences.Remove($"lastSync_{Pet.Id}");
-			Preferences.Remove(Constants.GetPetNotificationsKey(Pet.Id));
 			await Shell.Current.GoToAsync("..");
 		}
 		catch (Exception ex)
