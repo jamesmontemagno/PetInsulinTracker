@@ -156,6 +156,9 @@ public partial class ScheduleViewModel : ObservableObject
 		if (!Preferences.Get(Constants.NotificationsEnabledKey, true))
 			return;
 
+		if (!Preferences.Get(Constants.GetPetNotificationsKey(petId), true))
+			return;
+
 		await _notifications.ScheduleNotificationsForPetAsync(petId);
 	}
 

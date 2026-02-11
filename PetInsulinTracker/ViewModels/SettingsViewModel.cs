@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -12,6 +13,7 @@ public partial class SettingsViewModel : ObservableObject
 	private readonly IDatabaseService _db;
 	private readonly INotificationService _notifications;
 	private bool _suppressNotificationsChange;
+	private bool _suppressPetNotificationsChange;
 
 	public SettingsViewModel(ISyncService syncService, IDatabaseService db, INotificationService notifications)
 	{
@@ -43,6 +45,11 @@ public partial class SettingsViewModel : ObservableObject
 
 	[ObservableProperty]
 	private bool notificationsEnabled = Preferences.Get(Constants.NotificationsEnabledKey, true);
+
+	public bool ArePetNotificationsEnabled => NotificationsEnabled;
+	public bool ShowPerPetNotificationsHint => !NotificationsEnabled;
+
+	public ObservableCollection<PetNotificationItem> PetNotifications { get; } = [];
 
 	[ObservableProperty]
 	private bool offlineMode = Preferences.Get(Constants.OfflineModeKey, false);
@@ -76,7 +83,54 @@ public partial class SettingsViewModel : ObservableObject
 		if (_suppressNotificationsChange)
 			return;
 
+		OnPropertyChanged(nameof(ArePetNotificationsEnabled));
+		OnPropertyChanged(nameof(ShowPerPetNotificationsHint));
+
 		_ = HandleNotificationsChangedAsync(value);
+	}
+
+	public async Task LoadPetNotificationsAsync()
+	{
+		var pets = await _db.GetPetsAsync();
+		_suppressPetNotificationsChange = true;
+		PetNotifications.Clear();
+		foreach (var pet in pets.OrderBy(p => p.Name))
+		{
+			var enabled = Preferences.Get(Constants.GetPetNotificationsKey(pet.Id), true);
+			PetNotifications.Add(new PetNotificationItem(pet.Id, pet.Name, enabled, HandlePetNotificationChangedAsync));
+		}
+		_suppressPetNotificationsChange = false;
+	}
+
+	private async Task HandlePetNotificationChangedAsync(PetNotificationItem item, bool isEnabled)
+	{
+		if (_suppressPetNotificationsChange)
+			return;
+
+		var key = Constants.GetPetNotificationsKey(item.PetId);
+		Preferences.Set(key, isEnabled);
+
+		if (!NotificationsEnabled)
+			return;
+
+		if (isEnabled)
+		{
+			var granted = await _notifications.EnsurePermissionAsync();
+			if (!granted)
+			{
+				_suppressPetNotificationsChange = true;
+				item.IsEnabled = false;
+				_suppressPetNotificationsChange = false;
+				Preferences.Set(key, false);
+				return;
+			}
+
+			await _notifications.ScheduleNotificationsForPetAsync(item.PetId);
+		}
+		else
+		{
+			await _notifications.CancelNotificationsForPetAsync(item.PetId);
+		}
 	}
 
 	private async Task HandleNotificationsChangedAsync(bool value)
@@ -177,6 +231,33 @@ public partial class SettingsViewModel : ObservableObject
 		finally
 		{
 			IsSyncing = false;
+		}
+	}
+}
+
+public sealed class PetNotificationItem : ObservableObject
+{
+	private readonly Func<PetNotificationItem, bool, Task> _onToggled;
+	private bool _isEnabled;
+
+	public PetNotificationItem(string petId, string petName, bool isEnabled, Func<PetNotificationItem, bool, Task> onToggled)
+	{
+		PetId = petId;
+		PetName = petName;
+		_isEnabled = isEnabled;
+		_onToggled = onToggled;
+	}
+
+	public string PetId { get; }
+	public string PetName { get; }
+
+	public bool IsEnabled
+	{
+		get => _isEnabled;
+		set
+		{
+			if (SetProperty(ref _isEnabled, value))
+				_ = _onToggled(this, value);
 		}
 	}
 }

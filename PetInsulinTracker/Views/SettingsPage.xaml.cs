@@ -20,5 +20,8 @@ public partial class SettingsPage : ContentPage
 		await Task.WhenAll(
 			Content.FadeToAsync(1, 300, Easing.CubicOut),
 			Content.TranslateToAsync(0, 0, 300, Easing.CubicOut));
+
+		if (BindingContext is SettingsViewModel viewModel)
+			await viewModel.LoadPetNotificationsAsync();
 	}
 }

@@ -9,6 +9,7 @@ public static class Constants
 	public const string DeviceUserIdKey = "device_user_id";
 	public const string OfflineModeKey = "offline_mode";
 	public const string NotificationsEnabledKey = "notifications_enabled";
+	public const string PetNotificationsEnabledKeyPrefix = "pet_notifications_enabled_";
 	public const string LastSyncTimeKey = "last_sync_time";
 	public const string PreferLocalImageKey = "prefer_local_image";
 
@@ -28,6 +29,8 @@ public static class Constants
 
 	/// <summary>Gets the current owner name from preferences.</summary>
 	public static string OwnerName => Preferences.Get(OwnerNameKey, string.Empty);
+
+	public static string GetPetNotificationsKey(string petId) => $"{PetNotificationsEnabledKeyPrefix}{petId}";
 
 	/// <summary>Gets a stable unique ID for this device/user, generating one if needed.</summary>
 	public static string DeviceUserId

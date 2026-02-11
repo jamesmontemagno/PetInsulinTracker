@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using PetInsulinTracker.Helpers;
 using PetInsulinTracker.Models;
 using Plugin.LocalNotification;
@@ -28,6 +29,12 @@ public class NotificationService : INotificationService
 	{
 		if (!Preferences.Get(Constants.NotificationsEnabledKey, true))
 			return;
+
+		if (!Preferences.Get(Constants.GetPetNotificationsKey(petId), true))
+		{
+			await CancelNotificationsForPetAsync(petId);
+			return;
+		}
 
 		await CancelNotificationsForPetAsync(petId);
 
@@ -93,6 +100,8 @@ public class NotificationService : INotificationService
 		var pets = await _db.GetPetsAsync();
 		foreach (var pet in pets)
 		{
+			if (!Preferences.Get(Constants.GetPetNotificationsKey(pet.Id), true))
+				continue;
 			await ScheduleNotificationsForPetAsync(pet.Id);
 		}
 	}
@@ -106,6 +115,9 @@ public class NotificationService : INotificationService
 	// Generate a stable int ID from pet+schedule string IDs
 	private static int GenerateNotificationId(string petId, string scheduleId)
 	{
-		return HashCode.Combine(petId, scheduleId);
+		var input = System.Text.Encoding.UTF8.GetBytes($"{petId}:{scheduleId}");
+		var hash = SHA256.HashData(input);
+		var value = BitConverter.ToInt32(hash, 0);
+		return value & int.MaxValue;
 	}
 }

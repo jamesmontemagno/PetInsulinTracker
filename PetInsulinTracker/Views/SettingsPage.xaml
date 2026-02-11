@@ -5,6 +5,7 @@
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              x:Class="PetInsulinTracker.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
+             x:Name="SettingsPageRoot"
              Title="Settings"
              BackgroundColor="{DynamicResource PageBackground}">
 
@@ -46,6 +47,27 @@
                                FontFamily="OpenSansSemibold" />
                         <Switch Grid.Column="2" IsToggled="{Binding NotificationsEnabled}" />
                     </Grid>
+
+                    <VerticalStackLayout Margin="52,0,0,0" Spacing="8" Padding="0,4">
+                        <Label Text="Per pet" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        <VerticalStackLayout Spacing="6"
+                                             BindableLayout.ItemsSource="{Binding PetNotifications}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PetNotificationItem">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding PetName}" VerticalOptions="Center" FontSize="14" />
+                                        <Switch Grid.Column="1"
+                                                IsToggled="{Binding IsEnabled}"
+                                                IsEnabled="{Binding Source={x:Reference SettingsPageRoot}, Path=BindingContext.ArePetNotificationsEnabled}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Text="Turn on global notifications to adjust per-pet reminders."
+                               IsVisible="{Binding ShowPerPetNotificationsHint}"
+                               Style="{StaticResource SubtleTextStyle}"
+                               FontSize="12" />
+                    </VerticalStackLayout>
 
                     <BoxView Style="{StaticResource DividerStyle}" Margin="52,0,0,0" />
 

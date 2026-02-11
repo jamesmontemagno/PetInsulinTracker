@@ -563,6 +563,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
 			await _db.PurgePetDataAsync(Pet.Id);
 			Preferences.Remove($"lastSync_{Pet.Id}");
+			Preferences.Remove(Constants.GetPetNotificationsKey(Pet.Id));
 			await Shell.Current.GoToAsync("..");
 		}
 		catch (Exception ex)
@@ -590,6 +591,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			await _notifications.CancelNotificationsForPetAsync(Pet.Id);
 			await _db.PurgePetDataAsync(Pet.Id);
 			Preferences.Remove($"lastSync_{Pet.Id}");
+			Preferences.Remove(Constants.GetPetNotificationsKey(Pet.Id));
 			await Shell.Current.GoToAsync("..");
 		}
 		catch (Exception ex)
