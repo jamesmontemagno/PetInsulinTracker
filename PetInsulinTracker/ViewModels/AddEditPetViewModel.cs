@@ -207,24 +207,34 @@ public partial class AddEditPetViewModel : ObservableObject
 			string? photoUploadError = null;
 			if (photoChanged && !string.IsNullOrEmpty(PhotoPath) && pet.AccessLevel != "guest")
 			{
-				SavingStatus = "Uploading photo…";
-				try
+				// Ask user if they want to upload the photo
+				var uploadPhoto = await Shell.Current.DisplayAlertAsync(
+					"Upload Photo",
+					"Would you like to upload this photo to the cloud? You can always use the local photo if you choose not to upload.",
+					"Upload",
+					"Use Local Only");
+
+				if (uploadPhoto)
 				{
-					var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
-					if (!string.IsNullOrEmpty(url))
+					SavingStatus = "Uploading photo…";
+					try
 					{
-						pet.PhotoUrl = url;
-						await _db.SaveSyncedAsync(pet);
+						var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
+						if (!string.IsNullOrEmpty(url))
+						{
+							pet.PhotoUrl = url;
+							await _db.SaveSyncedAsync(pet);
+						}
+						else
+						{
+							photoUploadError = "Photo could not be uploaded. The image may be in an unsupported format.";
+						}
 					}
-					else
+					catch (Exception ex)
 					{
-						photoUploadError = "Photo could not be uploaded. The image may be in an unsupported format.";
+						Debug.WriteLine($"Photo upload failed: {ex}");
+						photoUploadError = $"Photo upload failed: {ex.Message}";
 					}
-				}
-				catch (Exception ex)
-				{
-					Debug.WriteLine($"Photo upload failed: {ex}");
-					photoUploadError = $"Photo upload failed: {ex.Message}";
 				}
 			}
 
@@ -319,7 +329,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		var final = corrected ?? bitmap;
 
 		using var image = SKImage.FromBitmap(final);
-		using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 90);
+		using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 95);
 		using var destStream = File.Create(destPath);
 		jpegData.SaveTo(destStream);
 
