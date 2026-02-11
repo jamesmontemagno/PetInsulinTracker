@@ -210,9 +210,9 @@ public partial class AddEditPetViewModel : ObservableObject
 				// Ask user if they want to upload the photo
 				var uploadPhoto = await Shell.Current.DisplayAlertAsync(
 					"Upload Photo",
-					"Would you like to upload this photo to the cloud? You can always use the local photo if you choose not to upload.",
+					"The photo has been saved locally. Would you like to also upload it to the cloud for backup and sharing across devices?",
 					"Upload",
-					"Use Local Only");
+					"Keep Local Only");
 
 				if (uploadPhoto)
 				{
