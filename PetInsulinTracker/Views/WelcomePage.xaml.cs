@@ -211,11 +211,16 @@ public partial class WelcomePage : ContentPage
 			MorningCombinedEnabled.IsToggled = true;
 			EveningCombinedEnabled.IsToggled = true;
 
-			// Hide separate schedules by default
-			MorningInsulinCard.IsVisible = false;
-			EveningInsulinCard.IsVisible = false;
-			MorningFeedingCard.IsVisible = false;
-			EveningFeedingCard.IsVisible = false;
+			MorningInsulinCard.IsVisible = true;
+			EveningInsulinCard.IsVisible = true;
+			MorningInsulinEnabled.IsToggled = false;
+			EveningInsulinEnabled.IsToggled = false;
+
+			MorningFeedingCard.IsVisible = true;
+			EveningFeedingCard.IsVisible = true;
+			MorningFeedingEnabled.IsToggled = false;
+			EveningFeedingEnabled.IsToggled = false;
+			
 		}
 		else
 		{
