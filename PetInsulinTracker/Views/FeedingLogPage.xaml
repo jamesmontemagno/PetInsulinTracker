@@ -78,6 +78,9 @@
                                                    Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center"
                                                    IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                         </HorizontalStackLayout>
+                                        <Label Text="{Binding Notes}"
+                                               Style="{StaticResource SubtleTextStyle}"
+                                               IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
                                     </VerticalStackLayout>
                                     <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
                                                  Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
