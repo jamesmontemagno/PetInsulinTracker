@@ -39,7 +39,7 @@ public class Pet
 				return PhotoPath;
 
 			if (!string.IsNullOrEmpty(PhotoUrl))
-				return PhotoUrl;
+				return CacheBustedUrl(PhotoUrl);
 
 			// Fallback: use local path even if preference is off (no remote available)
 			if (!string.IsNullOrEmpty(PhotoPath) && File.Exists(PhotoPath))
@@ -47,6 +47,16 @@ public class Pet
 
 			return null;
 		}
+	}
+
+	/// <summary>
+	/// Appends a cache-busting query parameter to a remote URL using LastModified,
+	/// so MAUI's image cache treats re-uploaded photos as new resources.
+	/// </summary>
+	private string CacheBustedUrl(string url)
+	{
+		var separator = url.Contains('?') ? "&" : "?";
+		return $"{url}{separator}v={LastModified.Ticks}";
 	}
 
 	/// <summary>e.g., Vetsulin, ProZinc, NPH, Glargine</summary>
