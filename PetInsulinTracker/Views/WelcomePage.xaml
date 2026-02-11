@@ -144,6 +144,11 @@
                             Clicked="OnRoleSitter" />
                 </VerticalStackLayout>
 
+                <Button Text="Back"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Fill"
+                        Clicked="OnStep2Back" />
+
                 <!-- Pet sitter redeem section (hidden until tapped) -->
                 <VerticalStackLayout x:Name="SitterRedeemSection" Spacing="12" IsVisible="False">
                     <BoxView Style="{StaticResource DividerStyle}" Margin="0,4" />
@@ -218,10 +223,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Button Text="Continue"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        HorizontalOptions="Fill"
-                        Clicked="OnStep2_5Next" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Back"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep2_5Back" />
+                    <Button Grid.Column="1" Text="Continue"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnStep2_5Next" />
+                </Grid>
             </VerticalStackLayout>
 
             <!-- ===== STEP 3: Add First Pet (Optional) ===== -->
@@ -417,12 +428,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Button Grid.Column="0" Text="Skip"
+                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Back"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill" WidthRequest="80"
+                            Clicked="OnStep3Back" />
+                    <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep3Skip" />
-                    <Button Grid.Column="1" Text="Next"
+                    <Button Grid.Column="2" Text="Next"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep3Next" />
@@ -439,12 +454,12 @@
                        TextColor="{DynamicResource PageText}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                <Label Text="Optionally set up insulin and feeding times. You can always do this later."
+                <Label x:Name="Step4Description" Text="Optionally set up insulin and feeding times. You can always do this later."
                        FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
                 <!-- Morning Insulin & Feeding (Combined) -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="MorningCombinedCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="True">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Morning Insulin &amp; Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -466,7 +481,7 @@
                 </Border>
 
                 <!-- Evening Insulin & Feeding (Combined) -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="EveningCombinedCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="True">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Evening Insulin &amp; Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -488,7 +503,7 @@
                 </Border>
 
                 <!-- Morning Insulin -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="MorningInsulinCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Morning Insulin" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -510,7 +525,7 @@
                 </Border>
 
                 <!-- Evening Insulin -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="EveningInsulinCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Evening Insulin" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -532,7 +547,7 @@
                 </Border>
 
                 <!-- Morning Feeding -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="MorningFeedingCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Morning Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -554,7 +569,7 @@
                 </Border>
 
                 <!-- Evening Feeding -->
-                <Border Style="{StaticResource CardStyle}" Padding="16">
+                <Border x:Name="EveningFeedingCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Evening Feeding" FontFamily="OpenSansSemibold" FontSize="16" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
@@ -575,6 +590,50 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- Morning Medication -->
+                <Border x:Name="MorningMedicationCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Morning Medication" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="MorningMedicationTime" Time="08:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="MorningMedicationReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="MorningMedicationEnabled" IsToggled="True" />
+                            <Label Text="Add this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Evening Medication -->
+                <Border x:Name="EveningMedicationCard" Style="{StaticResource CardStyle}" Padding="16" IsVisible="False">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Evening Medication" FontFamily="OpenSansSemibold" FontSize="16" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
+                                <TimePicker x:Name="EveningMedicationTime" Time="20:00:00" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
+                                <Entry x:Name="EveningMedicationReminder" Text="15" Keyboard="Numeric" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch x:Name="EveningMedicationEnabled" IsToggled="True" />
+                            <Label Text="Add this schedule" VerticalOptions="Center"
+                                   Style="{StaticResource SubtleTextStyle}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}" Padding="16">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Notifications" FontFamily="OpenSansSemibold" FontSize="16" />
@@ -588,12 +647,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Button Grid.Column="0" Text="Skip"
+                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Back"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill" WidthRequest="80"
+                            Clicked="OnStep4Back" />
+                    <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep4Skip" />
-                    <Button Grid.Column="1" Text="Next"
+                    <Button Grid.Column="2" Text="Next"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep4Next" />
@@ -639,12 +702,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Button Grid.Column="0" Text="Skip"
+                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Back"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill" WidthRequest="80"
+                            Clicked="OnStep5Back" />
+                    <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep5Skip" />
-                    <Button Grid.Column="1" Text="Get Started"
+                    <Button Grid.Column="2" Text="Get Started"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep5Done" />

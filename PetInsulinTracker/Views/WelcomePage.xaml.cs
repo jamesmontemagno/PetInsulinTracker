@@ -82,10 +82,28 @@ public partial class WelcomePage : ContentPage
 		GoToStep(2);
 	}
 
+	// Step 2: Back to theme selection
+	private void OnStep2Back(object? sender, EventArgs e)
+	{
+		// Hide sitter redeem section if visible
+		if (SitterRedeemSection.IsVisible)
+		{
+			OnSitterCancel(sender, e);
+			return;
+		}
+		GoToStep(1);
+	}
+
 	// Step 2: Owner → go to offline mode screen (Step 2.5)
 	private void OnRoleOwner(object? sender, EventArgs e)
 	{
 		GoToStep(25); // 2.5 represented as 25
+	}
+
+	// Step 2.5: Back to role selection
+	private void OnStep2_5Back(object? sender, EventArgs e)
+	{
+		GoToStep(2);
 	}
 
 	// Step 2.5: Offline mode choice → go to pet setup (Step 3)
@@ -152,6 +170,12 @@ public partial class WelcomePage : ContentPage
 		}
 	}
 
+	// Step 3: Back to offline mode selection
+	private void OnStep3Back(object? sender, EventArgs e)
+	{
+		GoToStep(25); // Back to Step 2.5
+	}
+
 	// Step 3: Collect pet info and continue to schedules
 	private async void OnStep3Next(object? sender, EventArgs e)
 	{
@@ -162,13 +186,76 @@ public partial class WelcomePage : ContentPage
 			return;
 		}
 
+		// Configure schedule visibility based on tracking toggles
+		ConfigureSchedulesForStep4();
 		GoToStep(4);
+	}
+
+	private void ConfigureSchedulesForStep4()
+	{
+		var trackInsulin = TrackInsulinSwitch.IsToggled;
+		var trackMedication = TrackMedicationSwitch.IsToggled;
+
+		// Update description based on what's being tracked
+		var items = new List<string>();
+		if (trackInsulin) items.Add("insulin");
+		if (trackMedication) items.Add("medication");
+		items.Add("feeding");
+		Step4Description.Text = $"Optionally set up {string.Join(", ", items)} times. You can always do this later.";
+
+		if (trackInsulin)
+		{
+			// Show combined insulin+feeding schedules (most common case)
+			MorningCombinedCard.IsVisible = true;
+			EveningCombinedCard.IsVisible = true;
+			MorningCombinedEnabled.IsToggled = true;
+			EveningCombinedEnabled.IsToggled = true;
+
+			// Hide separate schedules by default
+			MorningInsulinCard.IsVisible = false;
+			EveningInsulinCard.IsVisible = false;
+			MorningFeedingCard.IsVisible = false;
+			EveningFeedingCard.IsVisible = false;
+		}
+		else
+		{
+			// No insulin tracking - hide all insulin schedules, show feeding only
+			MorningCombinedCard.IsVisible = false;
+			EveningCombinedCard.IsVisible = false;
+			MorningInsulinCard.IsVisible = false;
+			EveningInsulinCard.IsVisible = false;
+
+			MorningFeedingCard.IsVisible = true;
+			EveningFeedingCard.IsVisible = true;
+			MorningFeedingEnabled.IsToggled = true;
+			EveningFeedingEnabled.IsToggled = true;
+		}
+
+		// Show/hide medication schedules
+		if (trackMedication)
+		{
+			MorningMedicationCard.IsVisible = true;
+			EveningMedicationCard.IsVisible = true;
+			MorningMedicationEnabled.IsToggled = true;
+			EveningMedicationEnabled.IsToggled = true;
+		}
+		else
+		{
+			MorningMedicationCard.IsVisible = false;
+			EveningMedicationCard.IsVisible = false;
+		}
 	}
 
 	// Step 3 skip → finish (no pet = no schedules/vet needed)
 	private async void OnStep3Skip(object? sender, EventArgs e)
 	{
 		await SaveAllAndFinishAsync();
+	}
+
+	// Step 4: Back to pet setup
+	private void OnStep4Back(object? sender, EventArgs e)
+	{
+		GoToStep(3);
 	}
 
 	// Step 4: Continue to Step 5
@@ -181,6 +268,12 @@ public partial class WelcomePage : ContentPage
 	private void OnStep4Skip(object? sender, EventArgs e)
 	{
 		GoToStep(5);
+	}
+
+	// Step 5: Back to schedule setup
+	private void OnStep5Back(object? sender, EventArgs e)
+	{
+		GoToStep(4);
 	}
 
 	// Step 5 done
@@ -321,6 +414,16 @@ public partial class WelcomePage : ContentPage
 			await SaveScheduleAsync(db, "Evening Feeding", Constants.ScheduleTypeFeeding,
 				EveningFeedingTime.Time ?? new TimeSpan(19, 0, 0),
 				int.TryParse(EveningFeedingReminder.Text, out var r4) ? r4 : 15);
+
+		if (MorningMedicationEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Morning Medication", Constants.ScheduleTypeMedication,
+				MorningMedicationTime.Time ?? new TimeSpan(8, 0, 0),
+				int.TryParse(MorningMedicationReminder.Text, out var r5) ? r5 : 15);
+
+		if (EveningMedicationEnabled.IsToggled)
+			await SaveScheduleAsync(db, "Evening Medication", Constants.ScheduleTypeMedication,
+				EveningMedicationTime.Time ?? new TimeSpan(20, 0, 0),
+				int.TryParse(EveningMedicationReminder.Text, out var r6) ? r6 : 15);
 	}
 
 	private async Task SaveScheduleAsync(IDatabaseService db, string label, string type,
