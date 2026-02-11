@@ -128,20 +128,22 @@
                        FontSize="14" TextColor="{DynamicResource PageTextSecondary}"
                        HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                <Button Text="I'm a Pet Owner"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        HorizontalOptions="Fill"
-                        Clicked="OnRoleOwner" />
+                <VerticalStackLayout x:Name="Step2Buttons" Spacing="20">
+                    <Button Text="I'm a Pet Owner"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnRoleOwner" />
 
-                <Button Text="I Have a Share Code"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        HorizontalOptions="Fill"
-                        Clicked="OnRoleSitter" />
+                    <Button Text="I Have a Share Code"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnRoleSitter" />
 
-                <Button Text="Use Offline Only"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        HorizontalOptions="Fill"
-                        Clicked="OnRoleOffline" />
+                    <Button Text="Use Offline Only"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnRoleOffline" />
+                </VerticalStackLayout>
 
                 <!-- Pet sitter redeem section (hidden until tapped) -->
                 <VerticalStackLayout x:Name="SitterRedeemSection" Spacing="12" IsVisible="False">
@@ -162,6 +164,11 @@
                                     Clicked="OnSitterRedeem" />
                         </VerticalStackLayout>
                     </Border>
+
+                    <Button Text="Cancel"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Fill"
+                            Clicked="OnSitterCancel" />
 
                     <Label x:Name="SitterStatusLabel" FontSize="14" FontFamily="OpenSansSemibold"
                            HorizontalTextAlignment="Center"

@@ -229,7 +229,16 @@ public partial class AddEditPetViewModel : ObservableObject
 			}
 
 			WeakReferenceMessenger.Default.Send(new PetSavedMessage(pet));
-			await Shell.Current.GoToAsync("..");
+
+			if (isNew)
+			{
+				// Guide the user through schedule and vet setup for the new pet
+				await PromptPostSaveSetupAsync(pet.Id);
+			}
+			else
+			{
+				await Shell.Current.GoToAsync("..");
+			}
 
 			if (!string.IsNullOrEmpty(photoUploadError))
 			{
@@ -244,6 +253,33 @@ public partial class AddEditPetViewModel : ObservableObject
 	}
 
 	private bool CanSave() => !string.IsNullOrWhiteSpace(Name);
+
+	/// <summary>
+	/// After creating a new pet, guides the user through setting up schedules and vet info,
+	/// mirroring the onboarding flow.
+	/// </summary>
+	private static async Task PromptPostSaveSetupAsync(string petId)
+	{
+		var action = await Shell.Current.DisplayActionSheetAsync(
+			"Pet saved! What would you like to set up next?",
+			"I'm Done",
+			null,
+			"Set Up Schedules",
+			"Add Vet Info");
+
+		switch (action)
+		{
+			case "Set Up Schedules":
+				await Shell.Current.GoToAsync($"../{nameof(Views.SchedulePage)}?petId={petId}");
+				break;
+			case "Add Vet Info":
+				await Shell.Current.GoToAsync($"../{nameof(Views.VetInfoPage)}?petId={petId}");
+				break;
+			default:
+				await Shell.Current.GoToAsync("..");
+				break;
+		}
+	}
 
 	/// <summary>
 	/// Copies a photo to the app data directory, converting HEIC/HEIF to JPEG

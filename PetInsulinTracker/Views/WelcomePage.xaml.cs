@@ -93,10 +93,21 @@ public partial class WelcomePage : ContentPage
 		GoToStep(3);
 	}
 
-	// Step 2: Pet sitter → show redeem section
+	// Step 2: Pet sitter → show redeem section, hide other buttons
 	private void OnRoleSitter(object? sender, EventArgs e)
 	{
+		Step2Buttons.IsVisible = false;
 		SitterRedeemSection.IsVisible = true;
+	}
+
+	// Step 2: Cancel import → hide redeem section, show buttons again
+	private void OnSitterCancel(object? sender, EventArgs e)
+	{
+		SitterRedeemSection.IsVisible = false;
+		SitterRedeemCodeEntry.Text = string.Empty;
+		SitterStatusLabel.IsVisible = false;
+		SitterRedeemButton.IsEnabled = true;
+		Step2Buttons.IsVisible = true;
 	}
 
 	// Step 2: Pet sitter redeems share code → finish
