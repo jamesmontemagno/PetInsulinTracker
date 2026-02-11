@@ -384,10 +384,23 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var doseIU = Pet.CurrentDoseIU ?? 0;
+		var insulinType = Pet.InsulinType ?? "insulin";
+		var concentration = Pet.InsulinConcentration ?? "";
+		var concentrationText = !string.IsNullOrWhiteSpace(concentration) ? $" ({concentration})" : "";
+		
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Quick Log Insulin",
+			$"Log {doseIU} IU of {insulinType}{concentrationText} now?",
+			"Log",
+			"Cancel");
+
+		if (!confirm) return;
+
 		var log = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = Pet.CurrentDoseIU ?? 0,
+			DoseIU = doseIU,
 			AdministeredAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
@@ -403,13 +416,26 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var foodName = Pet.DefaultFoodName ?? "Meal";
+		var amount = Pet.DefaultFoodAmount ?? 0;
+		var unit = Pet.DefaultFoodUnit;
+		var foodType = Pet.DefaultFoodType;
+		
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Quick Log Feeding",
+			$"Log {amount} {unit} of {foodName} ({foodType}) now?",
+			"Log",
+			"Cancel");
+
+		if (!confirm) return;
+
 		var log = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
-			Amount = Pet.DefaultFoodAmount ?? 0,
-			Unit = Pet.DefaultFoodUnit,
-			FoodType = Pet.DefaultFoodType,
+			FoodName = foodName,
+			Amount = amount,
+			Unit = unit,
+			FoodType = foodType,
 			FedAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
@@ -425,10 +451,27 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var doseIU = Pet.CurrentDoseIU ?? 0;
+		var insulinType = Pet.InsulinType ?? "insulin";
+		var concentration = Pet.InsulinConcentration ?? "";
+		var concentrationText = !string.IsNullOrWhiteSpace(concentration) ? $" ({concentration})" : "";
+		var foodName = Pet.DefaultFoodName ?? "Meal";
+		var amount = Pet.DefaultFoodAmount ?? 0;
+		var unit = Pet.DefaultFoodUnit;
+		var foodType = Pet.DefaultFoodType;
+		
+		var confirm = await Shell.Current.DisplayAlertAsync(
+			"Quick Log Food + Insulin",
+			$"Log {doseIU} IU of {insulinType}{concentrationText} and {amount} {unit} of {foodName} ({foodType}) now?",
+			"Log",
+			"Cancel");
+
+		if (!confirm) return;
+
 		var insulinLog = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = Pet.CurrentDoseIU ?? 0,
+			DoseIU = doseIU,
 			AdministeredAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
@@ -437,10 +480,10 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		var feedingLog = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
-			Amount = Pet.DefaultFoodAmount ?? 0,
-			Unit = Pet.DefaultFoodUnit,
-			FoodType = Pet.DefaultFoodType,
+			FoodName = foodName,
+			Amount = amount,
+			Unit = unit,
+			FoodType = foodType,
 			FedAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
