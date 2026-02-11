@@ -530,19 +530,25 @@ public class SyncService : ISyncService
 				return [];
 			}
 
-			var maxDimension = Math.Max(original.Width, original.Height);
-			var scale = maxDimension > maxSize ? (float)maxSize / maxDimension : 1f;
-			var targetWidth = Math.Max(1, (int)Math.Round(original.Width * scale));
-			var targetHeight = Math.Max(1, (int)Math.Round(original.Height * scale));
+			// Apply EXIF orientation correction
+			var corrected = AutoOrient(original, photoPath);
+			var source = corrected ?? original;
 
-			var imageInfo = new SKImageInfo(targetWidth, targetHeight, original.ColorType, original.AlphaType);
+			var maxDimension = Math.Max(source.Width, source.Height);
+			var scale = maxDimension > maxSize ? (float)maxSize / maxDimension : 1f;
+			var targetWidth = Math.Max(1, (int)Math.Round(source.Width * scale));
+			var targetHeight = Math.Max(1, (int)Math.Round(source.Height * scale));
+
+			var imageInfo = new SKImageInfo(targetWidth, targetHeight, source.ColorType, source.AlphaType);
 			using var resized = new SKBitmap(imageInfo);
 			using (var canvas = new SKCanvas(resized))
 			{
 				canvas.Clear(SKColors.Transparent);
 				var destRect = new SKRect(0, 0, targetWidth, targetHeight);
-				canvas.DrawBitmap(original, destRect);
+				canvas.DrawBitmap(source, destRect);
 			}
+
+			corrected?.Dispose();
 
 			using var image = SKImage.FromBitmap(resized);
 			using var data = image.Encode(SKEncodedImageFormat.Jpeg, quality);
@@ -552,6 +558,83 @@ public class SyncService : ISyncService
 		{
 			return [];
 		}
+	}
+
+	/// <summary>
+	/// Reads EXIF orientation from an image file and returns a new bitmap with the
+	/// correct rotation/flip applied. Returns null if no correction is needed.
+	/// </summary>
+	private static SKBitmap? AutoOrient(SKBitmap bitmap, string filePath)
+	{
+		try
+		{
+			using var stream = File.OpenRead(filePath);
+			using var codec = SKCodec.Create(stream);
+			if (codec is null) return null;
+
+			var origin = codec.EncodedOrigin;
+			if (origin == SKEncodedOrigin.Default || origin == SKEncodedOrigin.TopLeft)
+				return null;
+
+			var rotated = ApplyOrientation(bitmap, origin);
+			return rotated;
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// Creates a new bitmap with the EXIF orientation transform applied.
+	/// </summary>
+	private static SKBitmap ApplyOrientation(SKBitmap bitmap, SKEncodedOrigin origin)
+	{
+		// Determine if width/height swap is needed
+		var needsSwap = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop
+			or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
+
+		var width = needsSwap ? bitmap.Height : bitmap.Width;
+		var height = needsSwap ? bitmap.Width : bitmap.Height;
+
+		var result = new SKBitmap(width, height, bitmap.ColorType, bitmap.AlphaType);
+		using var canvas = new SKCanvas(result);
+
+		// Apply transform based on EXIF orientation
+		switch (origin)
+		{
+			case SKEncodedOrigin.TopRight: // Mirror horizontal
+				canvas.Scale(-1, 1, width / 2f, 0);
+				break;
+			case SKEncodedOrigin.BottomRight: // Rotate 180
+				canvas.RotateDegrees(180, width / 2f, height / 2f);
+				break;
+			case SKEncodedOrigin.BottomLeft: // Mirror vertical
+				canvas.Scale(1, -1, 0, height / 2f);
+				break;
+			case SKEncodedOrigin.LeftTop: // Transpose (mirror + rotate 270)
+				canvas.Translate(0, 0);
+				canvas.RotateDegrees(270, 0, 0);
+				canvas.Translate(-height, 0);
+				canvas.Scale(-1, 1, height / 2f, 0);
+				break;
+			case SKEncodedOrigin.RightTop: // Rotate 90
+				canvas.Translate(width, 0);
+				canvas.RotateDegrees(90);
+				break;
+			case SKEncodedOrigin.RightBottom: // Transverse (mirror + rotate 90)
+				canvas.Translate(width, 0);
+				canvas.RotateDegrees(90);
+				canvas.Scale(-1, 1, bitmap.Height / 2f, 0);
+				break;
+			case SKEncodedOrigin.LeftBottom: // Rotate 270
+				canvas.Translate(0, height);
+				canvas.RotateDegrees(270);
+				break;
+		}
+
+		canvas.DrawBitmap(bitmap, 0, 0);
+		return result;
 	}
 
 	public async Task DeleteShareCodeAsync(string shareCode)

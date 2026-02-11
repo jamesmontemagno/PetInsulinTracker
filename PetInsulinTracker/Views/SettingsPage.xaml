@@ -78,6 +78,23 @@
                         <Picker Grid.Column="2" ItemsSource="{Binding WeightUnitOptions}"
                                 SelectedItem="{Binding WeightUnit}" WidthRequest="80" />
                     </Grid>
+
+                    <BoxView Style="{StaticResource DividerStyle}" Margin="52,0,0,0" />
+
+                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12" Padding="0,8">
+                        <Border Grid.Column="0"
+                                BackgroundColor="{AppThemeBinding Light=#E8EAF6, Dark=#1A1F3D}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                HeightRequest="36" WidthRequest="36">
+                            <mi:MauiIcon Icon="{mi:Fluent Image24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                            <Label Text="Prefer Local Image" FontFamily="OpenSansSemibold" />
+                            <Label Text="Use your original photo instead of remote thumbnail"
+                                   Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="2" IsToggled="{Binding PreferLocalImage}" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

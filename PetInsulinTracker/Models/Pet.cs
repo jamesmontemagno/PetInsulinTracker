@@ -29,7 +29,25 @@ public class Pet
 	public string? PhotoUrl { get; set; }
 
 	[Ignore]
-	public string? PhotoSource => !string.IsNullOrEmpty(PhotoPath) ? PhotoPath : PhotoUrl;
+	public string? PhotoSource
+	{
+		get
+		{
+			var preferLocal = Preferences.Get("prefer_local_image", true);
+
+			if (preferLocal && !string.IsNullOrEmpty(PhotoPath) && File.Exists(PhotoPath))
+				return PhotoPath;
+
+			if (!string.IsNullOrEmpty(PhotoUrl))
+				return PhotoUrl;
+
+			// Fallback: use local path even if preference is off (no remote available)
+			if (!string.IsNullOrEmpty(PhotoPath) && File.Exists(PhotoPath))
+				return PhotoPath;
+
+			return null;
+		}
+	}
 
 	/// <summary>e.g., Vetsulin, ProZinc, NPH, Glargine</summary>
 	public string? InsulinType { get; set; }

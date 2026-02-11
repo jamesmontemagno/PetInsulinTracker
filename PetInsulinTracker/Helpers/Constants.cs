@@ -10,6 +10,10 @@ public static class Constants
 	public const string OfflineModeKey = "offline_mode";
 	public const string NotificationsEnabledKey = "notifications_enabled";
 	public const string LastSyncTimeKey = "last_sync_time";
+	public const string PreferLocalImageKey = "prefer_local_image";
+
+	/// <summary>Whether the user prefers local pet images over remote thumbnails (default: true).</summary>
+	public static bool PreferLocalImage => Preferences.Get(PreferLocalImageKey, true);
 
 	// Schedule type constants
 	public const string ScheduleTypeInsulin = "Insulin";

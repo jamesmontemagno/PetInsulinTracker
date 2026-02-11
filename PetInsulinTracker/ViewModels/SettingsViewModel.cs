@@ -48,6 +48,9 @@ public partial class SettingsViewModel : ObservableObject
 	private bool offlineMode = Preferences.Get(Constants.OfflineModeKey, false);
 
 	[ObservableProperty]
+	private bool preferLocalImage = Preferences.Get(Constants.PreferLocalImageKey, true);
+
+	[ObservableProperty]
 	private string weightUnit = Preferences.Get("default_weight_unit", "lbs");
 
 	[ObservableProperty]
@@ -104,6 +107,11 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		Preferences.Set(Constants.OfflineModeKey, value);
 		OnPropertyChanged(nameof(IsSyncVisible));
+	}
+
+	partial void OnPreferLocalImageChanged(bool value)
+	{
+		Preferences.Set(Constants.PreferLocalImageKey, value);
 	}
 
 	public bool IsSyncVisible => !OfflineMode;

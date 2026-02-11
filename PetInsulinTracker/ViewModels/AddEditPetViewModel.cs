@@ -248,6 +248,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	/// <summary>
 	/// Copies a photo to the app data directory, converting HEIC/HEIF to JPEG
 	/// since SkiaSharp may not decode HEIC on all platforms.
+	/// Also applies EXIF orientation correction so images display upright.
 	/// </summary>
 	private async Task<string?> CopyAndConvertPhotoAsync(FileResult result)
 	{
@@ -256,41 +257,112 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		var ext = Path.GetExtension(result.FileName)?.ToLowerInvariant();
 		var isHeic = ext is ".heic" or ".heif";
-		var destExt = isHeic ? ".jpg" : ext;
-		var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{destExt}");
+		// Always output JPEG so EXIF orientation is baked in
+		var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}.jpg");
 
 		using var sourceStream = await result.OpenReadAsync();
+		using var memStream = new MemoryStream();
+		await sourceStream.CopyToAsync(memStream);
+		memStream.Position = 0;
 
-		if (isHeic)
+		using var bitmap = SKBitmap.Decode(memStream);
+		if (bitmap is null)
 		{
-			// Decode via SkiaSharp and re-encode as JPEG for reliable thumbnail creation
-			using var memStream = new MemoryStream();
-			await sourceStream.CopyToAsync(memStream);
+			// Fallback: copy raw bytes
+			Debug.WriteLine($"SKBitmap.Decode failed for {result.FileName}, copying raw file");
 			memStream.Position = 0;
-
-			using var bitmap = SKBitmap.Decode(memStream);
-			if (bitmap is null)
-			{
-				// Fallback: copy raw bytes and let the thumbnail encoder try later
-				Debug.WriteLine($"HEIC decode failed for {result.FileName}, copying raw file");
-				memStream.Position = 0;
-				using var fallbackDest = File.Create(destPath);
-				await memStream.CopyToAsync(fallbackDest);
-				return destPath;
-			}
-
-			using var image = SKImage.FromBitmap(bitmap);
-			using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 90);
-			using var destStream = File.Create(destPath);
-			jpegData.SaveTo(destStream);
+			var rawDestPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{ext}");
+			using var fallbackDest = File.Create(rawDestPath);
+			await memStream.CopyToAsync(fallbackDest);
+			return rawDestPath;
 		}
-		else
-		{
-			using var destStream = File.Create(destPath);
-			await sourceStream.CopyToAsync(destStream);
-		}
+
+		// Read EXIF orientation and apply correction
+		memStream.Position = 0;
+		var corrected = ApplyExifOrientation(bitmap, memStream);
+		var final = corrected ?? bitmap;
+
+		using var image = SKImage.FromBitmap(final);
+		using var jpegData = image.Encode(SKEncodedImageFormat.Jpeg, 90);
+		using var destStream = File.Create(destPath);
+		jpegData.SaveTo(destStream);
+
+		corrected?.Dispose();
 
 		return destPath;
+	}
+
+	/// <summary>
+	/// Reads EXIF orientation from a stream and returns a corrected bitmap,
+	/// or null if no correction is needed.
+	/// </summary>
+	private static SKBitmap? ApplyExifOrientation(SKBitmap bitmap, Stream stream)
+	{
+		try
+		{
+			using var codec = SKCodec.Create(stream);
+			if (codec is null) return null;
+
+			var origin = codec.EncodedOrigin;
+			if (origin == SKEncodedOrigin.Default || origin == SKEncodedOrigin.TopLeft)
+				return null;
+
+			return ApplyOrientation(bitmap, origin);
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// Creates a new bitmap with the EXIF orientation transform applied.
+	/// </summary>
+	private static SKBitmap ApplyOrientation(SKBitmap bitmap, SKEncodedOrigin origin)
+	{
+		var needsSwap = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop
+			or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
+
+		var width = needsSwap ? bitmap.Height : bitmap.Width;
+		var height = needsSwap ? bitmap.Width : bitmap.Height;
+
+		var result = new SKBitmap(width, height, bitmap.ColorType, bitmap.AlphaType);
+		using var canvas = new SKCanvas(result);
+
+		switch (origin)
+		{
+			case SKEncodedOrigin.TopRight:
+				canvas.Scale(-1, 1, width / 2f, 0);
+				break;
+			case SKEncodedOrigin.BottomRight:
+				canvas.RotateDegrees(180, width / 2f, height / 2f);
+				break;
+			case SKEncodedOrigin.BottomLeft:
+				canvas.Scale(1, -1, 0, height / 2f);
+				break;
+			case SKEncodedOrigin.LeftTop:
+				canvas.Translate(0, 0);
+				canvas.RotateDegrees(270, 0, 0);
+				canvas.Translate(-height, 0);
+				canvas.Scale(-1, 1, height / 2f, 0);
+				break;
+			case SKEncodedOrigin.RightTop:
+				canvas.Translate(width, 0);
+				canvas.RotateDegrees(90);
+				break;
+			case SKEncodedOrigin.RightBottom:
+				canvas.Translate(width, 0);
+				canvas.RotateDegrees(90);
+				canvas.Scale(-1, 1, bitmap.Height / 2f, 0);
+				break;
+			case SKEncodedOrigin.LeftBottom:
+				canvas.Translate(0, height);
+				canvas.RotateDegrees(270);
+				break;
+		}
+
+		canvas.DrawBitmap(bitmap, 0, 0);
+		return result;
 	}
 
 	[RelayCommand]
