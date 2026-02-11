@@ -68,6 +68,7 @@ public class PetFunctions
 			DefaultFoodAmount = request.DefaultFoodAmount,
 			DefaultFoodUnit = request.DefaultFoodUnit,
 			DefaultFoodType = request.DefaultFoodType,
+			PetMedication = request.PetMedication,
 			LastModified = now,
 			IsDeleted = false
 		};
@@ -97,6 +98,7 @@ public class PetFunctions
 				DefaultFoodAmount = request.DefaultFoodAmount,
 				DefaultFoodUnit = request.DefaultFoodUnit,
 				DefaultFoodType = request.DefaultFoodType,
+				PetMedication = request.PetMedication,
 				LastModified = now
 			}
 		};

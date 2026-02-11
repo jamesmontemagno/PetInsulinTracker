@@ -19,6 +19,7 @@ public class PetDto
 	public double? DefaultFoodAmount { get; set; }
 	public string DefaultFoodUnit { get; set; } = "cups";
 	public string DefaultFoodType { get; set; } = "Dry";
+	public string? PetMedication { get; set; }
 	public string AccessLevel { get; set; } = "owner";
 	public DateTimeOffset LastModified { get; set; }
 	public bool IsDeleted { get; set; }
@@ -61,6 +62,19 @@ public class WeightLogDto
 	public double Weight { get; set; }
 	public string Unit { get; set; } = "lbs";
 	public DateTime RecordedAt { get; set; }
+	public string? Notes { get; set; }
+	public string? LoggedBy { get; set; }
+	public string? LoggedById { get; set; }
+	public DateTimeOffset LastModified { get; set; }
+	public bool IsDeleted { get; set; }
+}
+
+public class MedicationLogDto
+{
+	public string Id { get; set; } = string.Empty;
+	public string PetId { get; set; } = string.Empty;
+	public string MedicationName { get; set; } = string.Empty;
+	public DateTime AdministeredAt { get; set; }
 	public string? Notes { get; set; }
 	public string? LoggedBy { get; set; }
 	public string? LoggedById { get; set; }

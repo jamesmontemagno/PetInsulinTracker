@@ -57,11 +57,15 @@ public class NotificationService : INotificationService
 				Constants.ScheduleTypeInsulin => "💉",
 				Constants.ScheduleTypeFeeding => "🍽️",
 				Constants.ScheduleTypeCombined => "💉🍽️",
+				Constants.ScheduleTypeMedication => "💊",
 				_ => "⏰"
 			};
-			var scheduleText = schedule.ScheduleType == Constants.ScheduleTypeCombined 
-				? "insulin and feeding" 
-				: schedule.ScheduleType.ToLowerInvariant();
+			var scheduleText = schedule.ScheduleType switch
+			{
+				Constants.ScheduleTypeCombined => "insulin and feeding",
+				Constants.ScheduleTypeMedication => "medication",
+				_ => schedule.ScheduleType.ToLowerInvariant()
+			};
 			var request = new NotificationRequest
 			{
 				NotificationId = notificationId,

@@ -18,6 +18,7 @@
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                             <Label Text="Dose (IU)" Style="{StaticResource FormLabelStyle}" />
                             <Entry Text="{Binding DoseIU}" Keyboard="Numeric" />
+                            <Label Text="Required (must be greater than 0)" FontSize="12" TextColor="{DynamicResource Tertiary}" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
                             <Label Text="Injection Site" Style="{StaticResource FormLabelStyle}" />

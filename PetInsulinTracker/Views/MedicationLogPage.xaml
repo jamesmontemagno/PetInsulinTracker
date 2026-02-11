@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             xmlns:models="clr-namespace:PetInsulinTracker.Models"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             x:Class="PetInsulinTracker.Views.MedicationLogPage"
+             x:DataType="vm:MedicationLogViewModel"
+             Title="Medication Log"
+             BackgroundColor="{DynamicResource PageBackground}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add"
+                     Command="{Binding OpenAddLogCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{mi:Fluent Add24}" Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="*" Padding="20" RowSpacing="12">
+        <!-- History -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="12">
+                <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
+
+                <Label Text="No history yet"
+                       Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
+
+                <Button Text="Add your first entry"
+                        Command="{Binding OpenAddLogCommand}"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Logs}"
+                                     Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:MedicationLog">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Delete"
+                                                   BackgroundColor="{DynamicResource CurrentDanger}"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MedicationLogViewModel}}, x:DataType=vm:MedicationLogViewModel, Path=DeleteLogCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                                        <Border Grid.Column="0"
+                                                BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                                HeightRequest="40" WidthRequest="40">
+                                            <Label Text="💊" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                            <Label FontFamily="OpenSansSemibold" FontSize="15"
+                                                   Text="{Binding MedicationName}" />
+                                            <Label Text="{Binding AdministeredAt, StringFormat='{0:g}'}"
+                                                   Style="{StaticResource SubtleTextStyle}" />
+                                            <Label Text="{Binding LoggedBy, StringFormat='by {0}'}"
+                                                   Style="{StaticResource SubtleTextStyle}"
+                                                   IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                            <Label Text="{Binding Notes}"
+                                                   Style="{StaticResource SubtleTextStyle}"
+                                                   IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                        </VerticalStackLayout>
+                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                     Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
+                                                     IconColor="{DynamicResource CurrentSuccess}"
+                                                     IsVisible="{Binding IsSynced}" />
+                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                     Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
+                                                     IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
+                                                     IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

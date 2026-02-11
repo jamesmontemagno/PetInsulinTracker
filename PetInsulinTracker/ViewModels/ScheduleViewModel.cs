@@ -53,7 +53,7 @@ public partial class ScheduleViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isSyncing;
 
-	public List<string> ScheduleTypeOptions { get; } = [Constants.ScheduleTypeInsulin, Constants.ScheduleTypeFeeding, Constants.ScheduleTypeCombined];
+	public List<string> ScheduleTypeOptions { get; } = [Constants.ScheduleTypeInsulin, Constants.ScheduleTypeFeeding, Constants.ScheduleTypeCombined, Constants.ScheduleTypeMedication];
 
 	public string SaveButtonText => IsEditing ? "Save Changes" : "Add Schedule";
 
@@ -70,7 +70,8 @@ public partial class ScheduleViewModel : ObservableObject
 		var pet = await _db.GetPetAsync(PetId);
 		CanEdit = pet is not null && pet.AccessLevel != "guest";
 		var list = await _db.GetSchedulesAsync(PetId);
-		Schedules = new ObservableCollection<Schedule>(list);
+		Schedules = new ObservableCollection<Schedule>(
+			list.OrderBy(s => s.TimeOfDay));
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveSchedule))]

@@ -43,6 +43,9 @@ public partial class AddEditPetViewModel : ObservableObject
 	private DateTime? dateOfBirth;
 
 	[ObservableProperty]
+	private bool takesInsulin;
+
+	[ObservableProperty]
 	private string? insulinType;
 
 	[ObservableProperty]
@@ -70,6 +73,12 @@ public partial class AddEditPetViewModel : ObservableObject
 	private string defaultFoodType = "Dry";
 
 	[ObservableProperty]
+	private bool takesMedication;
+
+	[ObservableProperty]
+	private string? petMedication;
+
+	[ObservableProperty]
 	private string? photoPath;
 
 	[ObservableProperty]
@@ -92,6 +101,24 @@ public partial class AddEditPetViewModel : ObservableObject
 	public List<string> WeightUnitOptions { get; } = ["lbs", "kg"];
 	public List<string> FoodUnitOptions { get; } = ["cups", "grams", "oz", "cans"];
 	public List<string> FoodTypeOptions { get; } = ["Dry", "Wet", "Treat"];
+
+	partial void OnTakesInsulinChanged(bool value)
+	{
+		if (!value)
+		{
+			InsulinType = null;
+			InsulinConcentration = "U-40";
+			CurrentDoseIU = null;
+		}
+	}
+
+	partial void OnTakesMedicationChanged(bool value)
+	{
+		if (!value)
+		{
+			PetMedication = null;
+		}
+	}
 
 	partial void OnPetIdChanged(string? value)
 	{
@@ -127,6 +154,7 @@ public partial class AddEditPetViewModel : ObservableObject
 		Species = _existingPet.Species;
 		Breed = _existingPet.Breed;
 		DateOfBirth = _existingPet.DateOfBirth;
+		TakesInsulin = !string.IsNullOrEmpty(_existingPet.InsulinType) || _existingPet.CurrentDoseIU is not null;
 		InsulinType = _existingPet.InsulinType;
 		InsulinConcentration = _existingPet.InsulinConcentration ?? "U-40";
 		CurrentDoseIU = _existingPet.CurrentDoseIU;
@@ -136,6 +164,8 @@ public partial class AddEditPetViewModel : ObservableObject
 		DefaultFoodAmount = _existingPet.DefaultFoodAmount;
 		DefaultFoodUnit = _existingPet.DefaultFoodUnit;
 		DefaultFoodType = _existingPet.DefaultFoodType;
+		TakesMedication = !string.IsNullOrEmpty(_existingPet.PetMedication);
+		PetMedication = _existingPet.PetMedication;
 		PhotoPath = _existingPet.PhotoPath;
 		PhotoPreviewSource = !string.IsNullOrEmpty(_existingPet.PhotoPath)
 			? _existingPet.PhotoPath
@@ -172,6 +202,7 @@ public partial class AddEditPetViewModel : ObservableObject
 			pet.DefaultFoodAmount = DefaultFoodAmount;
 			pet.DefaultFoodUnit = DefaultFoodUnit;
 			pet.DefaultFoodType = DefaultFoodType;
+			pet.PetMedication = PetMedication;
 			pet.PhotoPath = PhotoPath;
 
 			await _db.SavePetAsync(pet);
@@ -295,6 +326,7 @@ public partial class AddEditPetViewModel : ObservableObject
 	/// Copies a photo to the app data directory, converting HEIC/HEIF to JPEG
 	/// since SkiaSharp may not decode HEIC on all platforms.
 	/// Also applies EXIF orientation correction so images display upright.
+	/// Returns a RELATIVE path from AppDataDirectory to ensure portability across app updates.
 	/// </summary>
 	private async Task<string?> CopyAndConvertPhotoAsync(FileResult result)
 	{
@@ -304,7 +336,8 @@ public partial class AddEditPetViewModel : ObservableObject
 		var ext = Path.GetExtension(result.FileName)?.ToLowerInvariant();
 		var isHeic = ext is ".heic" or ".heif";
 		// Always output JPEG so EXIF orientation is baked in
-		var destPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}.jpg");
+		var fileName = $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}.jpg";
+		var destPath = Path.Combine(destDir, fileName);
 
 		using var sourceStream = await result.OpenReadAsync();
 		using var memStream = new MemoryStream();
@@ -317,10 +350,12 @@ public partial class AddEditPetViewModel : ObservableObject
 			// Fallback: copy raw bytes
 			Debug.WriteLine($"SKBitmap.Decode failed for {result.FileName}, copying raw file");
 			memStream.Position = 0;
-			var rawDestPath = Path.Combine(destDir, $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{ext}");
+			var rawFileName = $"{(_existingPet?.Id ?? Guid.NewGuid().ToString())}{ext}";
+			var rawDestPath = Path.Combine(destDir, rawFileName);
 			using var fallbackDest = File.Create(rawDestPath);
 			await memStream.CopyToAsync(fallbackDest);
-			return rawDestPath;
+			// Return relative path from AppDataDirectory for portability
+			return Path.Combine("pet_photos", rawFileName);
 		}
 
 		// Read EXIF orientation and apply correction
@@ -335,7 +370,8 @@ public partial class AddEditPetViewModel : ObservableObject
 
 		corrected?.Dispose();
 
-		return destPath;
+		// Return relative path from AppDataDirectory for portability
+		return Path.Combine("pet_photos", Path.GetFileName(destPath));
 	}
 
 	/// <summary>

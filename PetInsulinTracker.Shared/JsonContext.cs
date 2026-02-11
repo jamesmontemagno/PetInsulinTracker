@@ -16,6 +16,7 @@ namespace PetInsulinTracker.Shared;
 [JsonSerializable(typeof(InsulinLogDto))]
 [JsonSerializable(typeof(FeedingLogDto))]
 [JsonSerializable(typeof(WeightLogDto))]
+[JsonSerializable(typeof(MedicationLogDto))]
 [JsonSerializable(typeof(VetInfoDto))]
 [JsonSerializable(typeof(ScheduleDto))]
 // Sync DTOs
@@ -41,6 +42,7 @@ namespace PetInsulinTracker.Shared;
 [JsonSerializable(typeof(List<InsulinLogDto>))]
 [JsonSerializable(typeof(List<FeedingLogDto>))]
 [JsonSerializable(typeof(List<WeightLogDto>))]
+[JsonSerializable(typeof(List<MedicationLogDto>))]
 [JsonSerializable(typeof(List<VetInfoDto>))]
 [JsonSerializable(typeof(List<ScheduleDto>))]
 [JsonSerializable(typeof(List<ShareCodeDto>))]

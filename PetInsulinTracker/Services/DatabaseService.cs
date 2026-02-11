@@ -20,6 +20,7 @@ public class DatabaseService : IDatabaseService
 		await _db.CreateTableAsync<FeedingLog>();
 		await _db.CreateTableAsync<WeightLog>();
 		await _db.CreateTableAsync<VetInfo>();
+		await _db.CreateTableAsync<MedicationLog>();
 		await _db.CreateTableAsync<Schedule>();
 
 		return _db;
@@ -65,6 +66,7 @@ public class DatabaseService : IDatabaseService
 		await db.ExecuteAsync("DELETE FROM [InsulinLog] WHERE [PetId] = ?", petId);
 		await db.ExecuteAsync("DELETE FROM [FeedingLog] WHERE [PetId] = ?", petId);
 		await db.ExecuteAsync("DELETE FROM [WeightLog] WHERE [PetId] = ?", petId);
+		await db.ExecuteAsync("DELETE FROM [MedicationLog] WHERE [PetId] = ?", petId);
 		await db.ExecuteAsync("DELETE FROM [VetInfo] WHERE [PetId] = ?", petId);
 		await db.ExecuteAsync("DELETE FROM [Schedule] WHERE [PetId] = ?", petId);
 		await db.ExecuteAsync("DELETE FROM [Pet] WHERE [Id] = ?", petId);
@@ -145,6 +147,52 @@ public class DatabaseService : IDatabaseService
 	}
 
 	public async Task<int> DeleteFeedingLogAsync(FeedingLog log)
+	{
+		log.IsDeleted = true;
+		log.IsSynced = false;
+		log.LastModified = DateTimeOffset.UtcNow;
+		var db = await GetConnectionAsync();
+		return await db.UpdateAsync(log);
+	}
+
+	// Medication Logs
+
+	public async Task<List<MedicationLog>> GetMedicationLogsAsync(string petId)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<MedicationLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.AdministeredAt)
+			.ToListAsync();
+	}
+
+	public async Task<MedicationLog?> GetMedicationLogAsync(string id)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<MedicationLog>().FirstOrDefaultAsync(l => l.Id == id);
+	}
+
+	public async Task<MedicationLog?> GetLatestMedicationLogAsync(string petId)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<MedicationLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.AdministeredAt)
+			.FirstOrDefaultAsync();
+	}
+
+	public async Task<int> SaveMedicationLogAsync(MedicationLog log)
+	{
+		log.LastModified = DateTimeOffset.UtcNow;
+		log.IsSynced = false;
+		var db = await GetConnectionAsync();
+		var existing = await db.Table<MedicationLog>().FirstOrDefaultAsync(l => l.Id == log.Id);
+		return existing is null
+			? await db.InsertAsync(log)
+			: await db.UpdateAsync(log);
+	}
+
+	public async Task<int> DeleteMedicationLogAsync(MedicationLog log)
 	{
 		log.IsDeleted = true;
 		log.IsSynced = false;

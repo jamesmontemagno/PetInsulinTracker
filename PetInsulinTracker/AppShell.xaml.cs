@@ -18,6 +18,8 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(nameof(AddWeightLogPage), typeof(AddWeightLogPage));
 		Routing.RegisterRoute(nameof(VetInfoPage), typeof(VetInfoPage));
 		Routing.RegisterRoute(nameof(SchedulePage), typeof(SchedulePage));
+		Routing.RegisterRoute(nameof(MedicationLogPage), typeof(MedicationLogPage));
+		Routing.RegisterRoute(nameof(AddMedicationLogPage), typeof(AddMedicationLogPage));
 		Routing.RegisterRoute(nameof(SharePage), typeof(SharePage));
 		Routing.RegisterRoute(nameof(ImportPetPage), typeof(ImportPetPage));
 		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));

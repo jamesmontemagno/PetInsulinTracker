@@ -29,11 +29,11 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Insulog needs access to your camera to take photos of your pet.</string>
+	<string>Pawse needs access to your camera to take photos of your pet.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Insulog needs access to your photo library to select photos of your pet.</string>
+	<string>Pawse needs access to your photo library to select photos of your pet.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Insulog needs access to save photos to your library.</string>
+	<string>Pawse needs access to save photos to your library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app does not use your location.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

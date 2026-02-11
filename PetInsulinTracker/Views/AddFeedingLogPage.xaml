@@ -17,6 +17,8 @@
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Food Name" Style="{StaticResource FormLabelStyle}" />
                         <Entry Text="{Binding FoodName}" Placeholder="e.g., Hill's w/d" />
+                        <Label Text="Required to save" FontSize="12" TextColor="{DynamicResource Tertiary}"
+                               IsVisible="{Binding FoodName, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">

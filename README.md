@@ -1,8 +1,8 @@
-# 🐾 Insulog — Pet Insulin & Wellness Tracker
+# 🐾 Pawse — Pet Health & Wellness Tracker
 
-> **[🌐 Visit the Insulog website](https://jamesmontemagno.github.io/PetInsulinTracker/)**
+> **[🌐 Visit the Pawse website](https://jamesmontemagno.github.io/PetInsulinTracker/)**
 
-**Insulog** is a cross-platform .NET MAUI app designed to help pet owners manage their diabetic pet's insulin regimen, feeding schedule, weight tracking, and overall wellness. Built with love for the furry family members who depend on us.
+**Pawse** is a cross-platform .NET MAUI app designed to help pet owners manage their pet's health — insulin tracking, medication schedules, feeding, weight monitoring, and overall wellness. Built with love for the furry family members who depend on us.
 
 ---
 

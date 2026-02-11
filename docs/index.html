@@ -3,8 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Insulog — Track your pet's insulin, feeding, weight, and more. Diabetic pet care, simplified.">
-	<title>Insulog — Diabetic Pet Care, Simplified</title>
+	<meta name="description" content="Pawse — Track your pet's insulin, feeding, weight, medication, and more. Pet care, simplified.">
+	<title>Pawse — Pet Care, Simplified</title>
 	<link rel="icon" href="images/icon.svg" type="image/svg+xml">
 	<link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,9 +13,9 @@
 	<!-- ========== 1. HERO ========== -->
 	<section class="hero">
 		<div class="container">
-			<img src="images/icon.svg" alt="Insulog icon" class="hero__icon" width="80" height="80">
-			<h1 class="hero__name">Insulog</h1>
-			<p class="hero__tagline">Diabetic Pet Care, Simplified</p>
+			<img src="images/icon.svg" alt="Pawse icon" class="hero__icon" width="80" height="80">
+			<h1 class="hero__name">Pawse</h1>
+			<p class="hero__tagline">Pet Care, Simplified</p>
 			<p class="hero__subtitle">
 				Track your pet's insulin, feeding, weight, and more — all in one beautiful app.
 				Share care with family and pet sitters effortlessly.
@@ -94,7 +94,7 @@
 	<!-- ========== 3. SCREENSHOTS GALLERY ========== -->
 	<section class="screenshots">
 		<div class="container">
-			<h2 class="section-title">See Insulog in action</h2>
+			<h2 class="section-title">See Pawse in action</h2>
 			<p class="section-subtitle"></p>
 
 			<div class="screenshots__scroll">
@@ -164,7 +164,7 @@
 	<section class="bottom-cta">
 		<div class="container">
 			<h2 class="section-title">Ready to take better care of your pet?</h2>
-			<p class="section-subtitle">Download Insulog today — it's free.</p>
+			<p class="section-subtitle">Download Pawse today — it's free.</p>
 
 			<div class="cta-group">
 				<a href="#" class="btn btn--white-outline">Download on the App Store</a>
@@ -176,8 +176,8 @@
 	<!-- ========== 6. FOOTER ========== -->
 	<footer class="footer">
 		<div class="container">
-			<p class="footer__brand">Insulog</p>
-			<p class="footer__tagline">Diabetic Pet Care, Simplified</p>
+			<p class="footer__brand">Pawse</p>
+			<p class="footer__tagline">Pet Care, Simplified</p>
 
 			<nav class="footer__links">
 				<a href="#" class="footer__link">GitHub</a>
@@ -185,7 +185,7 @@
 				<a href="#" class="footer__link">Contact</a>
 			</nav>
 
-			<p class="footer__copy">&copy; 2026 Insulog. Made with ❤️ for pets everywhere.</p>
+			<p class="footer__copy">&copy; 2026 Pawse. Made with ❤️ for pets everywhere.</p>
 		</div>
 	</footer>
 
@@ -219,12 +219,12 @@
 			s.classList.toggle('swatch--active', s.dataset.theme === name);
 		});
 
-		try { localStorage.setItem('insulog-theme', name); } catch(e) {}
+		try { localStorage.setItem('pawse-theme', name); } catch(e) {}
 	}
 
 	(function() {
 		try {
-			var saved = localStorage.getItem('insulog-theme');
+			var saved = localStorage.getItem('pawse-theme');
 			if (saved && themes[saved]) setTheme(saved);
 			else setTheme('berry');
 		} catch(e) { setTheme('berry'); }
