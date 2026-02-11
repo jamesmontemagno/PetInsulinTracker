@@ -248,6 +248,8 @@ public partial class WelcomePage : ContentPage
 		{
 			MorningMedicationCard.IsVisible = false;
 			EveningMedicationCard.IsVisible = false;
+			MorningMedicationEnabled.IsToggled = false;
+			EveningMedicationEnabled.IsToggled = false;
 		}
 	}
 

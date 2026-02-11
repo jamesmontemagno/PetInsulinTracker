@@ -702,16 +702,12 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Back"
                             Style="{StaticResource OutlineButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep5Back" />
-                    <Button Grid.Column="1" Text="Skip"
-                            Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Fill"
-                            Clicked="OnStep5Skip" />
-                    <Button Grid.Column="2" Text="Get Started"
+                    <Button Grid.Column="1" Text="Get Started"
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalOptions="Fill"
                             Clicked="OnStep5Done" />
