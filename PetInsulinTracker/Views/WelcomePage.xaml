@@ -428,10 +428,10 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Back"
                             Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Fill" WidthRequest="80"
+                            HorizontalOptions="Fill"
                             Clicked="OnStep3Back" />
                     <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
@@ -647,10 +647,10 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Back"
                             Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Fill" WidthRequest="80"
+                            HorizontalOptions="Fill"
                             Clicked="OnStep4Back" />
                     <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
@@ -702,10 +702,10 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Back"
                             Style="{StaticResource OutlineButtonStyle}"
-                            HorizontalOptions="Fill" WidthRequest="80"
+                            HorizontalOptions="Fill"
                             Clicked="OnStep5Back" />
                     <Button Grid.Column="1" Text="Skip"
                             Style="{StaticResource OutlineButtonStyle}"
