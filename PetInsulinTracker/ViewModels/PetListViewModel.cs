@@ -40,10 +40,12 @@ public partial class PetListItemViewModel : ObservableObject
 public partial class PetListViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
+	private readonly ISyncService _syncService;
 
-	public PetListViewModel(IDatabaseService db)
+	public PetListViewModel(IDatabaseService db, ISyncService syncService)
 	{
 		_db = db;
+		_syncService = syncService;
 		WeakReferenceMessenger.Default.Register<WeightUnitChangedMessage>(this, (_, _) => _ = LoadPetsAsync());
 		WeakReferenceMessenger.Default.Register<PetSavedMessage>(this, (_, _) => _ = LoadPetsAsync());
 	}
@@ -59,6 +61,16 @@ public partial class PetListViewModel : ObservableObject
 	{
 		try
 		{
+			// Try to sync all pets in the background before loading
+			try
+			{
+				await _syncService.SyncAllAsync();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Sync during refresh failed: {ex.Message}");
+			}
+
 			var petList = await _db.GetPetsAsync();
 			var petViewModels = new List<PetListItemViewModel>();
 
