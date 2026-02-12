@@ -41,6 +41,8 @@ public partial class PetListViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private DateTime _lastSyncTime = DateTime.MinValue;
+	private static readonly TimeSpan SyncInterval = TimeSpan.FromMinutes(30);
 
 	public PetListViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -61,14 +63,18 @@ public partial class PetListViewModel : ObservableObject
 	{
 		try
 		{
-			// Try to sync all pets in the background before loading
-			try
+			// Only sync if it's been longer than the sync interval
+			if (DateTime.UtcNow - _lastSyncTime >= SyncInterval)
 			{
-				await _syncService.SyncAllAsync();
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine($"Sync during refresh failed: {ex.Message}");
+				try
+				{
+					await _syncService.SyncAllAsync();
+					_lastSyncTime = DateTime.UtcNow;
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"Sync during refresh failed: {ex.Message}");
+				}
 			}
 
 			var petList = await _db.GetPetsAsync();

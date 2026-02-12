@@ -10,11 +10,6 @@
              Title="{Binding Pet.Name}"
              BackgroundColor="{DynamicResource PageBackground}">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Sync" Command="{Binding SyncNowCommand}"
-                     IconImageSource="{mi:Fluent ArrowSync24, IconSize=24, IconColor={DynamicResource PageText}}" />
-    </ContentPage.ToolbarItems>
-
     <ScrollView>
         <VerticalStackLayout Spacing="16">
 
@@ -40,24 +35,6 @@
                 <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="80" IconColor="White" Opacity="0.6"
                     HorizontalOptions="Center" VerticalOptions="Center"
                     IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
-
-                <!-- Sync status overlay -->
-                <Border BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 8"
-                        Padding="6,3"
-                        HorizontalOptions="Start" VerticalOptions="Start"
-                        Margin="12,12,0,0">
-                    <HorizontalStackLayout Spacing="4">
-                        <ActivityIndicator IsRunning="{Binding IsSyncing}"
-                                           IsVisible="{Binding IsSyncing}"
-                                           HeightRequest="10" WidthRequest="10"
-                                           Color="White" VerticalOptions="Center" />
-                        <Label Text="{Binding SyncStatus}"
-                               TextColor="White" FontSize="10"
-                               VerticalOptions="Center" />
-                    </HorizontalStackLayout>
-                </Border>
             </Grid>
 
             <!-- Pet Info Overlay (overlaps hero) -->
@@ -76,8 +53,7 @@
                                 </Label.Text>
                             </Label>
                             <Label Text="{Binding Pet.InsulinType, StringFormat='Insulin: {0}'}"
-                                   Style="{StaticResource SubtleTextStyle}"
-                                   IsVisible="{Binding ShowInsulinType}" />
+                                   Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1" Text="Edit"
                                 Style="{StaticResource GhostButtonStyle}"
@@ -85,7 +61,11 @@
                                 IsVisible="{Binding IsOwnerOrFull}"
                                 SemanticProperties.Hint="Edit pet" />
                     </Grid>
-
+                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
+                                           Color="{DynamicResource Primary}" />
+                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
+                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
@@ -99,7 +79,7 @@
             <VerticalStackLayout Padding="20,0" Spacing="16">
 
                 <!-- Dose Indicator + Quick Log -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" IsVisible="{Binding HasInsulinSchedule}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                     <!-- Overdue Warning Badge -->
                     <Border Grid.Column="0" Grid.ColumnSpan="2" 
                             BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
@@ -210,60 +190,11 @@
                     </VerticalStackLayout>
                 </Grid>
 
-                <!-- Medication Indicator + Quick Log -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" IsVisible="{Binding HasMedicationSchedule}">
-                    <!-- Overdue Warning Badge -->
-                    <Border Grid.Column="0" Grid.ColumnSpan="2" 
-                            BackgroundColor="{AppThemeBinding Light=#F3E5F5, Dark=#3D1A4A}"
-                            StrokeThickness="2"
-                            Stroke="{AppThemeBinding Light=#7B1FA2, Dark=#CE93D8}"
-                            StrokeShape="RoundRectangle 12"
-                            Padding="12,8"
-                            Margin="0,0,0,8"
-                            IsVisible="{Binding IsMedicationOverdue}"
-                            ZIndex="10">
-                        <HorizontalStackLayout Spacing="8">
-                            <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
-                                         IconColor="{AppThemeBinding Light=#7B1FA2, Dark=#CE93D8}" 
-                                         VerticalOptions="Center" />
-                            <Label Text="Medication is due!" 
-                                   FontFamily="OpenSansSemibold"
-                                   TextColor="{AppThemeBinding Light=#7B1FA2, Dark=#CE93D8}"
-                                   VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </Border>
-                    
-                    <controls:DoseIndicator Grid.Column="0"
-                                            WidthRequest="100" HeightRequest="100"
-                                            Progress="{Binding MedicationProgress}"
-                                            CenterText="{Binding MedicationCountdownText}"
-                                            SubText="{Binding MedicationRingSubText}"
-                                            RingColor="{Binding MedicationRingColor}"
-                                            TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                            CenterTextColor="{DynamicResource PageText}" />
-                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="8">
-                        <Button Text="💊 Quick Log Medication"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Command="{Binding QuickLogMedicationCommand}"
-                                SemanticProperties.Hint="Log the next upcoming medication" />
-                        <VerticalStackLayout Spacing="2">
-                            <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="Next med: {0} · {1}">
-                                        <Binding Path="MedicationCountdownText" />
-                                        <Binding Path="MedicationCountdownSubText" />
-                                    </MultiBinding>
-                                </Label.Text>
-                            </Label>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Grid>
-
                 <!-- Recent Activity -->
                 <Label Text="RECENT ACTIVITY" Style="{StaticResource OverlineStyle}" />
 
                 <!-- Last Insulin Card -->
-                <Border Style="{StaticResource CardStyle}" IsVisible="{Binding ShowInsulinCard}">
+                <Border Style="{StaticResource CardStyle}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToInsulinLogCommand}" />
                     </Border.GestureRecognizers>
@@ -295,25 +226,6 @@
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                             <Label Text="Last Feeding" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="{Binding LastFeedingText}" Style="{StaticResource SubtleTextStyle}" />
-                        </VerticalStackLayout>
-                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
-                    </Grid>
-                </Border>
-
-                <!-- Last Medication Card -->
-                <Border Style="{StaticResource CardStyle}" IsVisible="{Binding ShowMedicationCard}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding GoToMedicationLogCommand}" />
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
-                        <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
-                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                HeightRequest="40" WidthRequest="40">
-                            <Label Text="💊" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                            <Label Text="Last Medication" FontFamily="OpenSansSemibold" FontSize="14" />
-                            <Label Text="{Binding LastMedicationText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
                         <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
                     </Grid>
@@ -376,23 +288,63 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
+                <!-- Active Medications -->
+                <Label Text="ACTIVE MEDICATIONS" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
+                       IsVisible="{Binding ActiveMedicationSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMedicationSchedules}"
+                                     Spacing="8"
+                                     IsVisible="{Binding ActiveMedicationSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Schedule">
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid ColumnDefinitions="40,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A2A3D}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                            HeightRequest="40" WidthRequest="40">
+                                        <mi:MauiIcon Icon="{mi:Fluent CalendarAgenda24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding Label}" FontFamily="OpenSansSemibold" FontSize="14" />
+                                            <Label Text="{Binding TimeDisplay}" FontSize="13"
+                                                   TextColor="{DynamicResource CurrentPrimary}" FontFamily="OpenSansSemibold" />
+                                        </HorizontalStackLayout>
+                                        <Label Style="{StaticResource SubtleTextStyle}" FontSize="12">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} · {1}">
+                                                    <Binding Path="ScheduleType" />
+                                                    <Binding Path="ReminderDisplay" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
                 <!-- Manage Section -->
                 <Label Text="MANAGE" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Button Grid.Row="0" Grid.Column="0" Text="Schedules"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToScheduleCommand}" />
-                    <Button Grid.Row="0" Grid.Column="1" Text="Vet Info"
+                    <Button Grid.Row="0" Grid.Column="1" Text="Medication"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            Command="{Binding GoToMedicationScheduleCommand}" />
+                    <Button Grid.Row="1" Grid.Column="0" Text="Vet Info"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToVetInfoCommand}"
                             IsVisible="{Binding IsOwnerOrFull}" />
-                    <Button Grid.Row="1" Grid.Column="0" Text="Share"
+                    <Button Grid.Row="1" Grid.Column="1" Text="Share"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToShareCommand}"
                             IsVisible="{Binding IsOwnerOrFull}" />
-                    <Button Grid.Row="1" Grid.Column="1" Text="Delete Pet"
+                    <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Delete Pet"
                             Style="{StaticResource OutlineButtonStyle}"
                             TextColor="Red"
                             Command="{Binding DeletePetCommand}"
@@ -404,6 +356,29 @@
                         TextColor="Red"
                         Command="{Binding LeavePetCommand}"
                         IsVisible="{Binding IsOwner, Converter={StaticResource InvertedBoolConverter}}" />
+
+                <Button Text="Sync Now"
+                        Style="{StaticResource OutlineButtonStyle}"
+                        Command="{Binding SyncNowCommand}"
+                        IsEnabled="{Binding IsSyncing, Converter={StaticResource InvertedBoolConverter}}"
+                        SemanticProperties.Hint="Sync pet data with cloud" />
+
+                <!-- Sync Status -->
+                <Border Style="{StaticResource CardStyle}" Padding="12,8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <ActivityIndicator Grid.Column="0"
+                                           IsRunning="{Binding IsSyncing}"
+                                           IsVisible="{Binding IsSyncing}"
+                                           HeightRequest="18" WidthRequest="18"
+                                           Color="{DynamicResource Primary}"
+                                           VerticalOptions="Center" />
+                        <Label Grid.Column="1"
+                               Text="{Binding SyncStatus}"
+                               Style="{StaticResource SubtleTextStyle}"
+                               FontSize="12"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </Border>
 
                 <!-- Bottom spacing -->
                 <BoxView HeightRequest="20" BackgroundColor="Transparent" />
