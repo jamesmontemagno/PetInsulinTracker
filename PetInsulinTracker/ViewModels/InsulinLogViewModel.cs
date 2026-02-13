@@ -13,6 +13,7 @@ public partial class InsulinLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private List<InsulinLog> _allLogs = [];
 
 	public InsulinLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -25,6 +26,15 @@ public partial class InsulinLogViewModel : ObservableObject
 
 	[ObservableProperty]
 	private ObservableCollection<InsulinLog> logs = [];
+
+	[ObservableProperty]
+	private ObservableCollection<LogWeekGroup<InsulinLog>> groupedLogs = [];
+
+	[ObservableProperty]
+	private bool showingAll;
+
+	[ObservableProperty]
+	private bool isRefreshing;
 
 	// New log entry fields
 	[ObservableProperty]
@@ -68,7 +78,25 @@ public partial class InsulinLogViewModel : ObservableObject
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
+		_allLogs = logList;
 		Logs = new ObservableCollection<InsulinLog>(logList);
+		RebuildGroupedLogs();
+		IsRefreshing = false;
+	}
+
+	private void RebuildGroupedLogs()
+	{
+		var groups = LogWeekGroup<InsulinLog>.GroupByWeek(
+			_allLogs, l => l.AdministeredAt, recentOnly: !ShowingAll);
+		GroupedLogs = new ObservableCollection<LogWeekGroup<InsulinLog>>(groups);
+	}
+
+	[RelayCommand]
+	private async Task ToggleShowAllAsync()
+	{
+		ShowingAll = !ShowingAll;
+		RebuildGroupedLogs();
+		await Task.CompletedTask;
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveLog))]

@@ -13,6 +13,7 @@ public partial class MedicationLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private List<MedicationLog> _allLogs = [];
 
 	public MedicationLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -25,6 +26,15 @@ public partial class MedicationLogViewModel : ObservableObject
 
 	[ObservableProperty]
 	private ObservableCollection<MedicationLog> logs = [];
+
+	[ObservableProperty]
+	private ObservableCollection<LogWeekGroup<MedicationLog>> groupedLogs = [];
+
+	[ObservableProperty]
+	private bool showingAll;
+
+	[ObservableProperty]
+	private bool isRefreshing;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveLogCommand))]
@@ -83,7 +93,25 @@ public partial class MedicationLogViewModel : ObservableObject
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
+		_allLogs = logList;
 		Logs = new ObservableCollection<MedicationLog>(logList);
+		RebuildGroupedLogs();
+		IsRefreshing = false;
+	}
+
+	private void RebuildGroupedLogs()
+	{
+		var groups = LogWeekGroup<MedicationLog>.GroupByWeek(
+			_allLogs, l => l.AdministeredAt, recentOnly: !ShowingAll);
+		GroupedLogs = new ObservableCollection<LogWeekGroup<MedicationLog>>(groups);
+	}
+
+	[RelayCommand]
+	private async Task ToggleShowAllAsync()
+	{
+		ShowingAll = !ShowingAll;
+		RebuildGroupedLogs();
+		await Task.CompletedTask;
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveLog))]

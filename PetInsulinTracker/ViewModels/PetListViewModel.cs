@@ -58,60 +58,77 @@ public partial class PetListViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isRefreshing;
 
+	[ObservableProperty]
+	private bool isSyncing;
+
 	[RelayCommand]
 	private async Task LoadPetsAsync()
 	{
 		try
 		{
-			// Only sync if it's been longer than the sync interval
+			// Load local pets immediately so the UI is populated right away
+			await RefreshPetListFromDbAsync();
+
+			// Then sync in background if enough time has elapsed
 			if (DateTime.UtcNow - _lastSyncTime >= SyncInterval)
 			{
 				try
 				{
+					IsSyncing = true;
 					await _syncService.SyncAllAsync();
 					_lastSyncTime = DateTime.UtcNow;
+
+					// Refresh the list with any changes from sync
+					await RefreshPetListFromDbAsync();
 				}
 				catch (Exception ex)
 				{
 					System.Diagnostics.Debug.WriteLine($"Sync during refresh failed: {ex.Message}");
 				}
+				finally
+				{
+					IsSyncing = false;
+				}
 			}
-
-			var petList = await _db.GetPetsAsync();
-			var petViewModels = new List<PetListItemViewModel>();
-
-			foreach (var pet in petList)
-			{
-				var lastInsulin = await _db.GetLatestInsulinLogAsync(pet.Id);
-				var lastInsulinText = lastInsulin is not null
-					? $"{lastInsulin.AdministeredAt:g}"
-					: "No insulin logged";
-
-				var feedingLogs = await _db.GetFeedingLogsAsync(pet.Id);
-				var lastFeeding = feedingLogs.FirstOrDefault();
-				var lastFeedingText = lastFeeding is not null
-					? $"{lastFeeding.FedAt:g}"
-					: "No feeding logged";
-
-				// Get schedules to determine visibility
-				var schedules = await _db.GetSchedulesAsync(pet.Id);
-				var hasInsulinSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeInsulin || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
-				var hasFeedingSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeFeeding || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
-
-				// Determine visibility
-				var showWeight = pet.CurrentWeight.HasValue;
-				var showLastInsulin = !string.IsNullOrEmpty(pet.InsulinType) || pet.CurrentDoseIU.HasValue || hasInsulinSchedule;
-				var showLastFeeding = !string.IsNullOrEmpty(pet.DefaultFoodName) || pet.DefaultFoodAmount.HasValue || hasFeedingSchedule;
-
-				petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText, showWeight, showLastInsulin, showLastFeeding));
-			}
-
-			Pets = new ObservableCollection<PetListItemViewModel>(petViewModels);
 		}
 		finally
 		{
 			IsRefreshing = false;
 		}
+	}
+
+	private async Task RefreshPetListFromDbAsync()
+	{
+		var petList = await _db.GetPetsAsync();
+		var petViewModels = new List<PetListItemViewModel>();
+
+		foreach (var pet in petList)
+		{
+			var lastInsulin = await _db.GetLatestInsulinLogAsync(pet.Id);
+			var lastInsulinText = lastInsulin is not null
+				? $"{lastInsulin.AdministeredAt:g}"
+				: "No insulin logged";
+
+			var feedingLogs = await _db.GetFeedingLogsAsync(pet.Id);
+			var lastFeeding = feedingLogs.FirstOrDefault();
+			var lastFeedingText = lastFeeding is not null
+				? $"{lastFeeding.FedAt:g}"
+				: "No feeding logged";
+
+			// Get schedules to determine visibility
+			var schedules = await _db.GetSchedulesAsync(pet.Id);
+			var hasInsulinSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeInsulin || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
+			var hasFeedingSchedule = schedules.Any(s => s.ScheduleType == Helpers.Constants.ScheduleTypeFeeding || s.ScheduleType == Helpers.Constants.ScheduleTypeCombined);
+
+			// Determine visibility
+			var showWeight = pet.CurrentWeight.HasValue;
+			var showLastInsulin = !string.IsNullOrEmpty(pet.InsulinType) || pet.CurrentDoseIU.HasValue || hasInsulinSchedule;
+			var showLastFeeding = !string.IsNullOrEmpty(pet.DefaultFoodName) || pet.DefaultFoodAmount.HasValue || hasFeedingSchedule;
+
+			petViewModels.Add(new PetListItemViewModel(pet, lastInsulinText, lastFeedingText, showWeight, showLastInsulin, showLastFeeding));
+		}
+
+		Pets = new ObservableCollection<PetListItemViewModel>(petViewModels);
 	}
 
 	[RelayCommand]

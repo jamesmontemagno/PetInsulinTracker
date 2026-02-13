@@ -14,6 +14,7 @@ public partial class WeightLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private List<WeightLog> _allLogs = [];
 
 	public WeightLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -30,6 +31,15 @@ public partial class WeightLogViewModel : ObservableObject
 
 	[ObservableProperty]
 	private ObservableCollection<WeightLog> logs = [];
+
+	[ObservableProperty]
+	private ObservableCollection<LogWeekGroup<WeightLog>> groupedLogs = [];
+
+	[ObservableProperty]
+	private bool showingAll;
+
+	[ObservableProperty]
+	private bool isRefreshing;
 
 	// New log entry fields
 	[ObservableProperty]
@@ -79,8 +89,26 @@ public partial class WeightLogViewModel : ObservableObject
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
+		_allLogs = logList;
 		Logs = new ObservableCollection<WeightLog>(logList);
+		RebuildGroupedLogs();
 		UpdateTrend();
+		IsRefreshing = false;
+	}
+
+	private void RebuildGroupedLogs()
+	{
+		var groups = LogWeekGroup<WeightLog>.GroupByWeek(
+			_allLogs, l => l.RecordedAt, recentOnly: !ShowingAll);
+		GroupedLogs = new ObservableCollection<LogWeekGroup<WeightLog>>(groups);
+	}
+
+	[RelayCommand]
+	private async Task ToggleShowAllAsync()
+	{
+		ShowingAll = !ShowingAll;
+		RebuildGroupedLogs();
+		await Task.CompletedTask;
 	}
 
 	private void UpdateTrend()

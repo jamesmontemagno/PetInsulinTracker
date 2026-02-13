@@ -13,6 +13,7 @@ public partial class FeedingLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
+	private List<FeedingLog> _allLogs = [];
 
 	public FeedingLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -25,6 +26,15 @@ public partial class FeedingLogViewModel : ObservableObject
 
 	[ObservableProperty]
 	private ObservableCollection<FeedingLog> logs = [];
+
+	[ObservableProperty]
+	private ObservableCollection<LogWeekGroup<FeedingLog>> groupedLogs = [];
+
+	[ObservableProperty]
+	private bool showingAll;
+
+	[ObservableProperty]
+	private bool isRefreshing;
 
 	// New log entry fields
 	[ObservableProperty]
@@ -93,7 +103,25 @@ public partial class FeedingLogViewModel : ObservableObject
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
+		_allLogs = logList;
 		Logs = new ObservableCollection<FeedingLog>(logList);
+		RebuildGroupedLogs();
+		IsRefreshing = false;
+	}
+
+	private void RebuildGroupedLogs()
+	{
+		var groups = LogWeekGroup<FeedingLog>.GroupByWeek(
+			_allLogs, l => l.FedAt, recentOnly: !ShowingAll);
+		GroupedLogs = new ObservableCollection<LogWeekGroup<FeedingLog>>(groups);
+	}
+
+	[RelayCommand]
+	private async Task ToggleShowAllAsync()
+	{
+		ShowingAll = !ShowingAll;
+		RebuildGroupedLogs();
+		await Task.CompletedTask;
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveLog))]

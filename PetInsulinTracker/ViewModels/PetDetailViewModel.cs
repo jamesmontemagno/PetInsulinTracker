@@ -323,7 +323,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 				case CountdownState.DoneEarly:
 					IsDoseOverdue = false;
 					DoseProgress = 1.0;
-					DoseCountdownText = "\u2713";
+					DoseCountdownText = "Done";
 					DoseCountdownSubText = $"Done for {window.Next:t}";
 					DoseRingSubText = $"{label} done";
 					break;
@@ -403,7 +403,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 				case CountdownState.DoneEarly:
 					IsFeedingOverdue = false;
 					FeedingProgress = 1.0;
-					FeedingCountdownText = "\u2713";
+					FeedingCountdownText = "Done";
 					FeedingCountdownSubText = $"Done for {window.Next:t}";
 					FeedingRingSubText = "feeding done";
 					break;

@@ -16,88 +16,107 @@
                 <FontImageSource Glyph="{mi:Fluent Add24}" Color="{DynamicResource PageText}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
+        <ToolbarItem Command="{Binding ToggleShowAllCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{mi:Fluent MoreHorizontal24}" Color="{DynamicResource PageText}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="*" Padding="20" RowSpacing="12">
-            <!-- History -->
-            <ScrollView Grid.Row="0">
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding LoadLogsCommand}">
+        <ScrollView Padding="20">
             <VerticalStackLayout Spacing="12">
-            <Label Text="HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
+                <Label Text="LAST 30 DAYS" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
+                       IsVisible="{Binding ShowingAll, Converter={StaticResource InvertedBoolConverter}}" />
+                <Label Text="ALL HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
+                       IsVisible="{Binding ShowingAll}" />
 
-                 <Label Text="No history yet"
-                     Style="{StaticResource SubtleTextStyle}" FontSize="14"
-                     HorizontalTextAlignment="Center"
-                     IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
+                <Label Text="No history yet"
+                       Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
 
-                    <Button Text="Add your first entry"
+                <Button Text="Add your first entry"
                         Command="{Binding OpenAddLogCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         HorizontalOptions="Center"
                         IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
 
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Logs}"
-                                 Spacing="8">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="models:FeedingLog">
-                        <SwipeView>
-                            <SwipeView.RightItems>
-                                <SwipeItems>
-                                    <SwipeItem Text="Delete"
-                                               BackgroundColor="{DynamicResource CurrentDanger}"
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FeedingLogViewModel}}, x:DataType=vm:FeedingLogViewModel, Path=DeleteLogCommand}"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
-                            <Border Style="{StaticResource CardStyle}">
-                                <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
-                                    <Border Grid.Column="0"
-                                            BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                            HeightRequest="40" WidthRequest="40">
-                                        <mi:MauiIcon Icon="{mi:Fluent Food24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                        <Label FontFamily="OpenSansSemibold" FontSize="15">
-                                            <Label.Text>
-                                                <MultiBinding StringFormat="{}{0} — {1} {2}">
-                                                    <Binding Path="FoodName" />
-                                                    <Binding Path="Amount" />
-                                                    <Binding Path="Unit" />
-                                                </MultiBinding>
-                                            </Label.Text>
-                                        </Label>
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Border BackgroundColor="{DynamicResource CurrentPrimary}"
-                                                    StrokeThickness="0" StrokeShape="RoundRectangle 8"
-                                                    Padding="8,2">
-                                                <Label Text="{Binding FoodType}" Style="{StaticResource BadgeTextStyle}" />
-                                            </Border>
-                                            <Label Text="{Binding FedAt, StringFormat='{0:g}'}"
-                                                   Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center" />
-                                            <Label Text="{Binding LoggedBy, StringFormat='· {0}'}"
-                                                   Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center"
-                                                   IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
-                                        </HorizontalStackLayout>
-                                        <Label Text="{Binding Notes}"
-                                               Style="{StaticResource SubtleTextStyle}"
-                                               IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
-                                    </VerticalStackLayout>
-                                    <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
-                                                 Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
-                                                 IconColor="{DynamicResource CurrentSuccess}"
-                                                 IsVisible="{Binding IsSynced}" />
-                                    <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
-                                                 Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
-                                                 IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
-                                                 IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
-                                </Grid>
-                            </Border>
-                        </SwipeView>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupedLogs}"
+                                     Spacing="4">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding WeekLabel}" Style="{StaticResource SubtleTextStyle}"
+                                       FontFamily="OpenSansSemibold" FontSize="13" Margin="0,12,0,4" />
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding .}"
+                                                     Spacing="8">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:FeedingLog">
+                                            <SwipeView>
+                                                <SwipeView.RightItems>
+                                                    <SwipeItems>
+                                                        <SwipeItem Text="Delete"
+                                                                   BackgroundColor="{DynamicResource CurrentDanger}"
+                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FeedingLogViewModel}}, x:DataType=vm:FeedingLogViewModel, Path=DeleteLogCommand}"
+                                                                   CommandParameter="{Binding .}" />
+                                                    </SwipeItems>
+                                                </SwipeView.RightItems>
+                                                <Border Style="{StaticResource CardStyle}">
+                                                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                                                        <Border Grid.Column="0"
+                                                                BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3D24}"
+                                                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                                                HeightRequest="40" WidthRequest="40">
+                                                            <mi:MauiIcon Icon="{mi:Fluent Food24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                        </Border>
+                                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                            <Label FontFamily="OpenSansSemibold" FontSize="15">
+                                                                <Label.Text>
+                                                                    <MultiBinding StringFormat="{}{0} — {1} {2}">
+                                                                        <Binding Path="FoodName" />
+                                                                        <Binding Path="Amount" />
+                                                                        <Binding Path="Unit" />
+                                                                    </MultiBinding>
+                                                                </Label.Text>
+                                                            </Label>
+                                                            <HorizontalStackLayout Spacing="8">
+                                                                <Border BackgroundColor="{DynamicResource CurrentPrimary}"
+                                                                        StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                                        Padding="8,2">
+                                                                    <Label Text="{Binding FoodType}" Style="{StaticResource BadgeTextStyle}" />
+                                                                </Border>
+                                                                <Label Text="{Binding FedAt, StringFormat='{0:g}'}"
+                                                                       Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center" />
+                                                                <Label Text="{Binding LoggedBy, StringFormat='· {0}'}"
+                                                                       Style="{StaticResource SubtleTextStyle}" VerticalOptions="Center"
+                                                                       IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                            <Label Text="{Binding Notes}"
+                                                                   Style="{StaticResource SubtleTextStyle}"
+                                                                   IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                                        </VerticalStackLayout>
+                                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                                     Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
+                                                                     IconColor="{DynamicResource CurrentSuccess}"
+                                                                     IsVisible="{Binding IsSynced}" />
+                                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                                                     Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
+                                                                     IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
+                                                                     IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
+                                                    </Grid>
+                                                </Border>
+                                            </SwipeView>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
             </VerticalStackLayout>
-            </VerticalStackLayout>
-            </ScrollView>
-    </Grid>
+        </ScrollView>
+    </RefreshView>
 
 </ContentPage>

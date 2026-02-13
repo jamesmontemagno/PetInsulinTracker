@@ -116,6 +116,16 @@
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.Footer>
+                <VerticalStackLayout Padding="20,12" IsVisible="{Binding IsSyncing}">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="16" WidthRequest="16"
+                                           Color="{DynamicResource Primary}" VerticalOptions="Center" />
+                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </CollectionView.Footer>
         </CollectionView>
     </RefreshView>
 

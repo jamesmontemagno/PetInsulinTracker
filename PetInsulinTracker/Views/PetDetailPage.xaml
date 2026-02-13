@@ -97,28 +97,25 @@
             <VerticalStackLayout Padding="20,0" Spacing="16">
 
                 <!-- Dose Indicator + Quick Log -->
+                <!-- Overdue Warning Badge -->
+                <Border BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
+                        StrokeThickness="2"
+                        Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12,8"
+                        IsVisible="{Binding IsDoseOverdue}">
+                    <HorizontalStackLayout Spacing="8">
+                        <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
+                                     IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
+                                     VerticalOptions="Center" />
+                        <Label Text="Insulin dose is overdue!" 
+                               FontFamily="OpenSansSemibold"
+                               TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
-                    <!-- Overdue Warning Badge -->
-                    <Border Grid.Column="0" Grid.ColumnSpan="2" 
-                            BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
-                            StrokeThickness="2"
-                            Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                            StrokeShape="RoundRectangle 12"
-                            Padding="12,8"
-                            Margin="0,0,0,8"
-                            IsVisible="{Binding IsDoseOverdue}"
-                            ZIndex="10">
-                        <HorizontalStackLayout Spacing="8">
-                            <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
-                                         IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
-                                         VerticalOptions="Center" />
-                            <Label Text="Insulin dose is overdue!" 
-                                   FontFamily="OpenSansSemibold"
-                                   TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                                   VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </Border>
-                    
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding DoseProgress}"
@@ -159,28 +156,25 @@
                 </Grid>
 
                 <!-- Feeding Indicator + Quick Log -->
+                <!-- Overdue Feeding Warning Badge -->
+                <Border BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
+                        StrokeThickness="2"
+                        Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="12,8"
+                        IsVisible="{Binding IsFeedingOverdue}">
+                    <HorizontalStackLayout Spacing="8">
+                        <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
+                                     IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
+                                     VerticalOptions="Center" />
+                        <Label Text="Feeding is overdue!" 
+                               FontFamily="OpenSansSemibold"
+                               TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" IsVisible="{Binding ShowSeparateFeedingCountdown}">
-                    <!-- Overdue Warning Badge -->
-                    <Border Grid.Column="0" Grid.ColumnSpan="2" 
-                            BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#4A1F1F}"
-                            StrokeThickness="2"
-                            Stroke="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                            StrokeShape="RoundRectangle 12"
-                            Padding="12,8"
-                            Margin="0,0,0,8"
-                            IsVisible="{Binding IsFeedingOverdue}"
-                            ZIndex="10">
-                        <HorizontalStackLayout Spacing="8">
-                            <mi:MauiIcon Icon="{mi:Fluent Warning24}" IconSize="20" 
-                                         IconColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}" 
-                                         VerticalOptions="Center" />
-                            <Label Text="Feeding is overdue!" 
-                                   FontFamily="OpenSansSemibold"
-                                   TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                                   VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </Border>
-                    
                     <controls:DoseIndicator Grid.Column="0"
                                             WidthRequest="100" HeightRequest="100"
                                             Progress="{Binding FeedingProgress}"
