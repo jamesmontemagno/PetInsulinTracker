@@ -150,6 +150,17 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		Pet = await _db.GetPetAsync(id);
 		if (Pet is null) return;
 
+		// Restore last sync status from preferences
+		var lastSyncStr = Preferences.Get($"lastSync_{id}", string.Empty);
+		if (!string.IsNullOrEmpty(lastSyncStr) && DateTimeOffset.TryParse(lastSyncStr, out var lastSyncTime))
+		{
+			SyncStatus = $"Last synced: {lastSyncTime.LocalDateTime:g}";
+		}
+		else
+		{
+			SyncStatus = "Not synced";
+		}
+
 		IsGuest = Pet.AccessLevel == "guest";
 		IsOwnerOrFull = Pet.AccessLevel != "guest";
 		IsOwner = Pet.AccessLevel == "owner";

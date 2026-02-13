@@ -10,6 +10,11 @@
              Title="{Binding Pet.Name}"
              BackgroundColor="{DynamicResource PageBackground}">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Sync" Command="{Binding SyncNowCommand}"
+                     IconImageSource="{mi:Fluent ArrowSync24, IconSize=24, IconColor={DynamicResource PageText}}" />
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout Spacing="16">
 
@@ -35,6 +40,24 @@
                 <mi:MauiIcon Icon="{mi:Fluent AnimalDog24}" IconSize="80" IconColor="White" Opacity="0.6"
                     HorizontalOptions="Center" VerticalOptions="Center"
                     IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
+
+                <!-- Sync status overlay -->
+                <Border BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="6,3"
+                        HorizontalOptions="Start" VerticalOptions="Start"
+                        Margin="12,12,0,0">
+                    <HorizontalStackLayout Spacing="4">
+                        <ActivityIndicator IsRunning="{Binding IsSyncing}"
+                                           IsVisible="{Binding IsSyncing}"
+                                           HeightRequest="10" WidthRequest="10"
+                                           Color="White" VerticalOptions="Center" />
+                        <Label Text="{Binding SyncStatus}"
+                               TextColor="White" FontSize="10"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
             </Grid>
 
             <!-- Pet Info Overlay (overlaps hero) -->
@@ -61,11 +84,6 @@
                                 IsVisible="{Binding IsOwnerOrFull}"
                                 SemanticProperties.Hint="Edit pet" />
                     </Grid>
-                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsSyncing}">
-                        <ActivityIndicator IsRunning="{Binding IsSyncing}" HeightRequest="14" WidthRequest="14"
-                                           Color="{DynamicResource Primary}" />
-                        <Label Text="Syncing…" Style="{StaticResource SubtleTextStyle}" FontSize="12" />
-                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
@@ -329,22 +347,19 @@
                 <!-- Manage Section -->
                 <Label Text="MANAGE" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0" />
 
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Button Grid.Row="0" Grid.Column="0" Text="Schedules"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToScheduleCommand}" />
-                    <Button Grid.Row="0" Grid.Column="1" Text="Medication"
-                            Style="{StaticResource OutlineButtonStyle}"
-                            Command="{Binding GoToMedicationScheduleCommand}" />
-                    <Button Grid.Row="1" Grid.Column="0" Text="Vet Info"
+                    <Button Grid.Row="0" Grid.Column="1" Text="Vet Info"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToVetInfoCommand}"
                             IsVisible="{Binding IsOwnerOrFull}" />
-                    <Button Grid.Row="1" Grid.Column="1" Text="Share"
+                    <Button Grid.Row="1" Grid.Column="0" Text="Share"
                             Style="{StaticResource OutlineButtonStyle}"
                             Command="{Binding GoToShareCommand}"
                             IsVisible="{Binding IsOwnerOrFull}" />
-                    <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Delete Pet"
+                    <Button Grid.Row="1" Grid.Column="1" Text="Delete Pet"
                             Style="{StaticResource OutlineButtonStyle}"
                             TextColor="Red"
                             Command="{Binding DeletePetCommand}"
@@ -356,29 +371,6 @@
                         TextColor="Red"
                         Command="{Binding LeavePetCommand}"
                         IsVisible="{Binding IsOwner, Converter={StaticResource InvertedBoolConverter}}" />
-
-                <Button Text="Sync Now"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        Command="{Binding SyncNowCommand}"
-                        IsEnabled="{Binding IsSyncing, Converter={StaticResource InvertedBoolConverter}}"
-                        SemanticProperties.Hint="Sync pet data with cloud" />
-
-                <!-- Sync Status -->
-                <Border Style="{StaticResource CardStyle}" Padding="12,8">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                        <ActivityIndicator Grid.Column="0"
-                                           IsRunning="{Binding IsSyncing}"
-                                           IsVisible="{Binding IsSyncing}"
-                                           HeightRequest="18" WidthRequest="18"
-                                           Color="{DynamicResource Primary}"
-                                           VerticalOptions="Center" />
-                        <Label Grid.Column="1"
-                               Text="{Binding SyncStatus}"
-                               Style="{StaticResource SubtleTextStyle}"
-                               FontSize="12"
-                               VerticalOptions="Center" />
-                    </Grid>
-                </Border>
 
                 <!-- Bottom spacing -->
                 <BoxView HeightRequest="20" BackgroundColor="Transparent" />
