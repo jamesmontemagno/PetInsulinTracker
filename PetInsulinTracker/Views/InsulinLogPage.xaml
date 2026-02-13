@@ -18,95 +18,93 @@
         </ToolbarItem>
         <ToolbarItem Command="{Binding ToggleShowAllCommand}">
             <ToolbarItem.IconImageSource>
-                <FontImageSource Glyph="{mi:Fluent MoreHorizontal24}" Color="{DynamicResource PageText}" />
+                <FontImageSource Glyph="{mi:Fluent CalendarMonth24}" Color="{DynamicResource PageText}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding LoadLogsCommand}">
-        <ScrollView Padding="20">
-            <VerticalStackLayout Spacing="12">
-                <Label Text="LAST 30 DAYS" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
-                       IsVisible="{Binding ShowingAll, Converter={StaticResource InvertedBoolConverter}}" />
-                <Label Text="ALL HISTORY" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
-                       IsVisible="{Binding ShowingAll}" />
-
-                <Label Text="No history yet"
-                       Style="{StaticResource SubtleTextStyle}" FontSize="14"
-                       HorizontalTextAlignment="Center"
-                       IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
-
-                <Button Text="Add your first entry"
-                        Command="{Binding OpenAddLogCommand}"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        HorizontalOptions="Center"
-                        IsVisible="{Binding Logs.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
-
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupedLogs}"
-                                     Spacing="4">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <VerticalStackLayout Spacing="8">
-                                <Label Text="{Binding WeekLabel}" Style="{StaticResource SubtleTextStyle}"
-                                       FontFamily="OpenSansSemibold" FontSize="13" Margin="0,12,0,4" />
-                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding .}"
-                                                     Spacing="8">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="models:InsulinLog">
-                                            <SwipeView>
-                                                <SwipeView.RightItems>
-                                                    <SwipeItems>
-                                                        <SwipeItem Text="Delete"
-                                                                   BackgroundColor="{DynamicResource CurrentDanger}"
-                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InsulinLogViewModel}}, x:DataType=vm:InsulinLogViewModel, Path=DeleteLogCommand}"
-                                                                   CommandParameter="{Binding .}" />
-                                                    </SwipeItems>
-                                                </SwipeView.RightItems>
-                                                <Border Style="{StaticResource CardStyle}">
-                                                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
-                                                        <Border Grid.Column="0"
-                                                                BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
-                                                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                                                HeightRequest="40" WidthRequest="40">
-                                                            <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
-                                                        </Border>
-                                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                                            <Label FontFamily="OpenSansSemibold" FontSize="15"
-                                                                   Text="{Binding DoseIU, StringFormat='{0} IU'}" />
-                                                            <Label Text="{Binding AdministeredAt, StringFormat='{0:g}'}"
-                                                                   Style="{StaticResource SubtleTextStyle}" />
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Label Text="{Binding InjectionSite}"
-                                                                       Style="{StaticResource SubtleTextStyle}" />
-                                                                <Label Text="{Binding LoggedBy, StringFormat='by {0}'}"
-                                                                       Style="{StaticResource SubtleTextStyle}"
-                                                                       IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
-                                                            </HorizontalStackLayout>
-                                                            <Label Text="{Binding Notes}"
-                                                                   Style="{StaticResource SubtleTextStyle}"
-                                                                   IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
-                                                        </VerticalStackLayout>
-                                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
-                                                                     Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
-                                                                     IconColor="{DynamicResource CurrentSuccess}"
-                                                                     IsVisible="{Binding IsSynced}" />
-                                                        <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
-                                                                     Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
-                                                                     IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
-                                                                     IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
-                                                    </Grid>
-                                                </Border>
-                                            </SwipeView>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </VerticalStackLayout>
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+        <CollectionView ItemsSource="{Binding GroupedLogs}"
+                        IsGrouped="True"
+                        SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16" Padding="40">
+                    <Label Text="No history yet"
+                           Style="{StaticResource SubtleTextStyle}" FontSize="14"
+                           HorizontalTextAlignment="Center" />
+                    <Button Text="Add your first entry"
+                            Command="{Binding OpenAddLogCommand}"
+                            Style="{StaticResource OutlineButtonStyle}"
+                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </ScrollView>
+            </CollectionView.EmptyView>
+            <CollectionView.Header>
+                <VerticalStackLayout Padding="20,8,20,0">
+                    <Label Text="LAST 30 DAYS" Style="{StaticResource OverlineStyle}"
+                           IsVisible="{Binding ShowingAll, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Label Text="ALL HISTORY" Style="{StaticResource OverlineStyle}"
+                           IsVisible="{Binding ShowingAll}" />
+                </VerticalStackLayout>
+            </CollectionView.Header>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="x:Object">
+                    <Label Text="{Binding WeekLabel}" Style="{StaticResource SubtleTextStyle}"
+                           FontFamily="OpenSansSemibold" FontSize="13" Margin="20,12,20,4" />
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:InsulinLog">
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Delete"
+                                           BackgroundColor="{DynamicResource CurrentDanger}"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InsulinLogViewModel}}, x:DataType=vm:InsulinLogViewModel, Path=DeleteLogCommand}"
+                                           CommandParameter="{Binding .}" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+                        <Border Style="{StaticResource CardStyle}" Margin="20,0">
+                            <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                                <Border Grid.Column="0"
+                                        BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3D2C1E}"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                        HeightRequest="40" WidthRequest="40">
+                                    <mi:MauiIcon Icon="{mi:Fluent Syringe24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label FontFamily="OpenSansSemibold" FontSize="15"
+                                           Text="{Binding DoseIU, StringFormat='{0} IU'}" />
+                                    <Label Text="{Binding AdministeredAt, StringFormat='{0:g}'}"
+                                           Style="{StaticResource SubtleTextStyle}" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="{Binding InjectionSite}"
+                                               Style="{StaticResource SubtleTextStyle}" />
+                                        <Label Text="{Binding LoggedBy, StringFormat='by {0}'}"
+                                               Style="{StaticResource SubtleTextStyle}"
+                                               IsVisible="{Binding LoggedBy, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                    </HorizontalStackLayout>
+                                    <Label Text="{Binding Notes}"
+                                           Style="{StaticResource SubtleTextStyle}"
+                                           IsVisible="{Binding Notes, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                                </VerticalStackLayout>
+                                <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                             Icon="{mi:Fluent CloudCheckmark24}" IconSize="16"
+                                             IconColor="{DynamicResource CurrentSuccess}"
+                                             IsVisible="{Binding IsSynced}" />
+                                <mi:MauiIcon Grid.Column="2" VerticalOptions="Start"
+                                             Icon="{mi:Fluent CloudArrowUp24}" IconSize="16"
+                                             IconColor="{AppThemeBinding Light=#999999, Dark=#666666}"
+                                             IsVisible="{Binding IsSynced, Converter={StaticResource InvertedBoolConverter}}" />
+                            </Grid>
+                        </Border>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </RefreshView>
 
 </ContentPage>

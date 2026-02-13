@@ -14,7 +14,7 @@ public partial class WeightLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
-	private List<WeightLog> _allLogs = [];
+	private const int DefaultLimit = 50;
 
 	public WeightLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -83,32 +83,26 @@ public partial class WeightLogViewModel : ObservableObject
 		if (pet is not null)
 			Unit = pet.WeightUnit;
 
-		var logList = await _db.GetWeightLogsAsync(PetId);
+		var logList = ShowingAll
+			? await _db.GetWeightLogsAsync(PetId)
+			: await _db.GetWeightLogsAsync(PetId, DefaultLimit);
 
 		// Filter for guest access — only show own logs
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
-		_allLogs = logList;
 		Logs = new ObservableCollection<WeightLog>(logList);
-		RebuildGroupedLogs();
+		GroupedLogs = new ObservableCollection<LogWeekGroup<WeightLog>>(
+			LogWeekGroup<WeightLog>.GroupByWeek(logList, l => l.RecordedAt, recentOnly: !ShowingAll));
 		UpdateTrend();
 		IsRefreshing = false;
-	}
-
-	private void RebuildGroupedLogs()
-	{
-		var groups = LogWeekGroup<WeightLog>.GroupByWeek(
-			_allLogs, l => l.RecordedAt, recentOnly: !ShowingAll);
-		GroupedLogs = new ObservableCollection<LogWeekGroup<WeightLog>>(groups);
 	}
 
 	[RelayCommand]
 	private async Task ToggleShowAllAsync()
 	{
 		ShowingAll = !ShowingAll;
-		RebuildGroupedLogs();
-		await Task.CompletedTask;
+		await LoadLogsAsync();
 	}
 
 	private void UpdateTrend()

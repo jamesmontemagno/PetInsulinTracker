@@ -83,6 +83,16 @@ public class DatabaseService : IDatabaseService
 			.ToListAsync();
 	}
 
+	public async Task<List<InsulinLog>> GetInsulinLogsAsync(string petId, int limit)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<InsulinLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.AdministeredAt)
+			.Take(limit)
+			.ToListAsync();
+	}
+
 	public async Task<InsulinLog?> GetInsulinLogAsync(string id)
 	{
 		var db = await GetConnectionAsync();
@@ -129,6 +139,16 @@ public class DatabaseService : IDatabaseService
 			.ToListAsync();
 	}
 
+	public async Task<List<FeedingLog>> GetFeedingLogsAsync(string petId, int limit)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<FeedingLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.FedAt)
+			.Take(limit)
+			.ToListAsync();
+	}
+
 	public async Task<FeedingLog?> GetFeedingLogAsync(string id)
 	{
 		var db = await GetConnectionAsync();
@@ -163,6 +183,16 @@ public class DatabaseService : IDatabaseService
 		return await db.Table<MedicationLog>()
 			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.AdministeredAt)
+			.ToListAsync();
+	}
+
+	public async Task<List<MedicationLog>> GetMedicationLogsAsync(string petId, int limit)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<MedicationLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.AdministeredAt)
+			.Take(limit)
 			.ToListAsync();
 	}
 
@@ -209,6 +239,16 @@ public class DatabaseService : IDatabaseService
 		return await db.Table<WeightLog>()
 			.Where(l => l.PetId == petId && !l.IsDeleted)
 			.OrderByDescending(l => l.RecordedAt)
+			.ToListAsync();
+	}
+
+	public async Task<List<WeightLog>> GetWeightLogsAsync(string petId, int limit)
+	{
+		var db = await GetConnectionAsync();
+		return await db.Table<WeightLog>()
+			.Where(l => l.PetId == petId && !l.IsDeleted)
+			.OrderByDescending(l => l.RecordedAt)
+			.Take(limit)
 			.ToListAsync();
 	}
 

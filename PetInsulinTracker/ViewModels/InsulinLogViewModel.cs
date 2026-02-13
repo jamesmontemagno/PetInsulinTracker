@@ -13,7 +13,7 @@ public partial class InsulinLogViewModel : ObservableObject
 {
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
-	private List<InsulinLog> _allLogs = [];
+	private const int DefaultLimit = 50;
 
 	public InsulinLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -72,31 +72,25 @@ public partial class InsulinLogViewModel : ObservableObject
 		if (pet?.CurrentDoseIU is not null && DoseIU == 0)
 			DoseIU = pet.CurrentDoseIU.Value;
 
-		var logList = await _db.GetInsulinLogsAsync(PetId);
+		var logList = ShowingAll
+			? await _db.GetInsulinLogsAsync(PetId)
+			: await _db.GetInsulinLogsAsync(PetId, DefaultLimit);
 
 		// Filter for guest access — only show own logs
 		if (pet?.AccessLevel == "guest")
 			logList = logList.Where(l => l.LoggedById == Constants.DeviceUserId).ToList();
 
-		_allLogs = logList;
 		Logs = new ObservableCollection<InsulinLog>(logList);
-		RebuildGroupedLogs();
+		GroupedLogs = new ObservableCollection<LogWeekGroup<InsulinLog>>(
+			LogWeekGroup<InsulinLog>.GroupByWeek(logList, l => l.AdministeredAt, recentOnly: !ShowingAll));
 		IsRefreshing = false;
-	}
-
-	private void RebuildGroupedLogs()
-	{
-		var groups = LogWeekGroup<InsulinLog>.GroupByWeek(
-			_allLogs, l => l.AdministeredAt, recentOnly: !ShowingAll);
-		GroupedLogs = new ObservableCollection<LogWeekGroup<InsulinLog>>(groups);
 	}
 
 	[RelayCommand]
 	private async Task ToggleShowAllAsync()
 	{
 		ShowingAll = !ShowingAll;
-		RebuildGroupedLogs();
-		await Task.CompletedTask;
+		await LoadLogsAsync();
 	}
 
 	[RelayCommand(CanExecute = nameof(CanSaveLog))]
