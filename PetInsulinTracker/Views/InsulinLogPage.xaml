@@ -18,7 +18,7 @@
         </ToolbarItem>
         <ToolbarItem Command="{Binding ToggleShowAllCommand}">
             <ToolbarItem.IconImageSource>
-                <FontImageSource Glyph="{mi:Fluent MoreHorizontal24}" Color="{DynamicResource PageText}" />
+                <FontImageSource Glyph="{mi:Fluent CalendarMonth24}" Color="{DynamicResource PageText}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
@@ -46,7 +46,7 @@
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupedLogs}"
                                      Spacing="4">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="x:Object">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="{Binding WeekLabel}" Style="{StaticResource SubtleTextStyle}"
                                        FontFamily="OpenSansSemibold" FontSize="13" Margin="0,12,0,4" />
