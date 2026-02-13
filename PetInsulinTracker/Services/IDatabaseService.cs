@@ -13,6 +13,7 @@ public interface IDatabaseService
 
 	// Insulin Logs
 	Task<List<InsulinLog>> GetInsulinLogsAsync(string petId);
+	Task<List<InsulinLog>> GetInsulinLogsAsync(string petId, int limit);
 	Task<InsulinLog?> GetInsulinLogAsync(string id);
 	Task<InsulinLog?> GetLatestInsulinLogAsync(string petId);
 	Task<int> SaveInsulinLogAsync(InsulinLog log);
@@ -20,12 +21,14 @@ public interface IDatabaseService
 
 	// Feeding Logs
 	Task<List<FeedingLog>> GetFeedingLogsAsync(string petId);
+	Task<List<FeedingLog>> GetFeedingLogsAsync(string petId, int limit);
 	Task<FeedingLog?> GetFeedingLogAsync(string id);
 	Task<int> SaveFeedingLogAsync(FeedingLog log);
 	Task<int> DeleteFeedingLogAsync(FeedingLog log);
 
 	// Medication Logs
 	Task<List<MedicationLog>> GetMedicationLogsAsync(string petId);
+	Task<List<MedicationLog>> GetMedicationLogsAsync(string petId, int limit);
 	Task<MedicationLog?> GetMedicationLogAsync(string id);
 	Task<MedicationLog?> GetLatestMedicationLogAsync(string petId);
 	Task<int> SaveMedicationLogAsync(MedicationLog log);
@@ -33,6 +36,7 @@ public interface IDatabaseService
 
 	// Weight Logs
 	Task<List<WeightLog>> GetWeightLogsAsync(string petId);
+	Task<List<WeightLog>> GetWeightLogsAsync(string petId, int limit);
 	Task<WeightLog?> GetWeightLogAsync(string id);
 	Task<WeightLog?> GetLatestWeightLogAsync(string petId);
 	Task<int> SaveWeightLogAsync(WeightLog log);
