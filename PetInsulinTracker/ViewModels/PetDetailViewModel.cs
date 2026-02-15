@@ -217,7 +217,7 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		public DateTime FirstToday { get; } = firstToday;
 	}
 
-	private enum CountdownState { Upcoming, DoneEarly, Overdue }
+	private enum CountdownState { Upcoming, DoneEarly, DueNow, Overdue }
 
 	/// <summary>
 	/// Builds a window of previous/next/afterNext schedule occurrences for a given type.
@@ -300,7 +300,9 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		}
 
 		dueTime = window.Previous;
-		return CountdownState.Overdue;
+		return (now - window.Previous).TotalMinutes < Constants.OverdueGracePeriodMinutes
+			? CountdownState.DueNow
+			: CountdownState.Overdue;
 	}
 
 	private static string FormatCountdown(TimeSpan remaining)
@@ -326,6 +328,14 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 					DoseCountdownText = "Done";
 					DoseCountdownSubText = $"Done for {window.Next:t}";
 					DoseRingSubText = $"{label} done";
+					break;
+
+				case CountdownState.DueNow:
+					IsDoseOverdue = false;
+					DoseProgress = 1.0;
+					DoseCountdownText = "NOW";
+					DoseCountdownSubText = "Dose due";
+					DoseRingSubText = isCombined ? "dose + feed due" : "dose due";
 					break;
 
 				case CountdownState.Overdue:
@@ -406,6 +416,14 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 					FeedingCountdownText = "Done";
 					FeedingCountdownSubText = $"Done for {window.Next:t}";
 					FeedingRingSubText = "feeding done";
+					break;
+
+				case CountdownState.DueNow:
+					IsFeedingOverdue = false;
+					FeedingProgress = 1.0;
+					FeedingCountdownText = "NOW";
+					FeedingCountdownSubText = "Feeding due";
+					FeedingRingSubText = "feed due";
 					break;
 
 				case CountdownState.Overdue:

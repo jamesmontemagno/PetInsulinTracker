@@ -24,6 +24,8 @@ public static class Constants
 
 	// Buffer time in minutes around a schedule when logging should advance to next schedule
 	public const int ScheduleBufferMinutes = 30;
+	// Grace period in minutes after a schedule time before showing overdue UI
+	public const int OverdueGracePeriodMinutes = 15;
 
 	/// <summary>Whether the app is in fully offline mode (no cloud sync).</summary>
 	public static bool IsOfflineMode => Preferences.Get(OfflineModeKey, false);
