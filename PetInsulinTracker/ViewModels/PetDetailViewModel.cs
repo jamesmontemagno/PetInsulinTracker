@@ -450,10 +450,20 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var insulinDose = Pet.CurrentDoseIU ?? 0;
+		var insulinConcentration = Pet.InsulinConcentration ?? "U-40";
+		var confirmInsulin = await Shell.Current.DisplayAlertAsync(
+			"Confirm Quick Log",
+			$"Log insulin now for {Pet.Name}?\n\n• Insulin: {insulinDose} IU ({insulinConcentration})",
+			"Log",
+			"Cancel");
+
+		if (!confirmInsulin) return;
+
 		var log = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = Pet.CurrentDoseIU ?? 0,
+			DoseIU = insulinDose,
 			AdministeredAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
@@ -468,12 +478,23 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var foodName = string.IsNullOrWhiteSpace(Pet.DefaultFoodName) ? "Meal" : Pet.DefaultFoodName;
+		var foodAmount = Pet.DefaultFoodAmount ?? 0;
+		var foodUnit = string.IsNullOrWhiteSpace(Pet.DefaultFoodUnit) ? "portion" : Pet.DefaultFoodUnit;
+		var confirmFeeding = await Shell.Current.DisplayAlertAsync(
+			"Confirm Quick Log",
+			$"Log feeding now for {Pet.Name}?\n\n• Food: {foodName}\n• Amount: {foodAmount} {foodUnit}",
+			"Log",
+			"Cancel");
+
+		if (!confirmFeeding) return;
+
 		var log = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
-			Amount = Pet.DefaultFoodAmount ?? 0,
-			Unit = Pet.DefaultFoodUnit,
+			FoodName = foodName,
+			Amount = foodAmount,
+			Unit = foodUnit,
 			FoodType = Pet.DefaultFoodType,
 			FedAt = DateTime.Now,
 			LoggedBy = Constants.OwnerName,
@@ -489,12 +510,26 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 
+		var insulinDose = Pet.CurrentDoseIU ?? 0;
+		var insulinConcentration = Pet.InsulinConcentration ?? "U-40";
+		var foodName = string.IsNullOrWhiteSpace(Pet.DefaultFoodName) ? "Meal" : Pet.DefaultFoodName;
+		var foodAmount = Pet.DefaultFoodAmount ?? 0;
+		var foodUnit = string.IsNullOrWhiteSpace(Pet.DefaultFoodUnit) ? "portion" : Pet.DefaultFoodUnit;
+
+		var confirmCombined = await Shell.Current.DisplayAlertAsync(
+			"Confirm Quick Log",
+			$"Log feeding + insulin now for {Pet.Name}?\n\n• Insulin: {insulinDose} IU ({insulinConcentration})\n• Food: {foodName}\n• Amount: {foodAmount} {foodUnit}",
+			"Log",
+			"Cancel");
+
+		if (!confirmCombined) return;
+
 		var now = DateTime.Now;
 
 		var insulinLog = new InsulinLog
 		{
 			PetId = Pet.Id,
-			DoseIU = Pet.CurrentDoseIU ?? 0,
+			DoseIU = insulinDose,
 			AdministeredAt = now,
 			LoggedBy = Constants.OwnerName,
 			LoggedById = Constants.DeviceUserId
@@ -503,9 +538,9 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 		var feedingLog = new FeedingLog
 		{
 			PetId = Pet.Id,
-			FoodName = Pet.DefaultFoodName ?? "Meal",
-			Amount = Pet.DefaultFoodAmount ?? 0,
-			Unit = Pet.DefaultFoodUnit,
+			FoodName = foodName,
+			Amount = foodAmount,
+			Unit = foodUnit,
 			FoodType = Pet.DefaultFoodType,
 			FedAt = now,
 			LoggedBy = Constants.OwnerName,
