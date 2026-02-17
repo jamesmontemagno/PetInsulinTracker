@@ -465,7 +465,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningCombinedTime" Time="08:00:00" />
+                                <TimePicker x:Name="MorningCombinedTime" Time="08:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -487,7 +487,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningCombinedTime" Time="20:00:00" />
+                                <TimePicker x:Name="EveningCombinedTime" Time="20:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -509,7 +509,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningInsulinTime" Time="08:00:00" />
+                                <TimePicker x:Name="MorningInsulinTime" Time="08:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -531,7 +531,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningInsulinTime" Time="20:00:00" />
+                                <TimePicker x:Name="EveningInsulinTime" Time="20:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -553,7 +553,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningFeedingTime" Time="08:00:00" />
+                                <TimePicker x:Name="MorningFeedingTime" Time="08:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -575,7 +575,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningFeedingTime" Time="20:00:00" />
+                                <TimePicker x:Name="EveningFeedingTime" Time="20:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -597,7 +597,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="MorningMedicationTime" Time="08:00:00" />
+                                <TimePicker x:Name="MorningMedicationTime" Time="08:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
@@ -619,7 +619,7 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                <TimePicker x:Name="EveningMedicationTime" Time="20:00:00" />
+                                <TimePicker x:Name="EveningMedicationTime" Time="20:00:00" Format="h:mm tt" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />

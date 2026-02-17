@@ -33,7 +33,7 @@
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
                             <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                            <TimePicker Time="{Binding LogTime}" />
+                            <TimePicker Time="{Binding LogTime}" Format="h:mm tt" />
                         </VerticalStackLayout>
                     </Grid>
 
