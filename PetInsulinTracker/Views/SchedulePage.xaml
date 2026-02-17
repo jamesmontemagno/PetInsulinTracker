@@ -34,7 +34,7 @@
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <VerticalStackLayout Grid.Column="0" Spacing="4">
                                     <Label Text="Time" Style="{StaticResource FormLabelStyle}" />
-                                    <TimePicker Time="{Binding TimeOfDay}" />
+                                    <TimePicker Time="{Binding TimeOfDay}" Format="h:mm tt" />
                                 </VerticalStackLayout>
                                 <VerticalStackLayout Grid.Column="1" Spacing="4">
                                     <Label Text="Remind (min before)" Style="{StaticResource FormLabelStyle}" />
