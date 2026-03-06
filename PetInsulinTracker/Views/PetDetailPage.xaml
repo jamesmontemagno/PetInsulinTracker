@@ -23,14 +23,18 @@
                 <controls:GradientCard
                     StartColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#2A1820}"
                     EndColor="{AppThemeBinding Light={StaticResource Secondary}, Dark=#1A1015}" />
-                <!-- Pet Photo with rounded bottom corners -->
-                <Border StrokeThickness="0" BackgroundColor="Transparent">
+                <!-- Pet Photo with rounded bottom corners (tap to view full resolution) -->
+                <Border StrokeThickness="0" BackgroundColor="Transparent"
+                        IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                        SemanticProperties.Hint="Tap to view full-size photo">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="0,0,32,32" />
                     </Border.StrokeShape>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ViewPhotoCommand}" />
+                    </Border.GestureRecognizers>
                     <Image Source="{Binding Pet.PhotoSource}" 
-                           Aspect="AspectFill"
-                           IsVisible="{Binding Pet.PhotoSource, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                           Aspect="AspectFill" />
                 </Border>
                 <!-- Fallback gradient when no photo -->
                 <controls:GradientCard

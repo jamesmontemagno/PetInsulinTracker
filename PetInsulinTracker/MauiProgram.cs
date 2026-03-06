@@ -42,6 +42,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<MedicationLogViewModel>();
 		builder.Services.AddTransient<ShareViewModel>();
 		builder.Services.AddTransient<ImportPetViewModel>();
+		builder.Services.AddTransient<PetPhotoViewModel>();
 		builder.Services.AddTransient<SettingsViewModel>();
 
 		// Views
@@ -60,6 +61,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<AddMedicationLogPage>();
 		builder.Services.AddTransient<SharePage>();
 		builder.Services.AddTransient<ImportPetPage>();
+		builder.Services.AddTransient<PetPhotoPage>();
 		builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
