@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PetInsulinTracker.ViewModels"
+             x:Class="PetInsulinTracker.Views.PetPhotoPage"
+             x:DataType="vm:PetPhotoViewModel"
+             Title="{Binding Pet.Name}"
+             BackgroundColor="Black"
+             Shell.NavBarIsVisible="False">
+
+    <Grid>
+
+        <!-- Full-resolution pet photo with pinch-to-zoom -->
+        <Image x:Name="PetPhotoImage"
+               Source="{Binding Pet.PhotoSource}"
+               Aspect="AspectFit"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill"
+               SemanticProperties.Description="{Binding Pet.Name, StringFormat='Full-size photo of {0}'}">
+            <Image.GestureRecognizers>
+                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+                <TapGestureRecognizer NumberOfTapsRequired="2" Tapped="OnDoubleTapped" />
+            </Image.GestureRecognizers>
+        </Image>
+
+        <!-- Back button overlay -->
+        <Button Text="✕"
+                Clicked="OnCloseClicked"
+                HorizontalOptions="End"
+                VerticalOptions="Start"
+                Margin="0,48,16,0"
+                WidthRequest="40"
+                HeightRequest="40"
+                Padding="0"
+                FontSize="18"
+                BackgroundColor="#80000000"
+                TextColor="White"
+                CornerRadius="20"
+                SemanticProperties.Hint="Close photo viewer" />
+
+    </Grid>
+
+</ContentPage>

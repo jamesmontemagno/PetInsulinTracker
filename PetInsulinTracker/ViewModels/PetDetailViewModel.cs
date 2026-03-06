@@ -600,6 +600,13 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	}
 
 	[RelayCommand]
+	private async Task ViewPhotoAsync()
+	{
+		if (Pet is null || string.IsNullOrEmpty(Pet.PhotoSource)) return;
+		await Shell.Current.GoToAsync($"{nameof(Views.PetPhotoPage)}?petId={Pet.Id}");
+	}
+
+	[RelayCommand]
 	private async Task GoToEditPetAsync()
 	{
 		if (Pet is null) return;
