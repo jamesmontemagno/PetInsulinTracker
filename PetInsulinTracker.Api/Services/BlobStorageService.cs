@@ -21,11 +21,11 @@ public class BlobStorageService
 		_container = serviceClient.GetBlobContainerClient(containerName);
 	}
 
-	public async Task<string> UploadPetThumbnailAsync(string petId, byte[] bytes)
+	public async Task<string> UploadPetPhotoAsync(string petId, byte[] bytes)
 	{
 		await EnsureInitializedAsync();
 
-		var blobName = $"thumbnails/{petId}.jpg";
+		var blobName = $"photos/{petId}.jpg";
 		var blob = _container.GetBlobClient(blobName);
 		using var stream = new MemoryStream(bytes);
 		await blob.UploadAsync(stream, new BlobUploadOptions
@@ -36,13 +36,17 @@ public class BlobStorageService
 		return blob.Uri.ToString();
 	}
 
-	public async Task DeletePetThumbnailAsync(string petId)
+	public async Task DeletePetPhotoAsync(string petId)
 	{
 		await EnsureInitializedAsync();
 
-		var blobName = $"thumbnails/{petId}.jpg";
-		var blob = _container.GetBlobClient(blobName);
-		await blob.DeleteIfExistsAsync();
+		// Delete from the current photos path
+		var photoBlob = _container.GetBlobClient($"photos/{petId}.jpg");
+		await photoBlob.DeleteIfExistsAsync();
+
+		// Also clean up any photo previously stored under the legacy thumbnails path
+		var legacyBlob = _container.GetBlobClient($"thumbnails/{petId}.jpg");
+		await legacyBlob.DeleteIfExistsAsync();
 	}
 
 	private async Task EnsureInitializedAsync()

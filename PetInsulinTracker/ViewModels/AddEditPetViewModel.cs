@@ -257,7 +257,7 @@ public partial class AddEditPetViewModel : ObservableObject
 					SavingStatus = "Uploading photo…";
 					try
 					{
-						var url = await _syncService.UploadPetPhotoThumbnailAsync(pet.Id, PhotoPath);
+						var url = await _syncService.UploadPetPhotoAsync(pet.Id, PhotoPath);
 						if (!string.IsNullOrEmpty(url))
 						{
 							pet.PhotoUrl = url;
@@ -330,13 +330,12 @@ public partial class AddEditPetViewModel : ObservableObject
 	}
 
 	/// <summary>
-	/// Copies a picked photo to the app data directory so it persists.
-	/// Stores and returns the full absolute path.
-	/// SkiaSharp conversion/orientation is only done at upload time via SyncService.
+	/// Copies a picked photo to a dedicated local folder in app data so it persists across app updates.
+	/// Returns a relative path (relative to AppDataDirectory) to survive iOS container UUID changes between updates.
 	/// </summary>
 	private async Task<string?> CopyPhotoToAppDataAsync(FileResult result)
 	{
-		var destDir = Path.Combine(FileSystem.AppDataDirectory, "pet_photos");
+		var destDir = Path.Combine(FileSystem.AppDataDirectory, "LocalPhotos");
 		Directory.CreateDirectory(destDir);
 
 		var ext = Path.GetExtension(result.FileName)?.ToLowerInvariant();
@@ -348,7 +347,9 @@ public partial class AddEditPetViewModel : ObservableObject
 		using var destStream = File.Create(destPath);
 		await sourceStream.CopyToAsync(destStream);
 
-		return destPath;
+		// Return relative path so it resolves correctly after iOS app updates
+		// (absolute paths become invalid when the app container UUID changes)
+		return Path.Combine("LocalPhotos", fileName);
 	}
 
 	[RelayCommand]

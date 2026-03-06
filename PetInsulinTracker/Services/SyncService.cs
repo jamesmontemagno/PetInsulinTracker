@@ -260,7 +260,7 @@ public class SyncService : ISyncService
 		response.EnsureSuccessStatusCode();
 	}
 
-	public async Task<string?> UploadPetPhotoThumbnailAsync(string petId, string photoPath)
+	public async Task<string?> UploadPetPhotoAsync(string petId, string photoPath)
 	{
 		if (Constants.IsOfflineMode || string.IsNullOrWhiteSpace(photoPath)) return null;
 
@@ -272,12 +272,12 @@ public class SyncService : ISyncService
 			? photoPath 
 			: Path.Combine(FileSystem.AppDataDirectory, photoPath);
 
-		var bytes = CreateThumbnailJpeg(fullPath, 256, 80);
+		var bytes = CreateResizedJpeg(fullPath, 1024, 90);
 		if (bytes.Length == 0)
 		{
 			var ext = Path.GetExtension(fullPath);
 			throw new InvalidOperationException(
-				$"Unable to create thumbnail from the selected photo (format: {ext}). Try choosing a JPEG or PNG image.");
+				$"Unable to process the selected photo (format: {ext}). Try choosing a JPEG or PNG image.");
 		}
 
 		var request = new PetPhotoUploadRequest
@@ -560,7 +560,7 @@ public class SyncService : ISyncService
 		Preferences.Set($"lastSync_{petId}", syncResponse.SyncTimestamp.ToString("O"));
 	}
 
-	private static byte[] CreateThumbnailJpeg(string photoPath, int maxSize, int quality)
+	private static byte[] CreateResizedJpeg(string photoPath, int maxSize, int quality)
 	{
 		try
 		{

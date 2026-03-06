@@ -129,14 +129,14 @@ public class PetFunctions
 		if (!deleted)
 			return req.CreateResponse(HttpStatusCode.NotFound);
 
-		// Clean up blob storage thumbnail
+		// Clean up blob storage photo
 		try
 		{
-			await _blob.DeletePetThumbnailAsync(request.PetId);
+			await _blob.DeletePetPhotoAsync(request.PetId);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogWarning(ex, "Failed to delete thumbnail for pet {PetId}", request.PetId);
+			_logger.LogWarning(ex, "Failed to delete photo for pet {PetId}", request.PetId);
 		}
 
 		_logger.LogInformation("Deleted pet {PetId} by owner {OwnerId}", request.PetId, request.OwnerId);
