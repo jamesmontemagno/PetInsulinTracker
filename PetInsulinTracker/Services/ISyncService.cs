@@ -11,7 +11,7 @@ public interface ISyncService
 	Task LeavePetAsync(string petId);
 	Task DeletePetAsync(string petId);
 	Task SyncAsync(string petId);
-	Task<string?> UploadPetPhotoThumbnailAsync(string petId, string photoPath);
+	Task<string?> UploadPetPhotoAsync(string petId, string photoPath);
 	Task DeleteShareCodeAsync(string shareCode);
 	Task SyncAllAsync();
 }

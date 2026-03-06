@@ -65,7 +65,7 @@ public class PetPhotoFunctions
 		}
 
 		// Reject oversized payloads before decoding base64 (base64 expands ~33%)
-		const int maxBytes = 512 * 1024;
+		const int maxBytes = 4 * 1024 * 1024;
 		if (request.Base64Image.Length > maxBytes * 4 / 3 + 4)
 		{
 			_logger.LogWarning("Photo upload rejected: payload too large ({Length} chars) for pet {PetId}", request.Base64Image.Length, petId);
@@ -91,7 +91,7 @@ public class PetPhotoFunctions
 		string url;
 		try
 		{
-			url = await _blob.UploadPetThumbnailAsync(petId, bytes);
+			url = await _blob.UploadPetPhotoAsync(petId, bytes);
 		}
 		catch (Exception ex)
 		{
