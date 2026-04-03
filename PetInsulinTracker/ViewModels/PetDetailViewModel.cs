@@ -60,6 +60,15 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	private string lastFeedingText = "No feeding logged yet";
 
 	[ObservableProperty]
+	private MedicationLog? lastMedicationLog;
+
+	[ObservableProperty]
+	private string lastMedicationText = "No medication logged yet";
+
+	[ObservableProperty]
+	private bool hasMedicationSchedule;
+
+	[ObservableProperty]
 	private double doseProgress;
 
 	[ObservableProperty]
@@ -191,12 +200,19 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 			? $"{lastFeeding.FoodName} ({lastFeeding.Amount} {lastFeeding.Unit}) — {lastFeeding.FedAt:g}"
 			: "No feeding logged yet";
 
+		var lastMedicationLog = await _db.GetLatestMedicationLogAsync(id);
+		LastMedicationLog = lastMedicationLog;
+		LastMedicationText = lastMedicationLog is not null
+			? $"{lastMedicationLog.MedicationName} — {lastMedicationLog.AdministeredAt:g}"
+			: "No medication logged yet";
+
 		_schedules = await _db.GetSchedulesAsync(id);
 		ActiveSchedules = new ObservableCollection<Schedule>(
 			_schedules.Where(s => s.ScheduleType != Constants.ScheduleTypeMedication));
 		ActiveMedicationSchedules = new ObservableCollection<Schedule>(
 			_schedules.Where(s => s.ScheduleType == Constants.ScheduleTypeMedication));
 		HasCombinedSchedule = _schedules.Any(s => s.ScheduleType == Constants.ScheduleTypeCombined);
+		HasMedicationSchedule = ActiveMedicationSchedules.Count > 0;
 
 		// Cache logs for timer updates
 		_cachedLastInsulinLog = insulinLog;
@@ -632,6 +648,20 @@ public partial class PetDetailViewModel : ObservableObject, IDisposable
 	{
 		if (Pet is null) return;
 		await Shell.Current.GoToAsync($"{nameof(Views.WeightLogPage)}?petId={Pet.Id}");
+	}
+
+	[RelayCommand]
+	private async Task GoToMedicationLogAsync()
+	{
+		if (Pet is null) return;
+		await Shell.Current.GoToAsync($"{nameof(Views.MedicationLogPage)}?petId={Pet.Id}");
+	}
+
+	[RelayCommand]
+	private async Task LogMedicationAsync()
+	{
+		if (Pet is null) return;
+		await Shell.Current.GoToAsync($"{nameof(Views.AddMedicationLogPage)}?petId={Pet.Id}");
 	}
 
 	[RelayCommand]

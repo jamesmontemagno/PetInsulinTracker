@@ -266,6 +266,25 @@
                     </Grid>
                 </Border>
 
+                <!-- Last Medication Card -->
+                <Border Style="{StaticResource CardStyle}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToMedicationLogCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                        <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light=#F3E5F5, Dark=#2D1A3D}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                HeightRequest="40" WidthRequest="40">
+                            <mi:MauiIcon Icon="{mi:Fluent Pill24}" IconSize="22" IconColor="{DynamicResource PageText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="Last Medication" FontFamily="OpenSansSemibold" FontSize="14" />
+                            <Label Text="{Binding LastMedicationText}" Style="{StaticResource SubtleTextStyle}" />
+                        </VerticalStackLayout>
+                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
                 <!-- Active Schedules -->
                 <Label Text="ACTIVE SCHEDULES" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
                        IsVisible="{Binding ActiveSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
@@ -307,6 +326,12 @@
                 <!-- Active Medications -->
                 <Label Text="ACTIVE MEDICATIONS" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
                        IsVisible="{Binding ActiveMedicationSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+
+                <Button Text="Log Medication"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding LogMedicationCommand}"
+                        IsVisible="{Binding HasMedicationSchedule}"
+                        SemanticProperties.Hint="Log a medication dose" />
 
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMedicationSchedules}"
                                      Spacing="8"
