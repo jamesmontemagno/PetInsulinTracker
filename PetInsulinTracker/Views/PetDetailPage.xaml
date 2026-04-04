@@ -281,7 +281,15 @@
                             <Label Text="Last Medication" FontFamily="OpenSansSemibold" FontSize="14" />
                             <Label Text="{Binding LastMedicationText}" Style="{StaticResource SubtleTextStyle}" />
                         </VerticalStackLayout>
-                        <mi:MauiIcon Grid.Column="2" Icon="{mi:Fluent ChevronRight24}" IconSize="16" IconColor="{DynamicResource PageTextSecondary}" VerticalOptions="Center" />
+                        <Button Grid.Column="2"
+                                Text="Log"
+                                Style="{StaticResource OutlineButtonStyle}"
+                                FontSize="12"
+                                HeightRequest="32"
+                                Padding="12,0"
+                                Command="{Binding LogMedicationCommand}"
+                                VerticalOptions="Center"
+                                SemanticProperties.Hint="Log a medication dose" />
                     </Grid>
                 </Border>
 
@@ -326,12 +334,6 @@
                 <!-- Active Medications -->
                 <Label Text="ACTIVE MEDICATIONS" Style="{StaticResource OverlineStyle}" Margin="0,8,0,0"
                        IsVisible="{Binding ActiveMedicationSchedules.Count, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
-
-                <Button Text="Log Medication"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Command="{Binding LogMedicationCommand}"
-                        IsVisible="{Binding HasMedicationSchedule}"
-                        SemanticProperties.Hint="Log a medication dose" />
 
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMedicationSchedules}"
                                      Spacing="8"

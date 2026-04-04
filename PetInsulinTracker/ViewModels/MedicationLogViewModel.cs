@@ -53,6 +53,12 @@ public partial class MedicationLogViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isSyncing;
 
+	[ObservableProperty]
+	private ObservableCollection<string> medicationNameSuggestions = [];
+
+	[ObservableProperty]
+	private bool showSuggestions;
+
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
@@ -64,26 +70,29 @@ public partial class MedicationLogViewModel : ObservableObject
 	{
 		if (PetId is null) return;
 
+		var schedules = await _db.GetSchedulesAsync(PetId);
+		var medSchedules = schedules
+			.Where(s => s.ScheduleType == Constants.ScheduleTypeMedication)
+			.OrderBy(s => s.TimeOfDay)
+			.ToList();
+
+		// Build suggestion list from schedule labels + "Other"
+		var suggestions = medSchedules.Select(s => s.Label).Where(l => !string.IsNullOrWhiteSpace(l)).Distinct().ToList();
+		suggestions.Add("Other");
+		MedicationNameSuggestions = new ObservableCollection<string>(suggestions);
+		ShowSuggestions = medSchedules.Count > 0;
+
 		// Pre-fill with upcoming medication schedule if form is empty
-		if (string.IsNullOrEmpty(MedicationName))
+		if (string.IsNullOrEmpty(MedicationName) && medSchedules.Count > 0)
 		{
-			var schedules = await _db.GetSchedulesAsync(PetId);
-			var medSchedules = schedules
-				.Where(s => s.ScheduleType == Constants.ScheduleTypeMedication)
-				.OrderBy(s => s.TimeOfDay)
-				.ToList();
+			var now = DateTime.Now;
+			var today = now.Date;
 
-			if (medSchedules.Count > 0)
-			{
-				var now = DateTime.Now;
-				var today = now.Date;
+			// Find the next upcoming medication schedule
+			var next = medSchedules.FirstOrDefault(s => today + s.TimeOfDay > now)
+				?? medSchedules[0]; // Fallback to first if all passed today
 
-				// Find the next upcoming medication schedule
-				var next = medSchedules.FirstOrDefault(s => today + s.TimeOfDay > now)
-					?? medSchedules[0]; // Fallback to first if all passed today
-
-				MedicationName = next.Label;
-			}
+			MedicationName = next.Label;
 		}
 
 		var pet = await _db.GetPetAsync(PetId);
@@ -99,6 +108,12 @@ public partial class MedicationLogViewModel : ObservableObject
 		GroupedLogs = new ObservableCollection<LogWeekGroup<MedicationLog>>(
 			LogWeekGroup<MedicationLog>.GroupByWeek(logList, l => l.AdministeredAt, recentOnly: !ShowingAll));
 		IsRefreshing = false;
+	}
+
+	[RelayCommand]
+	private void SelectMedicationName(string name)
+	{
+		MedicationName = name == "Other" ? string.Empty : name;
 	}
 
 	[RelayCommand]
