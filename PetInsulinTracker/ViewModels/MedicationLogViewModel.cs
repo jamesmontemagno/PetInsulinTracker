@@ -42,7 +42,7 @@ public partial class MedicationLogViewModel : ObservableObject
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveLogCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SaveAndCloseCommand))]
-	private string medicationName = string.Empty;
+	private string? medicationName = string.Empty;
 
 	[ObservableProperty]
 	private DateTime logDate = DateTime.Today;
@@ -71,7 +71,7 @@ public partial class MedicationLogViewModel : ObservableObject
 			_ = LoadLogsAsync();
 	}
 
-	partial void OnMedicationNameChanged(string value)
+	partial void OnMedicationNameChanged(string? value)
 	{
 		if (!_isUpdatingMedicationNameFromPicker)
 			_isMedicationNamePrefilled = false;
@@ -102,7 +102,7 @@ public partial class MedicationLogViewModel : ObservableObject
 		MedicationPickerOptions = new ObservableCollection<string>(pickerOptions);
 
 		// Pre-fill with upcoming medication schedule if form is empty
-		if (string.IsNullOrWhiteSpace(MedicationName) && medSchedules.Count > 0)
+		if (string.IsNullOrWhiteSpace(MedicationName) && pickerOptions.Count > 0)
 		{
 			var now = DateTime.Now;
 			var today = now.Date;
@@ -138,21 +138,22 @@ public partial class MedicationLogViewModel : ObservableObject
 		if (value == OtherMedicationOption)
 		{
 			if (string.IsNullOrWhiteSpace(MedicationName) || _isMedicationNamePrefilled)
-			{
-				_isUpdatingMedicationNameFromPicker = true;
-				MedicationName = string.Empty;
-				_isUpdatingMedicationNameFromPicker = false;
-			}
+				SetMedicationNameFromPicker(string.Empty);
 
 			_isMedicationNamePrefilled = false;
 
 			return;
 		}
 
+		SetMedicationNameFromPicker(value);
+		_isMedicationNamePrefilled = true;
+	}
+
+	private void SetMedicationNameFromPicker(string? value)
+	{
 		_isUpdatingMedicationNameFromPicker = true;
 		MedicationName = value;
 		_isUpdatingMedicationNameFromPicker = false;
-		_isMedicationNamePrefilled = true;
 	}
 
 	[RelayCommand]
@@ -170,7 +171,7 @@ public partial class MedicationLogViewModel : ObservableObject
 		var log = new MedicationLog
 		{
 			PetId = PetId,
-			MedicationName = MedicationName,
+			MedicationName = MedicationName ?? string.Empty,
 			AdministeredAt = LogDate.Date + LogTime,
 			Notes = Notes,
 			LoggedBy = Constants.OwnerName,
