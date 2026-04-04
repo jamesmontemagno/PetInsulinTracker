@@ -14,6 +14,9 @@ public partial class MedicationLogViewModel : ObservableObject
 	private readonly IDatabaseService _db;
 	private readonly ISyncService _syncService;
 	private const int DefaultLimit = 50;
+	private const string OtherMedicationOption = "Other";
+	private bool _isUpdatingMedicationNameFromPicker;
+	private bool _isMedicationNamePrefilled;
 
 	public MedicationLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -39,7 +42,7 @@ public partial class MedicationLogViewModel : ObservableObject
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveLogCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SaveAndCloseCommand))]
-	private string medicationName = string.Empty;
+	private string? medicationName = string.Empty;
 
 	[ObservableProperty]
 	private DateTime logDate = DateTime.Today;
@@ -54,15 +57,24 @@ public partial class MedicationLogViewModel : ObservableObject
 	private bool isSyncing;
 
 	[ObservableProperty]
-	private ObservableCollection<string> medicationNameSuggestions = [];
+	private ObservableCollection<string> medicationPickerOptions = [];
 
 	[ObservableProperty]
-	private bool showSuggestions;
+	private string? selectedMedicationOption;
+
+	[ObservableProperty]
+	private bool showMedicationPicker;
 
 	partial void OnPetIdChanged(string? value)
 	{
 		if (!string.IsNullOrEmpty(value))
 			_ = LoadLogsAsync();
+	}
+
+	partial void OnMedicationNameChanged(string? value)
+	{
+		if (!_isUpdatingMedicationNameFromPicker)
+			_isMedicationNamePrefilled = false;
 	}
 
 	[RelayCommand]
@@ -76,14 +88,21 @@ public partial class MedicationLogViewModel : ObservableObject
 			.OrderBy(s => s.TimeOfDay)
 			.ToList();
 
-		// Build suggestion list from schedule labels + "Other"
-		var suggestions = medSchedules.Select(s => s.Label).Where(l => !string.IsNullOrWhiteSpace(l)).Distinct().ToList();
-		suggestions.Add("Other");
-		MedicationNameSuggestions = new ObservableCollection<string>(suggestions);
-		ShowSuggestions = medSchedules.Count > 0;
+		var pickerOptions = medSchedules
+			.Select(s => s.Label)
+			.Where(label => !string.IsNullOrWhiteSpace(label))
+			.Distinct()
+			.ToList();
+
+		ShowMedicationPicker = pickerOptions.Count > 0;
+
+		if (ShowMedicationPicker)
+			pickerOptions.Add(OtherMedicationOption);
+
+		MedicationPickerOptions = new ObservableCollection<string>(pickerOptions);
 
 		// Pre-fill with upcoming medication schedule if form is empty
-		if (string.IsNullOrEmpty(MedicationName) && medSchedules.Count > 0)
+		if (string.IsNullOrWhiteSpace(MedicationName) && pickerOptions.Count > 0)
 		{
 			var now = DateTime.Now;
 			var today = now.Date;
@@ -92,7 +111,8 @@ public partial class MedicationLogViewModel : ObservableObject
 			var next = medSchedules.FirstOrDefault(s => today + s.TimeOfDay > now)
 				?? medSchedules[0]; // Fallback to first if all passed today
 
-			MedicationName = next.Label;
+			if (!string.IsNullOrWhiteSpace(next.Label))
+				SelectedMedicationOption = next.Label;
 		}
 
 		var pet = await _db.GetPetAsync(PetId);
@@ -110,10 +130,30 @@ public partial class MedicationLogViewModel : ObservableObject
 		IsRefreshing = false;
 	}
 
-	[RelayCommand]
-	private void SelectMedicationName(string name)
+	partial void OnSelectedMedicationOptionChanged(string? value)
 	{
-		MedicationName = name == "Other" ? string.Empty : name;
+		if (string.IsNullOrWhiteSpace(value))
+			return;
+
+		if (value == OtherMedicationOption)
+		{
+			if (string.IsNullOrWhiteSpace(MedicationName) || _isMedicationNamePrefilled)
+				SetMedicationNameFromPicker(string.Empty);
+
+			_isMedicationNamePrefilled = false;
+
+			return;
+		}
+
+		SetMedicationNameFromPicker(value);
+		_isMedicationNamePrefilled = true;
+	}
+
+	private void SetMedicationNameFromPicker(string? value)
+	{
+		_isUpdatingMedicationNameFromPicker = true;
+		MedicationName = value;
+		_isUpdatingMedicationNameFromPicker = false;
 	}
 
 	[RelayCommand]
@@ -131,7 +171,7 @@ public partial class MedicationLogViewModel : ObservableObject
 		var log = new MedicationLog
 		{
 			PetId = PetId,
-			MedicationName = MedicationName,
+			MedicationName = MedicationName ?? string.Empty,
 			AdministeredAt = LogDate.Date + LogTime,
 			Notes = Notes,
 			LoggedBy = Constants.OwnerName,

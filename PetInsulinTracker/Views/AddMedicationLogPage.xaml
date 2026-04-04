@@ -17,25 +17,12 @@
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Medication" Style="{StaticResource FormLabelStyle}" />
 
-                        <!-- Quick-select chips from medication schedules -->
-                        <FlexLayout BindableLayout.ItemsSource="{Binding MedicationNameSuggestions}"
-                                    Wrap="Wrap" JustifyContent="Start" AlignItems="Start"
-                                    IsVisible="{Binding ShowSuggestions}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Text="{Binding .}"
-                                            Style="{StaticResource OutlineButtonStyle}"
-                                            FontSize="12"
-                                            HeightRequest="32"
-                                            Padding="12,0"
-                                            Margin="0,0,6,6"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectMedicationNameCommand}"
-                                            CommandParameter="{Binding .}" />
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </FlexLayout>
+                        <Picker Title="Select a scheduled medication"
+                                ItemsSource="{Binding MedicationPickerOptions}"
+                                SelectedItem="{Binding SelectedMedicationOption}"
+                                IsVisible="{Binding ShowMedicationPicker}" />
 
-                        <Entry Text="{Binding MedicationName}" Placeholder="e.g., Pred 5mg" />
+                        <Entry Text="{Binding MedicationName}" Placeholder="Enter medication name" />
                         <Label Text="Required to save" FontSize="12" TextColor="{DynamicResource Tertiary}"
                                IsVisible="{Binding MedicationName, Converter={StaticResource IsNotNullOrEmptyConverter}, ConverterParameter=invert}" />
                     </VerticalStackLayout>
