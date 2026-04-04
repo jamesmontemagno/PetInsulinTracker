@@ -15,6 +15,8 @@ public partial class MedicationLogViewModel : ObservableObject
 	private readonly ISyncService _syncService;
 	private const int DefaultLimit = 50;
 	private const string OtherMedicationOption = "Other";
+	private bool _isUpdatingMedicationNameFromPicker;
+	private bool _isMedicationNamePrefilled;
 
 	public MedicationLogViewModel(IDatabaseService db, ISyncService syncService)
 	{
@@ -67,6 +69,12 @@ public partial class MedicationLogViewModel : ObservableObject
 	{
 		if (!string.IsNullOrEmpty(value))
 			_ = LoadLogsAsync();
+	}
+
+	partial void OnMedicationNameChanged(string value)
+	{
+		if (!_isUpdatingMedicationNameFromPicker)
+			_isMedicationNamePrefilled = false;
 	}
 
 	[RelayCommand]
@@ -129,13 +137,22 @@ public partial class MedicationLogViewModel : ObservableObject
 
 		if (value == OtherMedicationOption)
 		{
-			if (string.IsNullOrWhiteSpace(MedicationName) || MedicationPickerOptions.Contains(MedicationName))
+			if (string.IsNullOrWhiteSpace(MedicationName) || _isMedicationNamePrefilled)
+			{
+				_isUpdatingMedicationNameFromPicker = true;
 				MedicationName = string.Empty;
+				_isUpdatingMedicationNameFromPicker = false;
+			}
+
+			_isMedicationNamePrefilled = false;
 
 			return;
 		}
 
+		_isUpdatingMedicationNameFromPicker = true;
 		MedicationName = value;
+		_isUpdatingMedicationNameFromPicker = false;
+		_isMedicationNamePrefilled = true;
 	}
 
 	[RelayCommand]
